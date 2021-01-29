@@ -120,7 +120,7 @@ case "$1" in
         echo "                 | the changes have been made to finish and rebuild patches. Can be called from anywhere."
         echo ""
         echo "  * setup        | Add an alias to .bashrc to allow full functionality of this script. Run as:"
-        echo "                 |     . ./Cauldron setup"
+        echo "                 |     . ./cauldron setup"
         echo "                 | After you run this command you'll be able to just run 'cauldron' from anywhere."
         echo "                 | The default name for the resulting alias is 'cauldron', you can give an argument to override"
         echo "                 | this default, such as:"

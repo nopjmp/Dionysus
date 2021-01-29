@@ -13,7 +13,7 @@ git submodule update --init --recursive
 if [[ "$1" == up* ]]; then
     (
         cd "$basedir/Paper/"
-        git fetch && git reset --hard origin/master
+		git fetch && git reset --hard origin/ver/1.12.2
         cd ../
         git add Paper
     )
@@ -28,7 +28,7 @@ cd "Paper-Server"
 mcVer=$(mvn -o org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=minecraft_version | sed -n -e '/^\[.*\]/ !{ /^[0-9]/ { p; q } }')
 
 basedir
-. "$basedir"/scripts/importmcdev.sh
+. $basedir/scripts/importmcdev.sh
 
 minecraftversion=$(cat "$basedir"/Paper/work/BuildData/info.json | grep minecraftVersion | cut -d '"' -f 4)
 version=$(echo -e "Paper: $paperVer\nmc-dev:$importedmcdev")

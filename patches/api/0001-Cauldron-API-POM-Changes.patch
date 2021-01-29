@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Thu, 28 Jan 2021 18:50:27 -0600
+Subject: [PATCH] Cauldron-API POM Changes
+
+
+diff --git a/pom.xml b/pom.xml
+index 2fa2dd7c71e4f24f60e415c38ccf734c78713cbb..0587581eafcc9ca7a8c0465da86048b19a3f87ce 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -4,18 +4,18 @@
+     <modelVersion>4.0.0</modelVersion>
+ 
+     <parent>
+-        <groupId>com.destroystokyo.paper</groupId>
+-        <artifactId>paper-parent</artifactId>
++        <groupId>dev.pomf.cauldron</groupId>
++        <artifactId>cauldron-parent</artifactId>
+         <version>dev-SNAPSHOT</version>
+     </parent>
+ 
+-    <groupId>com.destroystokyo.paper</groupId>
+-    <artifactId>paper-api</artifactId>
++    <groupId>dev.pomf.cauldron</groupId>
++    <artifactId>cauldron-api</artifactId>
+     <version>1.12.2-R0.1-SNAPSHOT</version>
+     <packaging>jar</packaging>
+ 
+-    <name>Paper-API</name>
+-    <url>https://github.com/PaperMC/Paper</url>
++    <name>Cauldron-API</name>
++    <url>https://github.com/nopjmp/Cauldron</url>
+     <description>An enhanced plugin API for Minecraft servers.</description>
+ 
+     <properties>

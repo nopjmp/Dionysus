@@ -10,7 +10,7 @@ done
 
 workdir="$basedir"/Paper/work
 minecraftversion=$(cat "$basedir"/Paper/work/BuildData/info.json | grep minecraftVersion | cut -d '"' -f 4)
-decompiledir=$workdir/Minecraft/$minecraftversion/spigot
+decompiledir=$workdir/Minecraft/$minecraftversion
 
 nms="net/minecraft/server"
 export MODLOG=""
@@ -44,30 +44,11 @@ function import {
     fi
 }
 
-function importLibrary {
-    group=$1
-    lib=$2
-    prefix=$3
-    shift 3
-    for file in "$@"; do
-        file="$prefix/$file"
-        target="$basedir/Paper/Paper-Server/src/main/java/$file"
-        targetdir=$(dirname "$target")
-        mkdir -p "${targetdir}"
-        base="$workdir/Minecraft/$minecraftversion/libraries/${group}/${lib}/$file"
-        if [ ! -f "$base" ]; then
-            echo "Missing $base"
-            exit 1
-        fi
-        export MODLOG="$MODLOG  Imported $file from $lib\n";
-        sed 's/\r$//' "$base" > "$target" || exit 1
-    done
-}
 
 (
     cd Paper/Paper-Server/
     lastlog=$(git log -1 --oneline)
-    if [[ "$lastlog" = *"Cauldron-Extra mc-dev Imports"* ]]; then
+    if [[ "$lastlog" = *"Tuinity-Extra mc-dev Imports"* ]]; then
         git reset --hard HEAD^
     fi
 )
@@ -107,15 +88,11 @@ done
 #             # group    # lib          # prefix               # many files
 
 #importLibrary com.mojang datafixerupper com/mojang/datafixers/util Either.java
-importLibrary com.mojang brigadier  com/mojang/brigadier CommandDispatcher.java
-importLibrary com.mojang brigadier  com/mojang/brigadier/tree LiteralCommandNode.java
-importLibrary com.mojang brigadier  com/mojang/brigadier/suggestion SuggestionsBuilder.java
-importLibrary com.mojang brigadier  com/mojang/brigadier/arguments BoolArgumentType.java
 ################
 (
     cd Paper/Paper-Server/
     rm -rf nms-patches
     git add src -A
-    echo -e "Cauldron-Extra mc-dev Imports\n\n$MODLOG" | git commit src -F -
+    echo -e "Tuinity-Extra mc-dev Imports\n\n$MODLOG" | git commit src -F -
     exit 0
 )
