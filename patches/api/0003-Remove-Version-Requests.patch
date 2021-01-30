@@ -1,0 +1,151 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Sat, 30 Jan 2021 01:12:09 -0600
+Subject: [PATCH] Remove Version Requests
+
+
+diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+index 6bb7607dde6c3f20f2f2b9b8b5dad877f84f6646..87fba0b9624820614f6a215e8f3cfa19faa3f40d 100644
+--- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
++++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+@@ -1,10 +1,7 @@
+ package org.bukkit.command.defaults;
+ 
+-import com.google.common.base.Charsets;
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.List;
+-
++import com.destroystokyo.paper.VersionHistoryManager;
++import com.google.common.collect.ImmutableList;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -13,25 +10,8 @@ import org.bukkit.plugin.Plugin;
+ import org.bukkit.plugin.PluginDescriptionFile;
+ import org.bukkit.util.StringUtil;
+ 
+-import com.google.common.collect.ImmutableList;
+-import com.google.common.io.Resources;
+-import java.io.BufferedReader;
+-import java.io.IOException;
+-import java.net.URL;
+-import java.net.URLEncoder;
+-import java.util.HashSet;
+-import java.util.Set;
++import java.util.*;
+ import java.util.concurrent.locks.ReentrantLock;
+-import java.util.logging.Level;
+-import java.util.logging.Logger;
+-import org.json.simple.JSONObject;
+-import org.json.simple.parser.JSONParser;
+-import org.json.simple.parser.ParseException;
+-
+-// Paper start
+-import java.io.InputStreamReader;
+-import java.net.HttpURLConnection;
+-import com.destroystokyo.paper.VersionHistoryManager;
+ // Paper end
+ 
+ public class VersionCommand extends BukkitCommand {
+@@ -286,54 +266,57 @@ public class VersionCommand extends BukkitCommand {
+     }
+ 
+     private static int getFromJenkins(int currentVer) {
+-        try {
+-            BufferedReader reader = Resources.asCharSource(
+-                    new URL("https://ci.destroystokyo.com/job/Paper/lastSuccessfulBuild/buildNumber"), // Paper
+-                    Charsets.UTF_8
+-            ).openBufferedStream();
+-            try {
+-                int newVer = Integer.decode(reader.readLine());
+-                return newVer - currentVer;
+-            } catch (NumberFormatException ex) {
+-                ex.printStackTrace();
+-                return -2;
+-            } finally {
+-                reader.close();
+-            }
+-        } catch (IOException e) {
+-            e.printStackTrace();
+-            return -1;
+-        }
++        return 0;
++//        try {
++//            BufferedReader reader = Resources.asCharSource(
++//                    new URL("https://ci.destroystokyo.com/job/Paper/lastSuccessfulBuild/buildNumber"), // Paper
++//                    Charsets.UTF_8
++//            ).openBufferedStream();
++//            try {
++//                int newVer = Integer.decode(reader.readLine());
++//                return newVer - currentVer;
++//            } catch (NumberFormatException ex) {
++//                ex.printStackTrace();
++//                return -2;
++//            } finally {
++//                reader.close();
++//            }
++//        } catch (IOException e) {
++//            e.printStackTrace();
++//            return -1;
++//        }
+     }
+ 
+     // Contributed by Techcable <Techcable@outlook.com> in GH PR #65
+     private static final String BRANCH = "ver/1.12.2";
++
+     private static int getFromRepo(String repo, String hash) {
+-        try {
+-            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + BRANCH + "..." + hash).openConnection();
+-            connection.connect();
+-            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
+-            try (
+-                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))
+-            ) {
+-                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
+-                String status = (String) obj.get("status");
+-                switch (status) {
+-                    case "identical":
+-                        return 0;
+-                    case "behind":
+-                        return ((Number) obj.get("behind_by")).intValue();
+-                    default:
+-                        return -1;
+-                }
+-            } catch (ParseException | NumberFormatException e) {
+-                e.printStackTrace();
+-                return -1;
+-            }
+-        } catch (IOException e) {
+-            e.printStackTrace();
+-            return -1;
+-        }
++        return 0;
++//        try {
++//            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + BRANCH + "..." + hash).openConnection();
++//            connection.connect();
++//            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
++//            try (
++//                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))
++//            ) {
++//                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
++//                String status = (String) obj.get("status");
++//                switch (status) {
++//                    case "identical":
++//                        return 0;
++//                    case "behind":
++//                        return ((Number) obj.get("behind_by")).intValue();
++//                    default:
++//                        return -1;
++//                }
++//            } catch (ParseException | NumberFormatException e) {
++//                e.printStackTrace();
++//                return -1;
++//            }
++//        } catch (IOException e) {
++//            e.printStackTrace();
++//            return -1;
++//        }
+     }
+     // Paper end
+ }

@@ -1,0 +1,85 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Thu, 28 Jan 2021 22:24:04 -0600
+Subject: [PATCH] AntiBook Crasher
+
+This prevents someone from interacting with a book that is too large
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 59d5263295ec57981fb8a9cbab34a00bce904f70..44f6395965ce81ce9e05d546da300b43f5325b6a 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -7,17 +7,13 @@ import com.google.common.util.concurrent.Futures;
+ import io.netty.util.concurrent.Future;
+ import io.netty.util.concurrent.GenericFutureListener;
+ import java.io.IOException;
+-import java.util.ArrayList;
+-import java.util.Collections;
+-import java.util.Iterator;
+-import java.util.List;
+-import java.util.Set;
++import java.util.*;
++
+ import org.apache.commons.lang3.StringUtils;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+ // CraftBukkit start
+-import java.util.HashSet;
+ import java.util.concurrent.ExecutionException;
+ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+ import org.bukkit.Location;
+@@ -1790,6 +1786,13 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+         this.player.resetIdleTimer();
+         if (this.player.activeContainer.windowId == packetplayinwindowclick.a() && this.player.activeContainer.c(this.player) && this.player.activeContainer.canUse(this.player)) { // CraftBukkit
+             boolean cancelled = this.player.isSpectator(); // CraftBukkit - see below if
++            // Cauldron Start - AntiBook Crasher
++            if (!cancelled) {
++                ItemStack stack = packetplayinwindowclick.e();
++                if (stack.getItem() == Items.WRITABLE_BOOK && Objects.requireNonNull(stack.getTag()).hasKey("pages"))
++                    cancelled = !validateBook(stack, false);
++            }
++            // Cauldron End
+             if (false/*this.player.isSpectator()*/) { // CraftBukkit
+                 NonNullList nonnulllist = NonNullList.a();
+ 
+@@ -2352,7 +2355,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+     }
+ 
+     // Paper start
+-    private boolean validateBook(ItemStack testStack) {
++    private boolean validateBook(ItemStack testStack, boolean kick) {
+         NBTTagList pageList = testStack.getTag().getList("pages", 8);
+         long byteTotal = 0;
+         int maxBookPageSize = com.destroystokyo.paper.PaperConfig.maxBookPageSize;
+@@ -2381,8 +2384,10 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+         }
+ 
+         if (byteTotal > byteAllowed) {
+-            PlayerConnection.LOGGER.warn(this.player.getName() + " tried to send too large of a book. Book Size: " + byteTotal + " - Allowed:  "+ byteAllowed + " - Pages: " + pageList.size());
+-            minecraftServer.postToMainThread(() -> this.disconnect("Book too large!"));
++            if (kick) {
++                PlayerConnection.LOGGER.warn(this.player.getName() + " tried to send too large of a book. Book Size: " + byteTotal + " - Allowed:  " + byteAllowed + " - Pages: " + pageList.size());
++                minecraftServer.postToMainThread(() -> this.disconnect("Book too large!"));
++            }
+             return false;
+         }
+ 
+@@ -2423,7 +2428,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                 }
+ 
+                 if (itemstack.getItem() == Items.WRITABLE_BOOK && itemstack.getItem() == itemstack1.getItem()) {
+-                    if (!validateBook(itemstack)) return; // Paper
++                    if (!validateBook(itemstack, true)) return; // Paper
+                     itemstack1.a("pages", (NBTBase) itemstack.getTag().getList("pages", 8));
+                     CraftEventFactory.handleEditBookEvent(player, itemstack1); // CraftBukkit
+                 }
+@@ -2459,7 +2464,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                     }
+ 
+                     if (itemstack.getItem() == Items.WRITABLE_BOOK && itemstack1.getItem() == Items.WRITABLE_BOOK) {
+-                        if (!validateBook(itemstack)) return; // Paper
++                        if (!validateBook(itemstack, true)) return; // Paper
+                         ItemStack itemstack2 = new ItemStack(Items.WRITTEN_BOOK);
+ 
+                         itemstack2.a("author", (NBTBase) (new NBTTagString(this.player.getName())));

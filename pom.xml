@@ -12,10 +12,10 @@
             <id>aikar</id>
             <url>https://repo.aikar.co/content/groups/aikar/</url>
         </repository>
-        <repository>
-            <id>velocity-snapshots</id>
-            <url>https://nexus.velocitypowered.com/repository/velocity-artifacts-snapshots/</url>
-        </repository>
+<!--        <repository>-->
+<!--            <id>velocity-snapshots</id>-->
+<!--            <url>https://nexus.velocitypowered.com/repository/velocity-artifacts-snapshots/</url>-->
+<!--        </repository>-->
     </repositories>
 
     <build>
@@ -26,4 +26,26 @@
         <module>Cauldron-API</module>
         <module>Cauldron-Server</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>owasp-dependency-check</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <version>6.1.0</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

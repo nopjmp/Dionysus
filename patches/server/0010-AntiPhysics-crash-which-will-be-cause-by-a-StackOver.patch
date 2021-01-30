@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Fri, 29 Jan 2021 00:03:23 -0600
+Subject: [PATCH] AntiPhysics crash which will be cause by a StackOverflowError
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 451cf0c7c07dbb6edb3e194a6103ef513e9bee1a..aaabc42a50ac3ea7da818d0b35c0e8f4c9f254b7 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -540,7 +540,16 @@ public abstract class World implements IBlockAccess {
+         this.b(blockposition.south(), block, blockposition);
+     }
+ 
++    // Cauldron - Prevent StackOverflowError
++    private int recursivePhysicsCount = 0;
++    private static final int MAX_PHYSICS_COUNT = 100;
+     public void applyPhysics(BlockPosition blockposition, Block block, boolean flag) {
++        // Cauldron Start - Prevent StackOverflowError
++        if (++recursivePhysicsCount >= MAX_PHYSICS_COUNT) {
++            MinecraftServer.LOGGER.warn("Breaking out of recursive physics loop happening with {} at {}", block.getName(), blockposition.toString());
++            return;
++        }
++        // Cauldron End
+         if (captureBlockStates) { return; } // Paper - Cancel all physics during placement
+         this.a(blockposition.west(), block, blockposition);
+         this.a(blockposition.east(), block, blockposition);
+@@ -552,6 +561,9 @@ public abstract class World implements IBlockAccess {
+             this.c(blockposition, block);
+         }
+ 
++        // Cauldron - Reset count once we are done with applyingPhysics
++        recursivePhysicsCount = 0;
++
+         this.chunkPacketBlockController.updateNearbyBlocks(this, blockposition); // Paper - Anti-Xray
+     }
+ 

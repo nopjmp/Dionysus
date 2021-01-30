@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Thu, 28 Jan 2021 19:16:49 -0600
+Subject: [PATCH] Cauldron config
+
+API to retrieve raw YamlConfiguration + timing exports
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 2912bdae68f52a0c3b2c58e849df5271ef2170bf..af2a14547a4f57b0f83eebd7e6f658712224ddc3 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1015,6 +1015,12 @@ public interface Server extends PluginMessageRecipient {
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        // Cauldron start - add config to timings report
++        public org.bukkit.configuration.file.YamlConfiguration getCauldronConfig()
++        {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
+         /**
+          * Sends the component to the player
+          *

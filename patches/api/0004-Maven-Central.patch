@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Sat, 30 Jan 2021 01:12:31 -0600
+Subject: [PATCH] Maven Central
+
+
+diff --git a/pom.xml b/pom.xml
+index 0587581eafcc9ca7a8c0465da86048b19a3f87ce..6fc0a5966a46f824de295312f747ad9e0e598998 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -34,13 +34,17 @@
+ 
+     <repositories>
+         <repository>
+-            <id>spigotmc-public</id>
+-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
++            <id>central</id>
++            <url>https://repo1.maven.org/maven2</url>
+         </repository>
+         <repository>
+             <id>sonatype</id>
+             <url>https://oss.sonatype.org/content/groups/public/</url>
+         </repository>
++        <repository>
++            <id>spigotmc-public</id>
++            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
++        </repository>
+     </repositories>
+ 
+     <dependencies>
