@@ -43,6 +43,27 @@ index 4849fcbc835040b5b6e46e3008080c2003b68d41..3233178049a01153860425314bd1836b
          public BlockPosition.MutableBlockPosition c(double d0, double d1, double d2) {
              return this.c(MathHelper.floor(d0), MathHelper.floor(d1), MathHelper.floor(d2));
          }
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 035fa533da442ddf0c0c3943fe0ebfc0e2218cce..7e662a49cd3be33bae6e5a09300a69ebc9d231e6 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -950,8 +950,6 @@ public class Chunk {
+ 
+         for (int k = i; k <= j; ++k) {
+             if (!this.entitySlices[k].isEmpty()) {
+-                Iterator iterator = this.entitySlices[k].iterator();
+-
+                 // Paper start - Don't search for inventories if we have none, and that is all we want
+                 /*
+                 * We check if they want inventories by seeing if it is the static `IEntitySelector.c`
+@@ -960,6 +958,7 @@ public class Chunk {
+                 * It should be the one that checks `var1 instanceof IInventory && var1.isAlive()`
+                 */
+                 if (predicate == IEntitySelector.c && inventoryEntityCounts[k] <= 0) continue;
++                Iterator iterator = this.entitySlices[k].iterator();
+                 // Paper end
+                 while (iterator.hasNext()) {
+                     Entity entity1 = (Entity) iterator.next();
 diff --git a/src/main/java/net/minecraft/server/ChunkSection.java b/src/main/java/net/minecraft/server/ChunkSection.java
 index afdc4a779a61c1ccbf6b42cf3214bfef9e819a71..fc84ae6c2ed6c060dde2d83350c76a29ce2f6d8a 100644
 --- a/src/main/java/net/minecraft/server/ChunkSection.java
