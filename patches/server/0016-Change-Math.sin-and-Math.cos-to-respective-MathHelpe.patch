@@ -1,0 +1,137 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Thu, 4 Feb 2021 20:46:33 -0600
+Subject: [PATCH] Change Math.sin and Math.cos to respective MathHelper
+
+
+diff --git a/src/main/java/net/minecraft/server/BiomeMesa.java b/src/main/java/net/minecraft/server/BiomeMesa.java
+index 67f8ad8eda987217291dccdbc61419ffed89725a..c5472b50109c2efb46c896d097860e48e65356ca 100644
+--- a/src/main/java/net/minecraft/server/BiomeMesa.java
++++ b/src/main/java/net/minecraft/server/BiomeMesa.java
+@@ -89,7 +89,7 @@ public class BiomeMesa extends BiomeBase {
+         IBlockData iblockdata = BiomeMesa.A;
+         IBlockData iblockdata1 = this.r;
+         int j1 = (int) (d0 / 3.0D + 3.0D + random.nextDouble() * 0.25D);
+-        boolean flag = Math.cos(d0 / 3.0D * 3.141592653589793D) > 0.0D;
++        boolean flag = MathHelper.cos((float)d0 / 3.0f * 3.141592653589793f) > 0.0f;
+         int k1 = -1;
+         boolean flag1 = false;
+         int l1 = 0;
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderHell.java b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+index 12bc10ff00eda73bcad7c6394088d84cfbc06fcf..3e3a3c6b38c72bce129818a427251921790d6489 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderHell.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+@@ -246,7 +246,7 @@ public class ChunkProviderHell implements ChunkGenerator {
+         int l1;
+ 
+         for (l1 = 0; l1 < i1; ++l1) {
+-            adouble1[l1] = Math.cos((double) l1 * 3.141592653589793D * 6.0D / (double) i1) * 2.0D;
++            adouble1[l1] = MathHelper.cos(l1 * 3.141592653589793f * 6.0f / i1) * 2.0D;
+             double d2 = (double) l1;
+ 
+             if (l1 > i1 / 2) {
+diff --git a/src/main/java/net/minecraft/server/EnderDragonBattle.java b/src/main/java/net/minecraft/server/EnderDragonBattle.java
+index 286069746a8eab03ca6ed06c626ec40ffd12cdb7..be0646e5e71daa86b05f5c3d88fb01fc14fe996f 100644
+--- a/src/main/java/net/minecraft/server/EnderDragonBattle.java
++++ b/src/main/java/net/minecraft/server/EnderDragonBattle.java
+@@ -352,8 +352,8 @@ public class EnderDragonBattle {
+     private void l() {
+         if (!this.e.isEmpty()) {
+             int i = ((Integer) this.e.remove(this.e.size() - 1)).intValue();
+-            int j = (int) (96.0D * Math.cos(2.0D * (-3.141592653589793D + 0.15707963267948966D * (double) i)));
+-            int k = (int) (96.0D * Math.sin(2.0D * (-3.141592653589793D + 0.15707963267948966D * (double) i)));
++            int j = (int) (96.0D * MathHelper.cos(2.0f * (-3.141592653589793f + 0.15707963267948966f * i)));
++            int k = (int) (96.0D * MathHelper.sin(2.0f * (-3.141592653589793f + 0.15707963267948966f * i)));
+ 
+             this.a(new BlockPosition(j, 75, k));
+         }
+diff --git a/src/main/java/net/minecraft/server/EntityEnderSignal.java b/src/main/java/net/minecraft/server/EntityEnderSignal.java
+index c8c75445eab5c48e93cdbd737af2892a22d9aca0..2f2f054c6a4daa4c2f12fbdf15cb1212770af8a0 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderSignal.java
++++ b/src/main/java/net/minecraft/server/EntityEnderSignal.java
+@@ -86,8 +86,8 @@ public class EntityEnderSignal extends Entity {
+                 this.motY *= 0.8D;
+             }
+ 
+-            this.motX = Math.cos((double) f2) * d2;
+-            this.motZ = Math.sin((double) f2) * d2;
++            this.motX = MathHelper.cos(f2) * d2;
++            this.motZ = MathHelper.sin(f2) * d2;
+             if (this.locY < this.b) {
+                 this.motY += (1.0D - this.motY) * 0.014999999664723873D;
+             } else {
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index aa0b27f0e1c6cd5168af02157ce8ce495afc6373..46c66cf03f465e8dc980655d9ba9c0b84bf4e48b 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -527,9 +527,9 @@ public abstract class EntityHuman extends EntityLiving {
+                 entityitem.motY = (double) (-MathHelper.sin(this.pitch * 0.017453292F) * f + 0.1F);
+                 f1 = this.random.nextFloat() * 6.2831855F;
+                 f = 0.02F * this.random.nextFloat();
+-                entityitem.motX += Math.cos((double) f1) * (double) f;
++                entityitem.motX += MathHelper.cos(f1) * (double) f;
+                 entityitem.motY += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
+-                entityitem.motZ += Math.sin((double) f1) * (double) f;
++                entityitem.motZ += MathHelper.sin(f1) * (double) f;
+             }
+ 
+             // CraftBukkit start - fire PlayerDropItemEvent
+diff --git a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+index 1f4025486e09067a232dad6c89272889e97a5ffc..8d917b9e5a804151c8c5371783e8ef6f4fdf7222 100644
+--- a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
++++ b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+@@ -487,8 +487,8 @@ public abstract class EntityMinecartAbstract extends Entity implements INamableT
+         if (entity instanceof EntityLiving) {
+             d6 = (double) ((EntityLiving) entity).bg;
+             if (d6 > 0.0D) {
+-                d7 = -Math.sin((double) (entity.yaw * 0.017453292F));
+-                d8 = Math.cos((double) (entity.yaw * 0.017453292F));
++                d7 = -MathHelper.sin(entity.yaw * 0.017453292F);
++                d8 = MathHelper.cos(entity.yaw * 0.017453292F);
+                 d9 = this.motX * this.motX + this.motZ * this.motZ;
+                 if (d9 < 0.01D) {
+                     this.motX += d7 * 0.1D;
+diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+index 50811852a3319895fc08419eb577c54fe9d0bbb8..9871b444c62d0d614338a6febbc967be84bcbb0c 100644
+--- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
++++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+@@ -25,9 +25,9 @@ public class EntityTNTPrimed extends Entity {
+         this.setPosition(d0, d1, d2);
+         float f = (float) (Math.random() * 6.2831854820251465D);
+ 
+-        this.motX = (double) (-((float) Math.sin((double) f)) * 0.02F);
++        this.motX = (double) (-MathHelper.sin(f) * 0.02F);
+         this.motY = 0.20000000298023224D;
+-        this.motZ = (double) (-((float) Math.cos((double) f)) * 0.02F);
++        this.motZ = (double) (-MathHelper.cos(f) * 0.02F);
+         this.setFuseTicks(80);
+         this.lastX = d0;
+         this.lastY = d1;
+diff --git a/src/main/java/net/minecraft/server/WorldGenStronghold.java b/src/main/java/net/minecraft/server/WorldGenStronghold.java
+index a3b958e0109ea54e478d543324151e9972d86541..595ecb9052b8ab62c52f8dbcad6f565660119342 100644
+--- a/src/main/java/net/minecraft/server/WorldGenStronghold.java
++++ b/src/main/java/net/minecraft/server/WorldGenStronghold.java
+@@ -130,8 +130,8 @@ public class WorldGenStronghold extends StructureGenerator {
+         if (l < this.d.length) {
+             for (int i1 = 0; i1 < this.d.length; ++i1) {
+                 double d1 = 4.0D * this.h + this.h * (double) j * 6.0D + (random.nextDouble() - 0.5D) * this.h * 2.5D;
+-                int j1 = (int) Math.round(Math.cos(d0) * d1);
+-                int k1 = (int) Math.round(Math.sin(d0) * d1);
++                int j1 = (int) Math.round(MathHelper.cos((float)d0) * d1);
++                int k1 = (int) Math.round(MathHelper.sin((float)d0) * d1);
+                 BlockPosition blockposition = this.g.getWorldChunkManager().a((j1 << 4) + 8, (k1 << 4) + 8, 112, this.a, random);
+ 
+                 if (blockposition != null) {
+diff --git a/src/main/java/net/minecraft/server/WorldProvider.java b/src/main/java/net/minecraft/server/WorldProvider.java
+index 35d8d1a6e77ce070b4b1c85e8fdb0edca768dcf7..64ce23c6e221d64798c16be2023acc8e97a9c6e7 100644
+--- a/src/main/java/net/minecraft/server/WorldProvider.java
++++ b/src/main/java/net/minecraft/server/WorldProvider.java
+@@ -76,7 +76,7 @@ public abstract class WorldProvider {
+ 
+         float f2 = f1;
+ 
+-        f1 = 1.0F - (float) ((Math.cos((double) f1 * 3.141592653589793D) + 1.0D) / 2.0D);
++        f1 = 1.0F - (MathHelper.cos(f1 * 3.141592653589793f) + 1.0f) / 2.0f;
+         f1 = f2 + (f1 - f2) / 3.0F;
+         return f1;
+     }
