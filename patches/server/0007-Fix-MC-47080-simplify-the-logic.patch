@@ -1,18 +1,18 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Thu, 28 Jan 2021 20:25:05 -0600
+Date: Fri, 5 Feb 2021 00:08:31 -0600
 Subject: [PATCH] Fix MC-47080 simplify the logic
 
 
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index af2a0a4ef03d09ae3fe41f2451117318b240339a..9fcd759dcf6c1009b7f75cee6da457707cdc2728 100644
+index af2a0a4ef03d09ae3fe41f2451117318b240339a..4ab42aa93c57be327fb7dd60e49eec3021eb795a 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -422,32 +422,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
          // CraftBukkit end
      }
  
-+    // Cauldron
++    // Dionysus
 +    // Fixes MC-47080 and simplifies the logic
      public boolean everyoneDeeplySleeping() {
 -        if (this.Q && !this.isClientSide) {

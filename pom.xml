@@ -1,11 +1,11 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.pomf.cauldron</groupId>
-    <artifactId>cauldron-parent</artifactId>
+    <groupId>dev.pomf.dionysus</groupId>
+    <artifactId>dionysus-parent</artifactId>
     <version>dev-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Cauldron (Parent)</name>
+    <name>Dionysus (Parent)</name>
 
     <repositories>
         <repository>
@@ -23,8 +23,8 @@
         <finalName>${project.artifactId}</finalName>
     </build>
     <modules>
-        <module>Cauldron-API</module>
-        <module>Cauldron-Server</module>
+        <module>Dionysus-API</module>
+        <module>Dauldron-Server</module>
     </modules>
 
     <profiles>

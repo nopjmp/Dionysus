@@ -71,7 +71,7 @@ for f in $files; do
     fi
 done
 
-# Cauldron Modifications
+# Dionysus Modifications
 import MathHelper
 
 ########################################################

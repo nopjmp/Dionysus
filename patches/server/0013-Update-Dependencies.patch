@@ -5,7 +5,7 @@ Subject: [PATCH] Update Dependencies
 
 
 diff --git a/pom.xml b/pom.xml
-index cb784909c54181aa619831850ba6a36bbe6c38e3..1e1713fb98f3c311359b92e551f4506dabf417ae 100644
+index 28b7e39b46361c00dd5bb47fdbe2edb2f39259bc..7b127347f861378322dedd6208a1569f44e45db5 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -32,7 +32,7 @@

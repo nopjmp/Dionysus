@@ -1,2 +1,2 @@
-Contributing to Cauldron
+Contributing to Dionysus
 TODO

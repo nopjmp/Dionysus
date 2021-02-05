@@ -1,16 +1,16 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Thu, 28 Jan 2021 20:14:47 -0600
-Subject: [PATCH] Add Cauldron Config
+Date: Fri, 5 Feb 2021 00:06:21 -0600
+Subject: [PATCH] Add Dionysus Config
 
 
-diff --git a/src/main/java/dev/pomf/cauldron/CauldronConfig.java b/src/main/java/dev/pomf/cauldron/CauldronConfig.java
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..a9f36e5196d071e60c28598edc08709a52ab83b9
+index 0000000000000000000000000000000000000000..c8ed8652eef62fa438fb6f9a14160c67cb04796b
 --- /dev/null
-+++ b/src/main/java/dev/pomf/cauldron/CauldronConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -0,0 +1,184 @@
-+package dev.pomf.cauldron;
++package dev.pomf.dionysus;
 +
 +import com.google.common.base.Throwables;
 +import net.minecraft.server.MinecraftServer;
@@ -31,9 +31,9 @@ index 0000000000000000000000000000000000000000..a9f36e5196d071e60c28598edc08709a
 +import java.util.logging.Level;
 +import java.util.regex.Pattern;
 +
-+public class CauldronConfig {
++public class DionysusConfig {
 +
-+    private static final String HEADER = "This is the main configuration file for Cauldron.\n"
++    private static final String HEADER = "This is the main configuration file for Dionysus.\n"
 +            + "As you can see, there's tons to configure. Some options may impact gameplay, so use\n"
 +            + "with caution, and make sure you know what each option does before configuring.\n";
 +    private static final Pattern SPACE = Pattern.compile(" ");
@@ -67,7 +67,7 @@ index 0000000000000000000000000000000000000000..a9f36e5196d071e60c28598edc08709a
 +
 +        version = getInt("config-version", 1);
 +        set("config-version", 1);
-+        readConfig(CauldronConfig.class, null);
++        readConfig(DionysusConfig.class, null);
 +    }
 +
 +    protected static void logError(String s) {
@@ -82,7 +82,7 @@ index 0000000000000000000000000000000000000000..a9f36e5196d071e60c28598edc08709a
 +
 +    public static void registerCommands() {
 +        for (Map.Entry<String, Command> entry : commands.entrySet()) {
-+            MinecraftServer.getServer().server.getCommandMap().register(entry.getKey(), "Cauldron", entry.getValue());
++            MinecraftServer.getServer().server.getCommandMap().register(entry.getKey(), "Dionysus", entry.getValue());
 +        }
 +    }
 +

@@ -1381,10 +1381,10 @@ index d71734df819c76039e76d6790db181b210133224..c1273e988e6a46c20eca54530f928404
          for (int j = 1; j < 5; ++j) {
              if ((i & -1 << j * 7) == 0) {
 diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java b/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
-index 99de72d3a18a2e82bfae1a3e9bd0db502368ae96..d3f5ab13ed33dec8624402883321fdc02ca3b4be 100644
+index 108d4c500977ed34431b57fbf35feb36a43660ba..e37627fff51f4161231213ad08f7b411bd0874a5 100644
 --- a/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
 +++ b/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
-@@ -9,10 +9,6 @@ import java.util.Iterator;
+@@ -8,10 +8,6 @@ import java.util.Iterator;
  import java.util.List;
  import java.util.Map.Entry;
  
@@ -1395,9 +1395,9 @@ index 99de72d3a18a2e82bfae1a3e9bd0db502368ae96..d3f5ab13ed33dec8624402883321fdc0
  public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
  
      private int a;
-@@ -21,13 +17,8 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -20,13 +16,8 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
      private byte[] d;
-     private List<NBTTagCompound> e; private List<NBTTagCompound> getTileDataEntityData() { return this.e; } // Cauldron - Tuinity - OBFHELPER
+     private List<NBTTagCompound> e; private List<NBTTagCompound> getTileDataEntityData() { return this.e; } // Dionysus - Tuinity - OBFHELPER
      private boolean f;
 -    private volatile boolean ready = false; // Paper - Async-Anti-Xray - Ready flag for the network manager
  
@@ -1410,10 +1410,12 @@ index 99de72d3a18a2e82bfae1a3e9bd0db502368ae96..d3f5ab13ed33dec8624402883321fdc0
  
      // Paper start
      private final java.util.List<Packet> extraPackets = new java.util.ArrayList<>();
-@@ -41,21 +32,13 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -39,22 +30,15 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+     }
      // Paper end
  
-     public PacketPlayOutMapChunk(Chunk chunk, int i) { final int chunkSectionBitSet = i; // Cauldron - Tuinity - handle oversized chunk data packets more robustly
++
+     public PacketPlayOutMapChunk(Chunk chunk, int i) { final int chunkSectionBitSet = i; // Dionysus - Tuinity - handle oversized chunk data packets more robustly
 -        PacketPlayOutMapChunkInfo packetPlayOutMapChunkInfo = chunk.world.chunkPacketBlockController.getPacketPlayOutMapChunkInfo(this, chunk, i); // Paper - Anti-Xray - Add chunk packet info
          this.a = chunk.locX;
          this.b = chunk.locZ;
@@ -1432,17 +1434,17 @@ index 99de72d3a18a2e82bfae1a3e9bd0db502368ae96..d3f5ab13ed33dec8624402883321fdc0
 +        this.c = this.a(new PacketDataSerializer(this.g()), chunk, flag, i);
          this.e = Lists.newArrayList();
          Iterator iterator = chunk.getTileEntities().entrySet().iterator();
-         int totalTileEntities = 0; // Cauldron
-@@ -89,7 +72,6 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+         int totalTileEntities = 0; // Dionysus
+@@ -88,7 +72,6 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
              }
          }
  
 -        chunk.world.chunkPacketBlockController.modifyBlocks(this, packetPlayOutMapChunkInfo); // Paper - Anti-Xray - Modify blocks
-         // Cauldron - Tuinity start - improve oversized chunk data packet handling
+         // Dionysus - Tuinity start - improve oversized chunk data packet handling
          if (this.mustSplit) {
              int chunkSectionBitSetCopy = chunkSectionBitSet;
-@@ -107,16 +89,6 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
-         // Cauldron - Tuinity end - improve oversized chunk data packet handling
+@@ -106,16 +89,6 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+         // Dionysus - Tuinity end - improve oversized chunk data packet handling
      }
  
 -    // Paper start - Async-Anti-Xray - Getter and Setter for the ready flag
@@ -1458,7 +1460,7 @@ index 99de72d3a18a2e82bfae1a3e9bd0db502368ae96..d3f5ab13ed33dec8624402883321fdc0
      public void a(PacketDataSerializer packetdataserializer) throws IOException {
          this.a = packetdataserializer.readInt();
          this.b = packetdataserializer.readInt();
-@@ -169,15 +141,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -168,15 +141,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
          return bytebuf;
      }
  
@@ -1474,7 +1476,7 @@ index 99de72d3a18a2e82bfae1a3e9bd0db502368ae96..d3f5ab13ed33dec8624402883321fdc0
          int j = 0;
          ChunkSection[] achunksection = chunk.getSections();
          int k = 0;
-@@ -187,7 +151,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -186,7 +151,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
  
              if (chunksection != Chunk.a && (!this.e() || !chunksection.a()) && (i & 1 << k) != 0) {
                  j |= 1 << k;
@@ -1539,7 +1541,7 @@ index 76f6f35bb995b4f961ff087ec2cae490bae96349..03894df54cdeafc98e7b5abed24b0453
          return this.a.size();
      }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index aaabc42a50ac3ea7da818d0b35c0e8f4c9f254b7..7e4fdd67f623c609292c65548a5076179a3cb129 100644
+index 2111627759a520fb98ab71decd71b9282e199dcc..d52cbbd482b4f4cbab07f7a62830a3855d6ca11b 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -35,8 +35,6 @@ import org.bukkit.generator.ChunkGenerator;
@@ -1573,7 +1575,7 @@ index aaabc42a50ac3ea7da818d0b35c0e8f4c9f254b7..7e4fdd67f623c609292c65548a507617
          }
 -
 +        
-         // Cauldron - Reset count once we are done with applyingPhysics
+         // Dionysus - Reset count once we are done with applyingPhysics
          recursivePhysicsCount = 0;
 -
 -        this.chunkPacketBlockController.updateNearbyBlocks(this, blockposition); // Paper - Anti-Xray

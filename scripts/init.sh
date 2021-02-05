@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # BEGIN config
-FORK_NAME="Cauldron"
+FORK_NAME="Dionysus"
 API_REPO=""
 SERVER_REPO=""
 PAPER_API_REPO=""

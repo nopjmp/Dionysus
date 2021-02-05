@@ -1,12 +1,12 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Thu, 28 Jan 2021 22:24:04 -0600
+Date: Fri, 5 Feb 2021 00:13:43 -0600
 Subject: [PATCH] AntiBook Crasher
 
 This prevents someone from interacting with a book that is too large
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 59d5263295ec57981fb8a9cbab34a00bce904f70..44f6395965ce81ce9e05d546da300b43f5325b6a 100644
+index 59d5263295ec57981fb8a9cbab34a00bce904f70..0460166d4f2ffbd4df91e9392f2402f9aa47949c 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -7,17 +7,13 @@ import com.google.common.util.concurrent.Futures;
@@ -33,13 +33,13 @@ index 59d5263295ec57981fb8a9cbab34a00bce904f70..44f6395965ce81ce9e05d546da300b43
          this.player.resetIdleTimer();
          if (this.player.activeContainer.windowId == packetplayinwindowclick.a() && this.player.activeContainer.c(this.player) && this.player.activeContainer.canUse(this.player)) { // CraftBukkit
              boolean cancelled = this.player.isSpectator(); // CraftBukkit - see below if
-+            // Cauldron Start - AntiBook Crasher
++            // Dionysus Start - AntiBook Crasher
 +            if (!cancelled) {
 +                ItemStack stack = packetplayinwindowclick.e();
 +                if (stack.getItem() == Items.WRITABLE_BOOK && Objects.requireNonNull(stack.getTag()).hasKey("pages"))
 +                    cancelled = !validateBook(stack, false);
 +            }
-+            // Cauldron End
++            // Dionysus End
              if (false/*this.player.isSpectator()*/) { // CraftBukkit
                  NonNullList nonnulllist = NonNullList.a();
  

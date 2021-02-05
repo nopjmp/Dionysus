@@ -1,39 +1,31 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sat, 30 Jan 2021 02:12:58 -0600
+Date: Fri, 5 Feb 2021 00:10:45 -0600
 Subject: [PATCH] TileEntity Limit Optimization
 
 This limits the number of entities that are sent when a chunk is loaded.
 
 diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java b/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
-index 4fe7c9956533bac5036c6499daa3a8ddd82d788b..99de72d3a18a2e82bfae1a3e9bd0db502368ae96 100644
+index 4fe7c9956533bac5036c6499daa3a8ddd82d788b..108d4c500977ed34431b57fbf35feb36a43660ba 100644
 --- a/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
 +++ b/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
-@@ -1,6 +1,7 @@
- package net.minecraft.server;
- 
- import com.google.common.collect.Lists;
-+import dev.pomf.cauldron.CauldronConfig;
- import io.netty.buffer.ByteBuf;
- import io.netty.buffer.Unpooled;
- import java.io.IOException;
-@@ -18,7 +19,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -18,7 +18,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
      private int b;
      private int c;
      private byte[] d;
 -    private List<NBTTagCompound> e;
-+    private List<NBTTagCompound> e; private List<NBTTagCompound> getTileDataEntityData() { return this.e; } // Cauldron - Tuinity - OBFHELPER
++    private List<NBTTagCompound> e; private List<NBTTagCompound> getTileDataEntityData() { return this.e; } // Dionysus - Tuinity - OBFHELPER
      private boolean f;
      private volatile boolean ready = false; // Paper - Async-Anti-Xray - Ready flag for the network manager
  
-@@ -30,12 +31,16 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -30,12 +30,16 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
  
      // Paper start
      private final java.util.List<Packet> extraPackets = new java.util.ArrayList<>();
 -    private static final int SKIP_EXCESSIVE_SIGNS_LIMIT = Integer.getInteger("Paper.excessiveSignsLimit", 500);
-+    private static final int TE_LIMIT = Integer.getInteger("cauldron.te-limit", 750); // Cauldron - Tuinity - handle oversized chunk data packets more robustly
-+    private static final int TE_SPLIT_LIMIT = Math.max(4096 + 1, Integer.getInteger("cauldron.te-split-limit", 15_000)); // Cauldron - Tuinity- handle oversized chunk data packets more robustly
-+    private boolean mustSplit = false; // Cauldron - Tuinity - handle oversized chunk data packets more robustly
++    private static final int TE_LIMIT = Integer.getInteger("dionysus.te-limit", 750); // Dionysus - Tuinity - handle oversized chunk data packets more robustly
++    private static final int TE_SPLIT_LIMIT = Math.max(4096 + 1, Integer.getInteger("dionysus.te-split-limit", 15_000)); // Dionysus - Tuinity- handle oversized chunk data packets more robustly
++    private boolean mustSplit = false; // Dionysus - Tuinity - handle oversized chunk data packets more robustly
 +
      public java.util.List<Packet> getExtraPackets() {
          return extraPackets;
@@ -41,20 +33,20 @@ index 4fe7c9956533bac5036c6499daa3a8ddd82d788b..99de72d3a18a2e82bfae1a3e9bd0db50
      // Paper end
 -    public PacketPlayOutMapChunk(Chunk chunk, int i) {
 +
-+    public PacketPlayOutMapChunk(Chunk chunk, int i) { final int chunkSectionBitSet = i; // Cauldron - Tuinity - handle oversized chunk data packets more robustly
++    public PacketPlayOutMapChunk(Chunk chunk, int i) { final int chunkSectionBitSet = i; // Dionysus - Tuinity - handle oversized chunk data packets more robustly
          PacketPlayOutMapChunkInfo packetPlayOutMapChunkInfo = chunk.world.chunkPacketBlockController.getPacketPlayOutMapChunkInfo(this, chunk, i); // Paper - Anti-Xray - Add chunk packet info
          this.a = chunk.locX;
          this.b = chunk.locZ;
-@@ -53,7 +58,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -53,7 +57,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
          this.c = this.writeChunk(new PacketDataSerializer(this.g()), chunk, flag, i, packetPlayOutMapChunkInfo); // Paper - Anti-Xray - Add chunk packet info
          this.e = Lists.newArrayList();
          Iterator iterator = chunk.getTileEntities().entrySet().iterator();
 -        int totalSigns = 0; // Paper
-+        int totalTileEntities = 0; // Cauldron
++        int totalTileEntities = 0; // Dionysus
  
          while (iterator.hasNext()) {
              Entry entry = (Entry) iterator.next();
-@@ -62,14 +67,22 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -62,14 +66,22 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
              int j = blockposition.getY() >> 4;
  
              if (this.e() || (i & 1 << j) != 0) {
@@ -62,7 +54,7 @@ index 4fe7c9956533bac5036c6499daa3a8ddd82d788b..99de72d3a18a2e82bfae1a3e9bd0db50
 -                if (tileentity instanceof TileEntitySign) {
 -                    if (SKIP_EXCESSIVE_SIGNS_LIMIT < 0 || ++totalSigns < SKIP_EXCESSIVE_SIGNS_LIMIT) {
 -                        extraPackets.add(tileentity.getUpdatePacket());
-+                // Cauldron Start - handle tile entities better
++                // Dionysus Start - handle tile entities better
 +                ++totalTileEntities;
 +                if (totalTileEntities > TE_SPLIT_LIMIT) {
 +                    this.mustSplit = true;
@@ -79,15 +71,15 @@ index 4fe7c9956533bac5036c6499daa3a8ddd82d788b..99de72d3a18a2e82bfae1a3e9bd0db50
 -                    continue;
                  }
 -                // Paper end
-+                // Cauldron end
++                // Dionysus end
                  NBTTagCompound nbttagcompound = tileentity.d();
  
                  this.e.add(nbttagcompound);
-@@ -77,6 +90,21 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+@@ -77,6 +89,21 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
          }
  
          chunk.world.chunkPacketBlockController.modifyBlocks(this, packetPlayOutMapChunkInfo); // Paper - Anti-Xray - Modify blocks
-+        // Cauldron - Tuinity start - improve oversized chunk data packet handling
++        // Dionysus - Tuinity start - improve oversized chunk data packet handling
 +        if (this.mustSplit) {
 +            int chunkSectionBitSetCopy = chunkSectionBitSet;
 +            for (int a = 0, len = Integer.bitCount(chunkSectionBitSet); a < len; ++a) {
@@ -101,7 +93,7 @@ index 4fe7c9956533bac5036c6499daa3a8ddd82d788b..99de72d3a18a2e82bfae1a3e9bd0db50
 +                }
 +            }
 +        }
-+        // Cauldron - Tuinity end - improve oversized chunk data packet handling
++        // Dionysus - Tuinity end - improve oversized chunk data packet handling
      }
  
      // Paper start - Async-Anti-Xray - Getter and Setter for the ready flag
