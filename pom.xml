@@ -24,7 +24,7 @@
     </build>
     <modules>
         <module>Dionysus-API</module>
-        <module>Dauldron-Server</module>
+        <module>Dionysus-Server</module>
     </modules>
 
     <profiles>
