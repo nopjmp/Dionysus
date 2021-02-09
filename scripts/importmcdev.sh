@@ -73,6 +73,7 @@ done
 
 # Dionysus Modifications
 import MathHelper
+import EnumDirection
 
 ########################################################
 ########################################################

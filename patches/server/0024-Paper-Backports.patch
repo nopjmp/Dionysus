@@ -16,6 +16,179 @@ index d8753dffa478a4050434dfc326f646b6e9573b29..282239028b64e29cd953b8441a924912
      public ItemStack b(EnumHand enumhand) {
          if (enumhand == EnumHand.MAIN_HAND) {
              return this.getEquipment(EnumItemSlot.MAINHAND);
+diff --git a/src/main/java/net/minecraft/server/EnumDirection.java b/src/main/java/net/minecraft/server/EnumDirection.java
+index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07dd8f4677 100644
+--- a/src/main/java/net/minecraft/server/EnumDirection.java
++++ b/src/main/java/net/minecraft/server/EnumDirection.java
+@@ -19,19 +19,27 @@ public enum EnumDirection implements INamable {
+     private final String j;
+     private final EnumDirection.EnumAxis k;
+     private final EnumDirection.EnumAxisDirection l;
+-    private final BaseBlockPosition m;
+     private static final EnumDirection[] n = new EnumDirection[6];
+     private static final EnumDirection[] o = new EnumDirection[4];
+-    private static final Map<String, EnumDirection> p = Maps.newHashMap();
+-
+-    private EnumDirection(int i, int j, int k, String s, EnumDirection.EnumAxisDirection enumdirection_enumaxisdirection, EnumDirection.EnumAxis enumdirection_enumaxis, BaseBlockPosition baseblockposition) {
++    //private static final Map<String, EnumDirection> p = Maps.newHashMap();
++    // Paper start
++    private final int adjX;
++    private final int adjY;
++    private final int adjZ;
++    // Paper end
++
++    EnumDirection(int i, int j, int k, String s, EnumDirection.EnumAxisDirection enumdirection_enumaxisdirection, EnumDirection.EnumAxis enumdirection_enumaxis, BaseBlockPosition baseblockposition) {
+         this.g = i;
+         this.i = k;
+         this.h = j;
+         this.j = s;
+         this.k = enumdirection_enumaxis;
+         this.l = enumdirection_enumaxisdirection;
+-        this.m = baseblockposition;
++        // Paper start
++        this.adjX = baseblockposition.getX();
++        this.adjY = baseblockposition.getY();
++        this.adjZ = baseblockposition.getZ();
++        // Paper end
+     }
+ 
+     public int a() {
+@@ -89,15 +97,15 @@ public enum EnumDirection implements INamable {
+     }
+ 
+     public int getAdjacentX() {
+-        return this.k == EnumDirection.EnumAxis.X ? this.l.a() : 0;
++        return this.adjX; // Paper
+     }
+ 
+     public int getAdjacentY() {
+-        return this.k == EnumDirection.EnumAxis.Y ? this.l.a() : 0;
++        return this.adjY; // Paper
+     }
+ 
+     public int getAdjacentZ() {
+-        return this.k == EnumDirection.EnumAxis.Z ? this.l.a() : 0;
++        return this.adjZ; // Paper
+     }
+ 
+     public String j() {
+@@ -179,16 +187,16 @@ public enum EnumDirection implements INamable {
+                 EnumDirection.o[enumdirection.i] = enumdirection;
+             }
+ 
+-            EnumDirection.p.put(enumdirection.j().toLowerCase(Locale.ROOT), enumdirection);
++            //EnumDirection.p.put(enumdirection.j().toLowerCase(Locale.ROOT), enumdirection);
+         }
+ 
+     }
+ 
+-    public static enum EnumDirectionLimit implements Predicate<EnumDirection>, Iterable<EnumDirection> {
++    public enum EnumDirectionLimit implements Predicate<EnumDirection>, Iterable<EnumDirection> {
+ 
+         HORIZONTAL, VERTICAL;
+ 
+-        private EnumDirectionLimit() {}
++        EnumDirectionLimit() {}
+ 
+         public EnumDirection[] a() {
+             switch (this) {
+@@ -199,7 +207,7 @@ public enum EnumDirection implements INamable {
+                 return new EnumDirection[] { EnumDirection.UP, EnumDirection.DOWN};
+ 
+             default:
+-                throw new Error("Someone\'s been tampering with the universe!");
++                throw new Error("Someone's been tampering with the universe!");
+             }
+         }
+ 
+@@ -209,27 +217,23 @@ public enum EnumDirection implements INamable {
+             return aenumdirection[random.nextInt(aenumdirection.length)];
+         }
+ 
+-        public boolean a(@Nullable EnumDirection enumdirection) {
++        public boolean apply(@Nullable EnumDirection enumdirection) {
+             return enumdirection != null && enumdirection.k().d() == this;
+         }
+ 
+         public Iterator<EnumDirection> iterator() {
+             return Iterators.forArray(this.a());
+         }
+-
+-        public boolean apply(@Nullable Object object) {
+-            return this.a((EnumDirection) object);
+-        }
+     }
+ 
+-    public static enum EnumAxisDirection {
++    public enum EnumAxisDirection {
+ 
+         POSITIVE(1, "Towards positive"), NEGATIVE(-1, "Towards negative");
+ 
+         private final int c;
+         private final String d;
+ 
+-        private EnumAxisDirection(int i, String s) {
++        EnumAxisDirection(int i, String s) {
+             this.c = i;
+             this.d = s;
+         }
+@@ -243,7 +247,7 @@ public enum EnumDirection implements INamable {
+         }
+     }
+ 
+-    public static enum EnumAxis implements Predicate<EnumDirection>, INamable {
++    public enum EnumAxis implements Predicate<EnumDirection>, INamable {
+ 
+         X("x", EnumDirection.EnumDirectionLimit.HORIZONTAL), Y("y", EnumDirection.EnumDirectionLimit.VERTICAL), Z("z", EnumDirection.EnumDirectionLimit.HORIZONTAL);
+ 
+@@ -251,9 +255,9 @@ public enum EnumDirection implements INamable {
+         private final String e;
+         private final EnumDirection.EnumDirectionLimit f;
+ 
+-        private EnumAxis(String s, EnumDirection.EnumDirectionLimit enumdirection_enumdirectionlimit) {
++        EnumAxis(String s, EnumDirection.EnumDirectionLimit enumDirectionLimit) {
+             this.e = s;
+-            this.f = enumdirection_enumdirectionlimit;
++            this.f = enumDirectionLimit;
+         }
+ 
+         public String a() {
+@@ -272,10 +276,6 @@ public enum EnumDirection implements INamable {
+             return this.e;
+         }
+ 
+-        public boolean a(@Nullable EnumDirection enumdirection) {
+-            return enumdirection != null && enumdirection.k() == this;
+-        }
+-
+         public EnumDirection.EnumDirectionLimit d() {
+             return this.f;
+         }
+@@ -284,18 +284,18 @@ public enum EnumDirection implements INamable {
+             return this.e;
+         }
+ 
+-        public boolean apply(@Nullable Object object) {
+-            return this.a((EnumDirection) object);
++        public boolean apply(@Nullable EnumDirection enumdirection) {
++            return enumdirection != null && enumdirection.k() == this;
+         }
+ 
+         static {
+-            EnumDirection.EnumAxis[] aenumdirection_enumaxis = values();
+-            int i = aenumdirection_enumaxis.length;
++            EnumDirection.EnumAxis[] enumAxisValue = values();
++            int i = enumAxisValue.length;
+ 
+             for (int j = 0; j < i; ++j) {
+-                EnumDirection.EnumAxis enumdirection_enumaxis = aenumdirection_enumaxis[j];
++                EnumDirection.EnumAxis enumAxis = enumAxisValue[j];
+ 
+-                EnumDirection.EnumAxis.d.put(enumdirection_enumaxis.a().toLowerCase(Locale.ROOT), enumdirection_enumaxis);
++                EnumDirection.EnumAxis.d.put(enumAxis.a().toLowerCase(Locale.ROOT), enumAxis);
+             }
+ 
+         }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
 index e22575917a0004cfae986d144fd62d1c9de29bb4..514a793375d471ebd476ae320276eea0220073ee 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
