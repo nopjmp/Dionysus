@@ -1,0 +1,194 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Tue, 9 Feb 2021 00:15:56 -0600
+Subject: [PATCH] Paper Backports
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index d8753dffa478a4050434dfc326f646b6e9573b29..282239028b64e29cd953b8441a924912b47b5269 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1557,6 +1557,7 @@ public abstract class EntityLiving extends Entity {
+         return this.getEquipment(EnumItemSlot.OFFHAND);
+     }
+ 
++    public final ItemStack getItemInHand(EnumHand enumhand) { return this.b(enumhand); } // Paper - OBFHELPER
+     public ItemStack b(EnumHand enumhand) {
+         if (enumhand == EnumHand.MAIN_HAND) {
+             return this.getEquipment(EnumItemSlot.MAINHAND);
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index e22575917a0004cfae986d144fd62d1c9de29bb4..514a793375d471ebd476ae320276eea0220073ee 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -485,6 +485,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+         // CraftBukkit start
+         if (this.server != null) {
+             this.server.disablePlugins();
++            this.server.waitForAsyncTasksShutdown();
+         }
+         // CraftBukkit end
+         if (this.an() != null) {
+diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
+index 858afc6b7ebb5dc61e8ed2c74177352f737ffb7d..e975bbdce6b2e7222a657e2ece2cd6a7837626f3 100644
+--- a/src/main/java/net/minecraft/server/NBTTagCompound.java
++++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
+@@ -1,7 +1,5 @@
+ package net.minecraft.server;
+ 
+-import com.google.common.collect.Lists;
+-import com.google.common.collect.Maps;
+ import java.io.DataInput;
+ import java.io.DataOutput;
+ import java.io.IOException;
+@@ -15,6 +13,9 @@ import java.util.Set;
+ import java.util.UUID;
+ import java.util.regex.Pattern;
+ import javax.annotation.Nullable;
++
++import com.google.common.collect.Lists;
++import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap; // Paper
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -22,9 +23,15 @@ public class NBTTagCompound extends NBTBase {
+ 
+     private static final Logger b = LogManager.getLogger();
+     private static final Pattern c = Pattern.compile("[A-Za-z0-9._+-]+");
+-    public final Map<String, NBTBase> map = Maps.newHashMap(); // Paper
++    public final Map<String, NBTBase> map; // Paper
++
++    public NBTTagCompound() {
++        this(new Object2ObjectOpenHashMap<>(8, 0.8f)); // Paper - reduce memory footprint of NBTTagCompound
++    }
+ 
+-    public NBTTagCompound() {}
++    protected NBTTagCompound(Map<String, NBTBase> map) {
++        this.map = map;
++    }
+ 
+     void write(DataOutput dataoutput) throws IOException {
+         Iterator iterator = this.map.keySet().iterator();
+@@ -295,19 +302,19 @@ public class NBTTagCompound extends NBTBase {
+ 
+     public String toString() {
+         StringBuilder stringbuilder = new StringBuilder("{");
+-        Object object = this.map.keySet();
++        Collection<String> collection = this.map.keySet();
+ 
+         if (NBTTagCompound.b.isDebugEnabled()) {
+-            ArrayList arraylist = Lists.newArrayList(this.map.keySet());
++            ArrayList<String> list = Lists.newArrayList(this.map.keySet());
+ 
+-            Collections.sort(arraylist);
+-            object = arraylist;
++            Collections.sort(list);
++            collection = list;
+         }
+ 
+         String s;
+ 
+-        for (Iterator iterator = ((Collection) object).iterator(); iterator.hasNext(); stringbuilder.append(s(s)).append(':').append(this.map.get(s))) {
+-            s = (String) iterator.next();
++        for (Iterator<String> iterator = collection.iterator(); iterator.hasNext(); stringbuilder.append(s(s)).append(':').append(this.map.get(s))) {
++            s = iterator.next();
+             if (stringbuilder.length() != 1) {
+                 stringbuilder.append(',');
+             }
+@@ -347,16 +354,18 @@ public class NBTTagCompound extends NBTBase {
+     }
+ 
+     public NBTTagCompound g() {
+-        NBTTagCompound nbttagcompound = new NBTTagCompound();
+-        Iterator iterator = this.map.keySet().iterator();
++        // Paper start - reduce memory footprint of NBTTagCompound
++        Object2ObjectOpenHashMap<String, NBTBase> ret = new Object2ObjectOpenHashMap<>(this.map.size(), 0.8f);
+ 
++        Iterator<Map.Entry<String, NBTBase>> iterator = (this.map instanceof Object2ObjectOpenHashMap) ? ((Object2ObjectOpenHashMap)this.map).object2ObjectEntrySet().fastIterator() : this.map.entrySet().iterator();
+         while (iterator.hasNext()) {
+-            String s = (String) iterator.next();
+-
+-            nbttagcompound.set(s, this.map.get(s).clone());
++            Map.Entry<String, NBTBase> entry = iterator.next();
++            ret.put(entry.getKey(), entry.getValue().clone());
+         }
+ 
+-        return nbttagcompound;
++        return new NBTTagCompound(ret);
++        // Paper end - reduce memory footprint of NBTTagCompound
++
+     }
+ 
+     public boolean equals(Object object) {
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index d7ba50f2ccf764a40d78be2c626efbafc5a02187..ddeb68f2b3b0ac45639103f57ee07ce06f69498a 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1062,10 +1062,13 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+ 
+             if (cancelled) {
+                 this.player.getBukkitEntity().updateInventory(); // SPIGOT-2524
+-            } else {
+-                this.player.playerInteractManager.a(this.player, worldserver, itemstack, enumhand);
++                return;
+             }
+-            // CraftBukkit end
++            // Paper start
++            itemstack = this.player.getItemInHand(enumhand);
++            if (itemstack.isEmpty()) return;
++            // Paper end
++            this.player.playerInteractManager.a(this.player, worldserver, itemstack, enumhand);
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index eb15b319600abe65510b7e55aa437c6b5387a536..66bc06c5804cbe6447372fcdb088fd981a6b8d98 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -808,6 +808,35 @@ public final class CraftServer implements Server {
+         enablePlugins(PluginLoadOrder.POSTWORLD);
+     }
+ 
++    // Paper start
++    public void waitForAsyncTasksShutdown() {
++        int pollCount = 0;
++
++        // Wait for at most 5 seconds for plugins to close their threads
++        while (pollCount < 10*5 && getScheduler().getActiveWorkers().size() > 0) {
++            try {
++                Thread.sleep(100);
++            } catch (InterruptedException e) {}
++            pollCount++;
++        }
++
++        List<BukkitWorker> overdueWorkers = getScheduler().getActiveWorkers();
++        for (BukkitWorker worker : overdueWorkers) {
++            Plugin plugin = worker.getOwner();
++            String author = "<NoAuthorGiven>";
++            if (plugin.getDescription().getAuthors().size() > 0) {
++                author = plugin.getDescription().getAuthors().get(0);
++            }
++            getLogger().log(Level.SEVERE, String.format(
++                    "Nag author: '%s' of '%s' about the following: %s",
++                    author,
++                    plugin.getDescription().getName(),
++                    "This plugin is not properly shutting down its async tasks when it is being shut down. This task may throw errors during the final shutdown logs and might not complete before process dies."
++            ));
++        }
++    }
++    // Paper end
++
+     @Override
+     public void reloadData() {
+         console.reload();
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index ae2c51f5d30e143180092e2ade56f5df26e35616..f1f6d4c97ddcc0ea3203679f5298969d30fd4c28 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -22,6 +22,7 @@ public class Main {
+ 
+     public static void main(String[] args) {
+         // Todo: Installation script
++        if (System.getProperty("jdk.nio.maxCachedBufferSize") == null) System.setProperty("jdk.nio.maxCachedBufferSize", "262144"); // Paper - cap per-thread NIO cache size
+         OptionParser parser = new OptionParser() {
+             {
+                 acceptsAll(asList("?", "help"), "Show the help");

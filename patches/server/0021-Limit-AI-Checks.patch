@@ -8,10 +8,10 @@ This will limit AI when TPS is low, player count is high.
 Additionally, update the defaults to be friendly to anarchy servers a bit.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 6f03a641bcc66bb36ec8396212207a96c0f95904..1d7c64defafb1a4a285128dc8eeec1b1fd3bcc06 100644
+index 6f03a641bcc66bb36ec8396212207a96c0f95904..27ad94a83d5e48eb33f110eeeccac718d6253ebc 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -178,11 +178,24 @@ public class DionysusConfig {
+@@ -178,11 +178,28 @@ public class DionysusConfig {
      }
  
      public static boolean enableAntiBackdoor = true;
@@ -21,12 +21,16 @@ index 6f03a641bcc66bb36ec8396212207a96c0f95904..1d7c64defafb1a4a285128dc8eeec1b1
      }
  
 +    public static boolean customNameAiLimitBypass = true;
++    public static boolean tamableAiLimitBypass = true;
++    public static boolean spawnerAiLimitBypass = true;
 +    public static double monsterAiLimitTPS = 10;
 +    public static int monsterAiLimitPlayerCount = 90;
 +    public static double animalAiLimitTPS = 6;
 +    public static int animalAiLimitPlayerCount = 120;
 +    private static void aiLimit() {
-+        customNameAiLimitBypass = getBoolean("ai-limit.custom-name-bypass", true);
++        customNameAiLimitBypass = getBoolean("ai-limit.bypass.custom-name", true);
++        tamableAiLimitBypass = getBoolean("ai-limit.bypass.tamable", true);
++        spawnerAiLimitBypass = getBoolean("ai-limit.bypass.spawner", true);
 +        monsterAiLimitTPS = getDouble("ai-limit.monster.tps", 10);
 +        monsterAiLimitPlayerCount = getInt("ai-limit.monster.player-count", 90);
 +
@@ -38,7 +42,7 @@ index 6f03a641bcc66bb36ec8396212207a96c0f95904..1d7c64defafb1a4a285128dc8eeec1b1
  //    private static void backdoorMessages() {
  //        backdoorKickPlayerMessage = getString("messages.kick.backdoor", backdoorKickPlayerMessage);
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index 6ae0809f5dc3772965942725dd84f89ee5364650..7bdfa519b35b8b6a6aefdeee890d4be66e5184f3 100644
+index 6ae0809f5dc3772965942725dd84f89ee5364650..e182154578b61b6d23960175a77fb7f79580341c 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
 @@ -1,5 +1,6 @@
@@ -77,9 +81,9 @@ index 6ae0809f5dc3772965942725dd84f89ee5364650..7bdfa519b35b8b6a6aefdeee890d4be6
 +    }
 +
 +    private boolean shouldLimitAI() {
-+        if (DionysusConfig.customNameAiLimitBypass && hasCustomName())
-+            return false;
-+        if (this instanceof EntityTameableAnimal || this.fromMobSpawner)
++        if ((DionysusConfig.customNameAiLimitBypass && hasCustomName())
++                || (DionysusConfig.tamableAiLimitBypass && this instanceof EntityTameableAnimal)
++                || (DionysusConfig.spawnerAiLimitBypass && this.fromMobSpawner))
 +            return false;
 +
 +        double tps = MinecraftServer.getServer().tps1.getAverage();
