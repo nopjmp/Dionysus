@@ -23340,7 +23340,7 @@ index a29731f1d1f15bbf4420f0771ea605696ed27485..3e4468d03593e74f1ec207a863436fc1
  
              if (item instanceof ItemBlock) {
 diff --git a/src/test/java/org/bukkit/support/DummyServer.java b/src/test/java/org/bukkit/support/DummyServer.java
-index e5215bb4e57cd9f572f2ef97663dc8bb4ac6467c..ffc6ebffcf91bc09104ec646b3c3ca3133db9255 100644
+index e5215bb4e57cd9f572f2ef97663dc8bb4ac6467c..8c8e88b051e83aaccdefdebc5b0dc01780aa3638 100644
 --- a/src/test/java/org/bukkit/support/DummyServer.java
 +++ b/src/test/java/org/bukkit/support/DummyServer.java
 @@ -12,7 +12,7 @@ import org.bukkit.craftbukkit.inventory.CraftItemFactory;

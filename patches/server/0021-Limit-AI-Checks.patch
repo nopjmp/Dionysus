@@ -7,8 +7,38 @@ This will limit AI when TPS is low, player count is high.
 
 Additionally, update the defaults to be friendly to anarchy servers a bit.
 
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 6f03a641bcc66bb36ec8396212207a96c0f95904..1d7c64defafb1a4a285128dc8eeec1b1fd3bcc06 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -178,11 +178,24 @@ public class DionysusConfig {
+     }
+ 
+     public static boolean enableAntiBackdoor = true;
+-
+     private static void antiBackdoor() {
+         enableAntiBackdoor = getBoolean("anti-backdoor", true);
+     }
+ 
++    public static boolean customNameAiLimitBypass = true;
++    public static double monsterAiLimitTPS = 10;
++    public static int monsterAiLimitPlayerCount = 90;
++    public static double animalAiLimitTPS = 6;
++    public static int animalAiLimitPlayerCount = 120;
++    private static void aiLimit() {
++        customNameAiLimitBypass = getBoolean("ai-limit.custom-name-bypass", true);
++        monsterAiLimitTPS = getDouble("ai-limit.monster.tps", 10);
++        monsterAiLimitPlayerCount = getInt("ai-limit.monster.player-count", 90);
++
++        animalAiLimitTPS = getDouble("ai-limit.animal.tps", 6);
++        animalAiLimitPlayerCount = getInt("ai-limit.animal.player-count", 120);
++    }
++
+     // NOTE: leaving this here just in case we want to change this to a kick or notification
+ //    private static void backdoorMessages() {
+ //        backdoorKickPlayerMessage = getString("messages.kick.backdoor", backdoorKickPlayerMessage);
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index 6ae0809f5dc3772965942725dd84f89ee5364650..f489e5ae3a23407ef498bd5dac7621ee25752b2b 100644
+index 6ae0809f5dc3772965942725dd84f89ee5364650..7bdfa519b35b8b6a6aefdeee890d4be66e5184f3 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
 @@ -1,5 +1,6 @@
@@ -18,15 +48,16 @@ index 6ae0809f5dc3772965942725dd84f89ee5364650..f489e5ae3a23407ef498bd5dac7621ee
  import com.google.common.collect.Maps;
  import java.util.Arrays;
  import java.util.Iterator;
-@@ -10,6 +11,7 @@ import java.util.UUID;
+@@ -10,6 +11,8 @@ import java.util.UUID;
  import javax.annotation.Nullable;
  
  // CraftBukkit start
++import dev.pomf.dionysus.DionysusConfig;
 +import org.bukkit.Bukkit;
  import org.bukkit.craftbukkit.event.CraftEventFactory;
  import org.bukkit.craftbukkit.entity.CraftLivingEntity;
  import org.bukkit.entity.LivingEntity;
-@@ -1197,26 +1199,34 @@ public abstract class EntityInsentient extends EntityLiving {
+@@ -1197,26 +1200,41 @@ public abstract class EntityInsentient extends EntityLiving {
      }
  
      public void setNoAI(boolean flag) {
@@ -46,11 +77,18 @@ index 6ae0809f5dc3772965942725dd84f89ee5364650..f489e5ae3a23407ef498bd5dac7621ee
 +    }
 +
 +    private boolean shouldLimitAI() {
-+        if (hasCustomName())
++        if (DionysusConfig.customNameAiLimitBypass && hasCustomName())
++            return false;
++        if (this instanceof EntityTameableAnimal || this.fromMobSpawner)
 +            return false;
 +
-+        // low tps or high player count
-+        return MinecraftServer.getServer().tps1.getAverage() < 6 || world.players.size() > 120;
++        double tps = MinecraftServer.getServer().tps1.getAverage();
++        int playerCount = world.players.size();
++
++        if (this instanceof EntityMonster)
++            return tps < DionysusConfig.monsterAiLimitTPS || playerCount > DionysusConfig.monsterAiLimitPlayerCount;
++        else
++            return tps < DionysusConfig.animalAiLimitTPS || playerCount > DionysusConfig.animalAiLimitPlayerCount;
      }
  
      public boolean isNoAI() {
