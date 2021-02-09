@@ -216,7 +216,7 @@ index 0000000000000000000000000000000000000000..d81da4f2b482adbc012fca922cf5b1fa
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/BlockDispenser.java b/src/main/java/net/minecraft/server/BlockDispenser.java
-index 539b2b3ce06c239c5c5f3b88c7608a94a9454234..647c9e29f2c8cca7ee0eb9d9f6a4d17466597367 100644
+index 3e758a81a1de408ed98c042f55fa2b3871877cc0..6f6c1dac31ee2544eefac02e5aea59af4a519b13 100644
 --- a/src/main/java/net/minecraft/server/BlockDispenser.java
 +++ b/src/main/java/net/minecraft/server/BlockDispenser.java
 @@ -1,5 +1,7 @@
@@ -237,7 +237,7 @@ index 539b2b3ce06c239c5c5f3b88c7608a94a9454234..647c9e29f2c8cca7ee0eb9d9f6a4d174
  
      protected BlockDispenser() {
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 746f64700f7400287710548c62a2cfe5a28e4320..fc62be79c1d2feb77f3cfc81f8edf20d00b376e0 100644
+index 3034756a2f3032cb6fe44512e6d168b47bfd7342..cc8167479bfc398d3f7af8bb554817650a01ca0c 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -13,6 +13,8 @@ import java.util.Random;
@@ -259,7 +259,7 @@ index 746f64700f7400287710548c62a2cfe5a28e4320..fc62be79c1d2feb77f3cfc81f8edf20d
          @Override
          public synchronized void setSeed(long seed) {
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index a3a39935b4f177a35b7356dd4d922d47faccf30c..627c9fd422b73bd0a7836ef0aa624f2b67003f5e 100644
+index 589da0e5a34565cf03bb4b8a5ded5b09ee74925b..35dd465de29e9cabb34bd8dcd6cd997d48eab524 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -291,7 +291,7 @@ index a3a39935b4f177a35b7356dd4d922d47faccf30c..627c9fd422b73bd0a7836ef0aa624f2b
      private final double posX;
      private final double posY;
 diff --git a/src/main/java/net/minecraft/server/MathHelper.java b/src/main/java/net/minecraft/server/MathHelper.java
-index c888e80aeacaaf9a8ed57f5307669ad42ef104f4..568f70f5ceabbfcd24d1660b4ca09d1f8fb08563 100644
+index 4dafb190e6490f7e1f8dfc546cf9a6fc55e19615..aaa47879d6629eb83e18c9cf3104213a46e11d05 100644
 --- a/src/main/java/net/minecraft/server/MathHelper.java
 +++ b/src/main/java/net/minecraft/server/MathHelper.java
 @@ -1,6 +1,7 @@
@@ -312,7 +312,7 @@ index c888e80aeacaaf9a8ed57f5307669ad42ef104f4..568f70f5ceabbfcd24d1660b4ca09d1f
      private static final double e;
      private static final double[] f;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 014a09dbace61a57993881ccbb49662acfb97e79..70afcf20b590d7b41ab351f3f1b36f68e17a1c62 100644
+index de456592d3d6acfc2832591d621cabdd1888930e..e22575917a0004cfae986d144fd62d1c9de29bb4 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -9,6 +9,7 @@ import com.mojang.authlib.GameProfile;
@@ -333,7 +333,7 @@ index 014a09dbace61a57993881ccbb49662acfb97e79..70afcf20b590d7b41ab351f3f1b36f68
      private String serverIp;
      private int u = -1;
 @@ -782,7 +783,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
-                 agameprofile[k] = ((EntityPlayer) this.v.v().get(j + k)).getProfile();
+                 agameprofile[k] = this.v.v().get(j + k).getProfile();
              }
  
 -            Collections.shuffle(Arrays.asList(agameprofile));
@@ -342,7 +342,7 @@ index 014a09dbace61a57993881ccbb49662acfb97e79..70afcf20b590d7b41ab351f3f1b36f68
          }
  
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 8907a462056a1c503eed020c4daf0a6507b1d0df..9b5c0e2c21970996eb9f3b92db30586bbbfe34a4 100644
+index b88e9083b3ab82d00924c6329ae247df1089d6ed..0365ea262118a61b0af0277db366c9af0b81f499 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -362,7 +362,7 @@ index 8907a462056a1c503eed020c4daf0a6507b1d0df..9b5c0e2c21970996eb9f3b92db30586b
      private static final Logger e = LogManager.getLogger();
      public static final LazyInitVar<NioEventLoopGroup> a = new LazyInitVar() {
          protected NioEventLoopGroup a() {
-@@ -137,7 +138,7 @@ public class ServerConnection {
+@@ -136,7 +137,7 @@ public class ServerConnection {
              // This prevents players from 'gaming' the server, and strategically relogging to increase their position in the tick order
              if ( org.spigotmc.SpigotConfig.playerShuffle > 0 && MinecraftServer.currentTick % org.spigotmc.SpigotConfig.playerShuffle == 0 )
              {
@@ -372,7 +372,7 @@ index 8907a462056a1c503eed020c4daf0a6507b1d0df..9b5c0e2c21970996eb9f3b92db30586b
              // Spigot End
              Iterator iterator = this.h.iterator();
 diff --git a/src/main/java/net/minecraft/server/TileEntityDispenser.java b/src/main/java/net/minecraft/server/TileEntityDispenser.java
-index fc0b231f16d2f449095fc48a74328525c898f459..11beaeb1893ecd0f5f9cafc3265864376c716c72 100644
+index b366885888a3b1f17030e9d17e612b26e9ddc3f7..474b4e59af85695c8b9878c2efa071078216ecd7 100644
 --- a/src/main/java/net/minecraft/server/TileEntityDispenser.java
 +++ b/src/main/java/net/minecraft/server/TileEntityDispenser.java
 @@ -5,13 +5,14 @@ import java.util.Random;
@@ -392,7 +392,7 @@ index fc0b231f16d2f449095fc48a74328525c898f459..11beaeb1893ecd0f5f9cafc326586437
  
      // CraftBukkit start - add fields and methods
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index d52cbbd482b4f4cbab07f7a62830a3855d6ca11b..13d04298a94737fa432de129430b21f32449c0d1 100644
+index 13d408f684bd2d9b84b09de60cfc3bd42a715eaa..5ebe8c671340ce4ee47bef82e9d407b1fe321eec 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -20,6 +20,8 @@ import javax.annotation.Nullable;
@@ -414,7 +414,7 @@ index d52cbbd482b4f4cbab07f7a62830a3855d6ca11b..13d04298a94737fa432de129430b21f3
      protected NavigationListener t = new NavigationListener();
      protected List<IWorldAccess> u;
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index afb141c62974e1877c774a7d1ab09e3398f7713e..e7b9d7668055e446945ada59de17d64c85c93c09 100644
+index 7ebb3714d711f8f0190cb2d4b5656a3295c3a74d..3d6a3bd946c36cbd54945f9c5f5190d65198d151 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -12,6 +12,7 @@ import java.util.Random;

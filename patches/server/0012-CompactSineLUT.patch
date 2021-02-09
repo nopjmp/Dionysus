@@ -104,7 +104,7 @@ index 0000000000000000000000000000000000000000..d598fc50f8f7293412e2e371f9cf5a0e
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/MathHelper.java b/src/main/java/net/minecraft/server/MathHelper.java
-index 28ef4249fd70d35d1153afdea656e0224f357ba4..c888e80aeacaaf9a8ed57f5307669ad42ef104f4 100644
+index 893c4feb7ce16edcbd43dc176b1f32ad32b102b5..4dafb190e6490f7e1f8dfc546cf9a6fc55e19615 100644
 --- a/src/main/java/net/minecraft/server/MathHelper.java
 +++ b/src/main/java/net/minecraft/server/MathHelper.java
 @@ -1,12 +1,14 @@

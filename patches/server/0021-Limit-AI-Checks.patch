@@ -1,0 +1,95 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Mon, 8 Feb 2021 01:12:47 -0600
+Subject: [PATCH] Limit AI Checks
+
+This will limit AI when TPS is low, player count is high.
+
+Additionally, update the defaults to be friendly to anarchy servers a bit.
+
+diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
+index 6ae0809f5dc3772965942725dd84f89ee5364650..f489e5ae3a23407ef498bd5dac7621ee25752b2b 100644
+--- a/src/main/java/net/minecraft/server/EntityInsentient.java
++++ b/src/main/java/net/minecraft/server/EntityInsentient.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.google.common.base.Predicates;
+ import com.google.common.collect.Maps;
+ import java.util.Arrays;
+ import java.util.Iterator;
+@@ -10,6 +11,7 @@ import java.util.UUID;
+ import javax.annotation.Nullable;
+ 
+ // CraftBukkit start
++import org.bukkit.Bukkit;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+ import org.bukkit.entity.LivingEntity;
+@@ -1197,26 +1199,34 @@ public abstract class EntityInsentient extends EntityLiving {
+     }
+ 
+     public void setNoAI(boolean flag) {
+-        byte b0 = this.datawatcher.get(EntityInsentient.a).byteValue();
++        byte b0 = this.datawatcher.get(EntityInsentient.a);
+ 
+-        this.datawatcher.set(EntityInsentient.a, Byte.valueOf(flag ? (byte) (b0 | 1) : (byte) (b0 & -2)));
++        this.datawatcher.set(EntityInsentient.a, flag ? (byte) (b0 | 1) : (byte) (b0 & -2));
+     }
+ 
+     public void o(boolean flag) {
+-        byte b0 = this.datawatcher.get(EntityInsentient.a).byteValue();
++        byte b0 = this.datawatcher.get(EntityInsentient.a);
+ 
+-        this.datawatcher.set(EntityInsentient.a, Byte.valueOf(flag ? (byte) (b0 | 2) : (byte) (b0 & -3)));
++        this.datawatcher.set(EntityInsentient.a, flag ? (byte) (b0 | 2) : (byte) (b0 & -3));
++    }
++
++    private boolean shouldLimitAI() {
++        if (hasCustomName())
++            return false;
++
++        // low tps or high player count
++        return MinecraftServer.getServer().tps1.getAverage() < 6 || world.players.size() > 120;
+     }
+ 
+     public boolean isNoAI() {
+         if (shouldLimitAI()) {
+             return false;
+         }
+-        return (this.datawatcher.get(EntityInsentient.a).byteValue() & 1) != 0;
++        return (this.datawatcher.get(EntityInsentient.a) & 1) != 0;
+     }
+ 
+     public boolean dd() {
+-        return (this.datawatcher.get(EntityInsentient.a).byteValue() & 2) != 0;
++        return (this.datawatcher.get(EntityInsentient.a) & 2) != 0;
+     }
+ 
+     public EnumMainHand getMainHand() {
+diff --git a/src/main/java/org/spigotmc/SpigotWorldConfig.java b/src/main/java/org/spigotmc/SpigotWorldConfig.java
+index 39ed4cc9941629dafc0daaffb74615931584d5aa..582d8d2b658383ce51c7fbe57c10dc4fee07d2a9 100644
+--- a/src/main/java/org/spigotmc/SpigotWorldConfig.java
++++ b/src/main/java/org/spigotmc/SpigotWorldConfig.java
+@@ -145,7 +145,7 @@ public class SpigotWorldConfig
+     public int monsterActivationRange = 32;
+     public int miscActivationRange = 16;
+     public int waterActivationRange = 16; // Paper
+-    public boolean tickInactiveVillagers = true;
++    public boolean tickInactiveVillagers = false;
+     private void activationRange()
+     {
+         animalActivationRange = getInt( "entity-activation-range.animals", animalActivationRange );
+@@ -156,9 +156,9 @@ public class SpigotWorldConfig
+         log( "Entity Activation Range: An " + animalActivationRange + " / Mo " + monsterActivationRange + " / Mi " + miscActivationRange + " / Tiv " + tickInactiveVillagers );
+     }
+ 
+-    public int playerTrackingRange = 48;
+-    public int animalTrackingRange = 48;
+-    public int monsterTrackingRange = 48;
++    public int playerTrackingRange = 40;
++    public int animalTrackingRange = 40;
++    public int monsterTrackingRange = 40;
+     public int miscTrackingRange = 32;
+     public int otherTrackingRange = 64;
+     private void trackingRange()

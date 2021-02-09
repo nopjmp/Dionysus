@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sun, 7 Feb 2021 22:34:53 -0600
+Date: Mon, 8 Feb 2021 01:33:03 -0600
 Subject: [PATCH] Remove LegacyPingHandler
 
 
@@ -253,15 +253,15 @@ index 2762bcc2eb761f0c7153234031f25094e22bec1d..00000000000000000000000000000000
 -    }
 -}
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 4a629aaa1e7b5b06525661d6c9e6b9e1375917b7..8907a462056a1c503eed020c4daf0a6507b1d0df 100644
+index ec4bafbc33dcd62fb4d9d476f2eee081092a302a..b88e9083b3ab82d00924c6329ae247df1089d6ed 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
-@@ -100,7 +100,8 @@ public class ServerConnection {
-                         ;
+@@ -99,7 +99,8 @@ public class ServerConnection {
+                     } catch (ChannelException channelexception) {
                      }
  
 -                    channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("legacy_query", new LegacyPingHandler(ServerConnection.this)).addLast("splitter", new PacketSplitter()).addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND)).addLast("prepender", new PacketPrepender()).addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
-+                    // Cauldron - remove legacy server handler
++                    // Dionysus - remove legacy server handler
 +                    channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("splitter", new PacketSplitter()).addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND)).addLast("prepender", new PacketPrepender()).addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
                      NetworkManager networkmanager = new NetworkManager(EnumProtocolDirection.SERVERBOUND);
  

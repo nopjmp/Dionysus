@@ -5,10 +5,10 @@ Subject: [PATCH] AntiPhysics crash which will be cause by a StackOverflowError
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 451cf0c7c07dbb6edb3e194a6103ef513e9bee1a..2111627759a520fb98ab71decd71b9282e199dcc 100644
+index 922f27b7a5c988613ed5065c3f02c8e52b0127e0..634a7d7c2842e08f5a86cd1ffbac5015a459d8e4 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -540,7 +540,16 @@ public abstract class World implements IBlockAccess {
+@@ -539,7 +539,16 @@ public abstract class World implements IBlockAccess {
          this.b(blockposition.south(), block, blockposition);
      }
  
@@ -25,7 +25,7 @@ index 451cf0c7c07dbb6edb3e194a6103ef513e9bee1a..2111627759a520fb98ab71decd71b928
          if (captureBlockStates) { return; } // Paper - Cancel all physics during placement
          this.a(blockposition.west(), block, blockposition);
          this.a(blockposition.east(), block, blockposition);
-@@ -552,6 +561,9 @@ public abstract class World implements IBlockAccess {
+@@ -551,6 +560,9 @@ public abstract class World implements IBlockAccess {
              this.c(blockposition, block);
          }
  
