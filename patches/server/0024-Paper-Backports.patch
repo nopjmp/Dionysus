@@ -313,6 +313,35 @@ index d7ba50f2ccf764a40d78be2c626efbafc5a02187..ddeb68f2b3b0ac45639103f57ee07ce0
          }
      }
  
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 5ebe8c671340ce4ee47bef82e9d407b1fe321eec..739ca07c78450d8aa55eccd6f0758c86d5729da0 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -2116,20 +2116,19 @@ public abstract class World implements IBlockAccess {
+         }
+     }
+ 
+-    public Map<BlockPosition, TileEntity> capturedTileEntities = Maps.newHashMap();
++    public Map<BlockPosition, TileEntity> capturedTileEntities = Maps.newLinkedHashMap(); // Paper
+     @Nullable
+     public TileEntity getTileEntity(BlockPosition blockposition) {
+         if (blockposition.isInvalidYLocation()) { // Paper
+             return null;
+         } else {
+             // CraftBukkit start
+-            if (capturedTileEntities.containsKey(blockposition)) {
+-                return capturedTileEntities.get(blockposition);
++            TileEntity tileentity = null; // Paper
++            if (!capturedTileEntities.isEmpty() && (tileentity = capturedTileEntities.get(blockposition)) != null) { // Paper
++                return tileentity; // Paper
+             }
+             // CraftBukkit end
+ 
+-            TileEntity tileentity = null;
+-
+             if (this.O) {
+                 tileentity = this.F(blockposition);
+             }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 index eb15b319600abe65510b7e55aa437c6b5387a536..66bc06c5804cbe6447372fcdb088fd981a6b8d98 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
