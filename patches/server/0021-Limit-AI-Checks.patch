@@ -1,11 +1,14 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Mon, 8 Feb 2021 01:12:47 -0600
+Date: Tue, 9 Feb 2021 17:26:11 -0600
 Subject: [PATCH] Limit AI Checks
 
 This will limit AI when TPS is low, player count is high.
 
 Additionally, update the defaults to be friendly to anarchy servers a bit.
+
+Inspiration taken from https://github.com/oldfagorg/MobOptimizer
+Credit to: John200410
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 index 6f03a641bcc66bb36ec8396212207a96c0f95904..27ad94a83d5e48eb33f110eeeccac718d6253ebc 100644
