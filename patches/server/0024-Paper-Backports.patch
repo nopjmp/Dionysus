@@ -190,7 +190,7 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
  
          }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e22575917a0004cfae986d144fd62d1c9de29bb4..514a793375d471ebd476ae320276eea0220073ee 100644
+index e22575917a0004cfae986d144fd62d1c9de29bb4..159d5f62b4e33cb17698c9ef2de9a89cc1585241 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -485,6 +485,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
@@ -201,6 +201,36 @@ index e22575917a0004cfae986d144fd62d1c9de29bb4..514a793375d471ebd476ae320276eea0
          }
          // CraftBukkit end
          if (this.an() != null) {
+@@ -868,13 +869,24 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+         MinecraftTimings.chunkIOTickTimer.stopTiming(); // Spigot
+ 
+         MinecraftTimings.timeUpdateTimer.startTiming(); // Spigot
+-        // Send time updates to everyone, it will get the right time from the world the player is in.
+-        if (this.ticks % 20 == 0) {
+-            for (int i = 0; i < this.getPlayerList().players.size(); ++i) {
+-                EntityPlayer entityplayer = this.getPlayerList().players.get(i);
+-                entityplayer.playerConnection.sendPacket(new PacketPlayOutUpdateTime(entityplayer.world.getTime(), entityplayer.getPlayerTime(), entityplayer.world.getGameRules().getBoolean("doDaylightCycle"))); // Add support for per player time
++        // Paper start - optimize time updates
++        for (final WorldServer world : this.worldServer) {
++            final boolean doDaylight = world.getGameRules().getBoolean("doDaylightCycle");
++            final long dayTime = world.getDayTime();
++            long worldTime = world.getTime();
++            final PacketPlayOutUpdateTime worldPacket = new PacketPlayOutUpdateTime(worldTime, dayTime, doDaylight);
++            for (EntityHuman entityhuman : world.players) {
++                if (!(entityhuman instanceof EntityPlayer) || (ticks + entityhuman.getId()) % 20 != 0) {
++                    continue;
++                }
++                EntityPlayer entityplayer = (EntityPlayer) entityhuman;
++                long playerTime = entityplayer.getPlayerTime();
++                PacketPlayOutUpdateTime packet = (playerTime == dayTime) ? worldPacket :
++                        new PacketPlayOutUpdateTime(worldTime, playerTime, doDaylight);
++                entityplayer.playerConnection.sendPacket(packet); // Add support for per player time
+             }
+         }
++        // Paper end
+         MinecraftTimings.timeUpdateTimer.stopTiming(); // Spigot
+ 
+         int i;
 diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
 index 858afc6b7ebb5dc61e8ed2c74177352f737ffb7d..e975bbdce6b2e7222a657e2ece2cd6a7837626f3 100644
 --- a/src/main/java/net/minecraft/server/NBTTagCompound.java
