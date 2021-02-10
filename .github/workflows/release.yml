@@ -35,6 +35,10 @@ jobs:
           name: Dionysus-JDK8
           path: dionysus-paperclip.jar
 
+      – name: Extract release notes
+        id: extract_release_notes
+        uses: ffurrer2/extract-release-notes@v1
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -43,6 +47,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
+          body: ${{ steps.extract_release_notes.outputs.release_notes }}
           draft: false
           prerelease: false
       
