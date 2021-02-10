@@ -75,10 +75,10 @@ index 7ace5c940ebe7bf1ccce39ad4b521672d4e2b278..e02cb861e0fb9af573cc916106654a6c
          }
          // Paper end
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index cfbaabe1b307ab481bad6eac015102b25581a1af..d61492a6e1b8c5ef7f6fe1cb6764f4e7ac54958d 100644
+index 86ee85f0904916d881df3b891cfcde0ff068896e..42f245db040092d61e46417c3e1ba4e724ae23b8 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -153,6 +153,7 @@ public abstract class World implements IBlockAccess {
+@@ -149,6 +149,7 @@ public abstract class World implements IBlockAccess {
      private final org.spigotmc.TickLimiter tileLimiter;
      private int tileTickPosition;
      public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<>(); // Paper - Optimize explosions

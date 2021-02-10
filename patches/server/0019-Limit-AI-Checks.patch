@@ -11,11 +11,11 @@ Inspiration taken from https://github.com/oldfagorg/MobOptimizer
 Credit to: John200410
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 24e3838cfa4ce43f84d4d12d7b240e27bd4e6eba..7ec5ac939ce836f67aa0c29b391c75c989400d3b 100644
+index c8ed8652eef62fa438fb6f9a14160c67cb04796b..b8f11dbb22215abe9958ead0db33031471099752 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -182,8 +182,21 @@ public class DionysusConfig {
-         maxPhysicsRecursion = getInt("physics.recursion", 100);
+@@ -177,8 +177,21 @@ public class DionysusConfig {
+         return config.getString(path, config.getString(path));
      }
  
 -//    private static void flyingKickMessages() {

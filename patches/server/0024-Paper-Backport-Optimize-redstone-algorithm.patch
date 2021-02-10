@@ -1121,10 +1121,10 @@ index 2a10359a3e65a0548e59f9081dceaead1e4e98f9..6ff05735624d22409d08e6d4c255f2d3
                  this.b(world, blockposition, iblockdata, 0);
                  world.setAir(blockposition);
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index d61492a6e1b8c5ef7f6fe1cb6764f4e7ac54958d..b14ffa4f911ba8dd78eb8c227ac0518e7670feb0 100644
+index 42f245db040092d61e46417c3e1ba4e724ae23b8..4521d8a051409489dd194b83be88cee4d63ab24e 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -596,6 +596,7 @@ public abstract class World implements IBlockAccess {
+@@ -578,6 +578,7 @@ public abstract class World implements IBlockAccess {
  
      }
  
@@ -1132,7 +1132,7 @@ index d61492a6e1b8c5ef7f6fe1cb6764f4e7ac54958d..b14ffa4f911ba8dd78eb8c227ac0518e
      public void a(BlockPosition blockposition, final Block block, BlockPosition blockposition1) {
          if (!this.isClientSide) {
              IBlockData iblockdata = this.getType(blockposition);
-@@ -2851,6 +2852,7 @@ public abstract class World implements IBlockAccess {
+@@ -2833,6 +2834,7 @@ public abstract class World implements IBlockAccess {
          return this.getBlockFacePower(blockposition.down(), EnumDirection.DOWN) > 0 || (this.getBlockFacePower(blockposition.up(), EnumDirection.UP) > 0 || (this.getBlockFacePower(blockposition.north(), EnumDirection.NORTH) > 0 || (this.getBlockFacePower(blockposition.south(), EnumDirection.SOUTH) > 0 || (this.getBlockFacePower(blockposition.west(), EnumDirection.WEST) > 0 || this.getBlockFacePower(blockposition.east(), EnumDirection.EAST) > 0))));
      }
  
