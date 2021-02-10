@@ -11,18 +11,16 @@ Inspiration taken from https://github.com/oldfagorg/MobOptimizer
 Credit to: John200410
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 6f03a641bcc66bb36ec8396212207a96c0f95904..27ad94a83d5e48eb33f110eeeccac718d6253ebc 100644
+index c8ed8652eef62fa438fb6f9a14160c67cb04796b..35d77dcdc9a03bbbb084510b3673e6917ac5131f 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -178,11 +178,28 @@ public class DionysusConfig {
+@@ -177,8 +177,26 @@ public class DionysusConfig {
+         return config.getString(path, config.getString(path));
      }
  
-     public static boolean enableAntiBackdoor = true;
--
-     private static void antiBackdoor() {
-         enableAntiBackdoor = getBoolean("anti-backdoor", true);
-     }
- 
+-//    private static void flyingKickMessages() {
+-//        flyingKickPlayerMessage = getString("messages.kick.flying-player", flyingKickPlayerMessage);
+-//        flyingKickVehicleMessage = getString("messages.kick.flying-vehicle", flyingKickVehicleMessage);
 +    public static boolean customNameAiLimitBypass = true;
 +    public static boolean tamableAiLimitBypass = true;
 +    public static boolean spawnerAiLimitBypass = true;
@@ -41,9 +39,11 @@ index 6f03a641bcc66bb36ec8396212207a96c0f95904..27ad94a83d5e48eb33f110eeeccac718
 +        animalAiLimitPlayerCount = getInt("ai-limit.animal.player-count", 120);
 +    }
 +
-     // NOTE: leaving this here just in case we want to change this to a kick or notification
- //    private static void backdoorMessages() {
- //        backdoorKickPlayerMessage = getString("messages.kick.backdoor", backdoorKickPlayerMessage);
++    // NOTE: leaving this here just in case we want to change this to a kick or notification
++//    private static void backdoorMessages() {
++//        backdoorKickPlayerMessage = getString("messages.kick.backdoor", backdoorKickPlayerMessage);
+ //    }
+ }
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
 index 6ae0809f5dc3772965942725dd84f89ee5364650..e182154578b61b6d23960175a77fb7f79580341c 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
