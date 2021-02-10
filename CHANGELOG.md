@@ -17,6 +17,13 @@ All notable changes to this project will be documented in this file.
 
 ### Security
 
+## [0.1.2] - 2020-02-10
+
+### Removed
+
+* AntiPhysics crash
+  * this was half baked and not fully tested, needs more work.
+
 ## [0.1.0] - 2020-02-09
 
 ### New Features 
