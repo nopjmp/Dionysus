@@ -392,7 +392,7 @@ index b366885888a3b1f17030e9d17e612b26e9ddc3f7..474b4e59af85695c8b9878c2efa07107
  
      // CraftBukkit start - add fields and methods
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 13d408f684bd2d9b84b09de60cfc3bd42a715eaa..5ebe8c671340ce4ee47bef82e9d407b1fe321eec 100644
+index 78035578ebb6937196f0817642bb2838dd1ce44e..430e70999524a2a0c3335c71daf6618972a60f6d 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -20,6 +20,8 @@ import javax.annotation.Nullable;
@@ -404,7 +404,7 @@ index 13d408f684bd2d9b84b09de60cfc3bd42a715eaa..5ebe8c671340ce4ee47bef82e9d407b1
  import org.bukkit.Bukkit;
  import org.bukkit.block.BlockState;
  import org.bukkit.craftbukkit.CraftServer;
-@@ -85,7 +87,7 @@ public abstract class World implements IBlockAccess {
+@@ -89,7 +91,7 @@ public abstract class World implements IBlockAccess {
      protected float p;
      protected float q;
      private int M;

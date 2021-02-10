@@ -1541,7 +1541,7 @@ index f7416f7ff5b57d1f0610af0427a8811baa8feefd..97c7d0347f8700a34c9846928f9621fc
          return this.a.size();
      }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 634a7d7c2842e08f5a86cd1ffbac5015a459d8e4..13d408f684bd2d9b84b09de60cfc3bd42a715eaa 100644
+index a0f41504cdc930db45435161d90773de31bd912a..78035578ebb6937196f0817642bb2838dd1ce44e 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -35,8 +35,6 @@ import org.bukkit.generator.ChunkGenerator;
@@ -1553,7 +1553,7 @@ index 634a7d7c2842e08f5a86cd1ffbac5015a459d8e4..13d408f684bd2d9b84b09de60cfc3bd4
  import com.google.common.collect.Sets;
  // Paper end
  
-@@ -140,7 +138,6 @@ public abstract class World implements IBlockAccess {
+@@ -144,7 +142,6 @@ public abstract class World implements IBlockAccess {
      public final org.spigotmc.SpigotWorldConfig spigotConfig; // Spigot
  
      public final com.destroystokyo.paper.PaperWorldConfig paperConfig; // Paper
@@ -1561,7 +1561,7 @@ index 634a7d7c2842e08f5a86cd1ffbac5015a459d8e4..13d408f684bd2d9b84b09de60cfc3bd4
  
      public final co.aikar.timings.WorldTimingsHandler timings; // Paper
      private boolean guardEntityList; // Spigot
-@@ -172,7 +169,6 @@ public abstract class World implements IBlockAccess {
+@@ -176,7 +173,6 @@ public abstract class World implements IBlockAccess {
      protected World(IDataManager idatamanager, WorldData worlddata, WorldProvider worldprovider, MethodProfiler methodprofiler, boolean flag, ChunkGenerator gen, org.bukkit.World.Environment env) {
          this.spigotConfig = new org.spigotmc.SpigotWorldConfig( worlddata.getName() ); // Spigot
          this.paperConfig = new com.destroystokyo.paper.PaperWorldConfig(worlddata.getName(), this.spigotConfig); // Paper
@@ -1569,7 +1569,7 @@ index 634a7d7c2842e08f5a86cd1ffbac5015a459d8e4..13d408f684bd2d9b84b09de60cfc3bd4
          this.generator = gen;
          this.world = new CraftWorld((WorldServer) this, gen, env);
          this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit
-@@ -559,11 +555,9 @@ public abstract class World implements IBlockAccess {
+@@ -565,11 +561,9 @@ public abstract class World implements IBlockAccess {
          if (flag) {
              this.c(blockposition, block);
          }
