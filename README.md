@@ -10,7 +10,7 @@ TBD
 
 Dionysus uses the same paperclip jar system that Paper uses.
 
-You can download the latest build of Dionysus by going here: TBD
+You can download the latest build of Dionysus by going [here](https://github.com/nopjmp/Dionysus/releases/latest).
 
 You can also [build it yourself](https://github.com/nopjmp/Dionysus#building)
 
