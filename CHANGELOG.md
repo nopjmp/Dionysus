@@ -17,6 +17,12 @@ All notable changes to this project will be documented in this file.
 
 ### Security
 
+## [0.1.3] - 2020-02-10
+
+### Fixed
+
+* Dispenser Shulker Box Crash
+
 ## [0.1.2] - 2020-02-10
 
 ### Removed
