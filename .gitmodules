@@ -2,3 +2,6 @@
 	path = Paper
 	url = https://github.com/PaperMC/Paper
 	branch = ver/1.12.2
+[submodule "work/Paperclip"]
+	path = work/Paperclip
+	url = https://github.com/PaperMC/Paperclip
