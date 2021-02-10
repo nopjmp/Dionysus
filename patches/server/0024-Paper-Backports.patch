@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Tue, 9 Feb 2021 00:15:56 -0600
+Date: Tue, 9 Feb 2021 20:47:54 -0600
 Subject: [PATCH] Paper Backports
 
 
@@ -190,7 +190,7 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
  
          }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e22575917a0004cfae986d144fd62d1c9de29bb4..159d5f62b4e33cb17698c9ef2de9a89cc1585241 100644
+index e22575917a0004cfae986d144fd62d1c9de29bb4..9bce498a8d5cb386a4b92be106baca789d364615 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -485,6 +485,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
@@ -201,7 +201,7 @@ index e22575917a0004cfae986d144fd62d1c9de29bb4..159d5f62b4e33cb17698c9ef2de9a89c
          }
          // CraftBukkit end
          if (this.an() != null) {
-@@ -868,13 +869,24 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -868,13 +869,26 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          MinecraftTimings.chunkIOTickTimer.stopTiming(); // Spigot
  
          MinecraftTimings.timeUpdateTimer.startTiming(); // Spigot
@@ -212,19 +212,21 @@ index e22575917a0004cfae986d144fd62d1c9de29bb4..159d5f62b4e33cb17698c9ef2de9a89c
 -                entityplayer.playerConnection.sendPacket(new PacketPlayOutUpdateTime(entityplayer.world.getTime(), entityplayer.getPlayerTime(), entityplayer.world.getGameRules().getBoolean("doDaylightCycle"))); // Add support for per player time
 +        // Paper start - optimize time updates
 +        for (final WorldServer world : this.worldServer) {
-+            final boolean doDaylight = world.getGameRules().getBoolean("doDaylightCycle");
-+            final long dayTime = world.getDayTime();
-+            long worldTime = world.getTime();
-+            final PacketPlayOutUpdateTime worldPacket = new PacketPlayOutUpdateTime(worldTime, dayTime, doDaylight);
-+            for (EntityHuman entityhuman : world.players) {
-+                if (!(entityhuman instanceof EntityPlayer) || (ticks + entityhuman.getId()) % 20 != 0) {
-+                    continue;
++            if (world != null) {
++                final boolean doDaylight = world.getGameRules().getBoolean("doDaylightCycle");
++                final long dayTime = world.getDayTime();
++                long worldTime = world.getTime();
++                final PacketPlayOutUpdateTime worldPacket = new PacketPlayOutUpdateTime(worldTime, dayTime, doDaylight);
++                for (EntityHuman entityhuman : world.players) {
++                    if (!(entityhuman instanceof EntityPlayer) || (ticks + entityhuman.getId()) % 20 != 0) {
++                        continue;
++                    }
++                    EntityPlayer entityplayer = (EntityPlayer) entityhuman;
++                    long playerTime = entityplayer.getPlayerTime();
++                    PacketPlayOutUpdateTime packet = (playerTime == dayTime) ? worldPacket :
++                            new PacketPlayOutUpdateTime(worldTime, playerTime, doDaylight);
++                    entityplayer.playerConnection.sendPacket(packet); // Add support for per player time
 +                }
-+                EntityPlayer entityplayer = (EntityPlayer) entityhuman;
-+                long playerTime = entityplayer.getPlayerTime();
-+                PacketPlayOutUpdateTime packet = (playerTime == dayTime) ? worldPacket :
-+                        new PacketPlayOutUpdateTime(worldTime, playerTime, doDaylight);
-+                entityplayer.playerConnection.sendPacket(packet); // Add support for per player time
              }
          }
 +        // Paper end
