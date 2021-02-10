@@ -39,10 +39,10 @@ index 6611d0b9e598f5a235ea753641ae7cf1e3436951..acb925d323b29c8c4fd78517d0cf5ab6
  }
 diff --git a/src/main/java/com/destroystokyo/paper/util/RedstoneWireTurbo.java b/src/main/java/com/destroystokyo/paper/util/RedstoneWireTurbo.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..d881c7d6033eac15a46534f62fb51e83bd737568
+index 0000000000000000000000000000000000000000..7ab6a8e8dabb30c1e764fbee14558f95c04ca829
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/util/RedstoneWireTurbo.java
-@@ -0,0 +1,909 @@
+@@ -0,0 +1,908 @@
 +package com.destroystokyo.paper.util;
 +
 +import java.util.List;
@@ -854,9 +854,8 @@ index 0000000000000000000000000000000000000000..d881c7d6033eac15a46534f62fb51e83
 +    private IBlockData calculateCurrentChanges(final World worldIn, final UpdateNode upd) {
 +        IBlockData state = upd.currentState;
 +        final int i = state.get(BlockRedstoneWire.POWER);
-+        int j = 0;
-+        //noinspection UnusedAssignment
-+        j = getMaxCurrentStrength(upd, j);
++        int j;
++        // j = getMaxCurrentStrength(upd, j); - not used? - nopjmp
 +        int l = 0;
 +
 +        wire.setCanProvidePower(false);
