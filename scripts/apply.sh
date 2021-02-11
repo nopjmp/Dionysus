@@ -44,6 +44,7 @@ function applyPatch {
         mkdir "$basedir/$target"
         cd "$basedir/$target"
         git init
+	git config commit.gpgsign false
         git remote add origin "$5"
         cd "$basedir"
     fi

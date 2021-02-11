@@ -74,6 +74,10 @@ done
 # Dionysus Modifications
 import MathHelper
 import EnumDirection
+import PacketCompressor
+import PacketDecompressor
+import PacketEncrypter
+import PacketDecrypter
 
 ########################################################
 ########################################################

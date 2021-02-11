@@ -1,0 +1,93 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Thu, 11 Feb 2021 01:02:59 -0600
+Subject: [PATCH] Customizable Deflate Compression
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index b8f11dbb22215abe9958ead0db33031471099752..d59ee191dc511a382947d4ee6495c0b493f0ea88 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -194,4 +194,13 @@ public class DionysusConfig {
+         animalAiLimitTPS = getDouble("ai-limit.animal.tps", 6);
+         animalAiLimitPlayerCount = getInt("ai-limit.animal.player-count", 120);
+     }
++
++    public static int compressionLevel = -1;
++    private static void compressionLevel() {
++        compressionLevel = getInt("compression-level", -1);
++        if (compressionLevel < -1 || compressionLevel > 9) {
++            logError("Compression level is invalid resetting to default. Valid compression levels are -1 (Default), 0 (None), 1 (Fast) through 9 (Best)");
++            compressionLevel = -1;
++        }
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java b/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
+index d1ed4cf0723fa8c067d148a2355a5b9030b07d58..6b73bd46671377cbd34228f390644239086ab72c 100644
+--- a/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
++++ b/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
+@@ -1,5 +1,7 @@
+ package net.minecraft.server;
+ 
++import dev.pomf.dionysus.DionysusConfig;
++
+ import java.io.BufferedInputStream;
+ import java.io.BufferedOutputStream;
+ import java.io.DataInput;
+@@ -29,7 +31,7 @@ public class NBTCompressedStreamTools {
+     }
+ 
+     public static void a(NBTTagCompound nbttagcompound, OutputStream outputstream) throws IOException {
+-        DataOutputStream dataoutputstream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(outputstream)));
++        DataOutputStream dataoutputstream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(outputstream) {{ def.setLevel(DionysusConfig.compressionLevel);}})); // Dionysus - NBT Compression Level
+ 
+         try {
+             a(nbttagcompound, (DataOutput) dataoutputstream);
+diff --git a/src/main/java/net/minecraft/server/PacketCompressor.java b/src/main/java/net/minecraft/server/PacketCompressor.java
+index db7dc175239193ade658f7f0fce86463fbf0432c..a80d293b8a37ff86a243d6167a30639f7105749c 100644
+--- a/src/main/java/net/minecraft/server/PacketCompressor.java
++++ b/src/main/java/net/minecraft/server/PacketCompressor.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import dev.pomf.dionysus.DionysusConfig;
+ import io.netty.buffer.ByteBuf;
+ import io.netty.channel.ChannelHandlerContext;
+ import io.netty.handler.codec.MessageToByteEncoder;
+@@ -14,19 +15,20 @@ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
+     public PacketCompressor(int i) {
+         this.c = i;
+         this.b = new Deflater();
++        this.b.setLevel(DionysusConfig.compressionLevel); // Dionysus - Packet Compression Level
+     }
+ 
+-    protected void a(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
+-        int i = bytebuf.readableBytes();
+-        PacketDataSerializer packetdataserializer = new PacketDataSerializer(bytebuf1);
++    protected void a(ChannelHandlerContext channelhandlercontext, ByteBuf incoming, ByteBuf outgoing) throws Exception {
++        int i = incoming.readableBytes();
++        PacketDataSerializer packetdataserializer = new PacketDataSerializer(outgoing);
+ 
+         if (i < this.c) {
+             packetdataserializer.d(0);
+-            packetdataserializer.writeBytes(bytebuf);
++            packetdataserializer.writeBytes(incoming);
+         } else {
+             byte[] abyte = new byte[i];
+ 
+-            bytebuf.readBytes(abyte);
++            incoming.readBytes(abyte);
+             packetdataserializer.d(abyte.length);
+             this.b.setInput(abyte, 0, i);
+             this.b.finish();
+@@ -46,7 +48,8 @@ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
+         this.c = i;
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
++    @Override
++    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf incoming, ByteBuf outgoing) throws Exception {
++        this.a(channelhandlercontext, incoming, outgoing);
+     }
+ }
