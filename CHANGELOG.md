@@ -7,7 +7,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+* Velocity Native compression/crypto from Tuinity!
+* NBT Compression Levels (Chunks use NBT)
+
 ### Changed
+
+* Paperclip was updated to the latest version
 
 ### Deprecated
 
