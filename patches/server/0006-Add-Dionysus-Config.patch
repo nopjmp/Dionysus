@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Fri, 5 Feb 2021 00:06:21 -0600
+Date: Thu, 11 Feb 2021 01:47:40 -0600
 Subject: [PATCH] Add Dionysus Config
 
 
@@ -194,3 +194,49 @@ index 0000000000000000000000000000000000000000..c8ed8652eef62fa438fb6f9a14160c67
 +//        flyingKickVehicleMessage = getString("messages.kick.flying-vehicle", flyingKickVehicleMessage);
 +//    }
 +}
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index 6a8292ce4537392bc511419df565e238ac04acb1..9779311d21d2df5db7828e470303f0250ef9fa0a 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -201,6 +201,10 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+             com.destroystokyo.paper.PaperConfig.registerCommands();
+             com.destroystokyo.paper.VersionHistoryManager.INSTANCE.getClass(); // load version history now
+             // Paper end
++            // Dionysus start
++            dev.pomf.dionysus.DionysusConfig.init((File) options.valueOf("dionysus-settings"));
++            dev.pomf.dionysus.DionysusConfig.registerCommands();
++            // Dionysus end
+ 
+             DedicatedServer.LOGGER.info("Generating keypair");
+             this.a(MinecraftEncryption.b());
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index adf8c52fbdced52546df868be250deccc951bb96..a1fbda2e61afac93a85d4f2e606ed313b0020525 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -743,6 +743,7 @@ public final class CraftServer implements Server {
+ 
+         org.spigotmc.SpigotConfig.init((File) console.options.valueOf("spigot-settings")); // Spigot
+         com.destroystokyo.paper.PaperConfig.init((File) console.options.valueOf("paper-settings")); // Paper
++        dev.pomf.dionysus.DionysusConfig.init((File) console.options.valueOf("dionysus-settings")); // Dionysus
+         for (WorldServer world : console.worlds) {
+             world.worldData.setDifficulty(difficulty);
+             world.setSpawnFlags(monsters, animals);
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index ae2c51f5d30e143180092e2ade56f5df26e35616..1c5bfe3488f18c48cfafe3dbfd4cafb853c6c6cd 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -142,6 +142,14 @@ public class Main {
+                         .defaultsTo("Unknown Server")
+                         .describedAs("Name");
+                 // Paper end
++
++                // Dionysus Start
++                acceptsAll(asList("dionysus", "dionysus-settings"), "File for dionysus settings")
++                        .withRequiredArg()
++                        .ofType(File.class)
++                        .defaultsTo(new File("dionysus.yml"))
++                        .describedAs("Yml file");
++                // Dionysus end
+             }
+         };
+ 

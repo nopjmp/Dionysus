@@ -8347,7 +8347,7 @@ index fe84844531ab06d20de9ca4988ee12e69ab5f2f7..558563c1c283d2230715900b14877af8
                  a(packetdataserializer, datawatcher_item);
              }
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e0fe3534f 100644
+index 9779311d21d2df5db7828e470303f0250ef9fa0a..a7fcbba7aa2cf71ad6e13c11aff9f701d4833ecf 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
 @@ -59,7 +59,6 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
@@ -8367,7 +8367,7 @@ index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e
              org.spigotmc.SpigotConfig.init((File) options.valueOf("spigot-settings"));
              org.spigotmc.SpigotConfig.registerCommands();
              // Spigot end
-@@ -264,7 +263,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -268,7 +267,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                              k = l;
                          }
                      } catch (NumberFormatException numberformatexception) {
@@ -8376,7 +8376,7 @@ index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e
                      }
                  }
  
-@@ -288,7 +287,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -292,7 +291,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                  DedicatedServer.LOGGER.info("Preparing level \"{}\"", this.S());
                  this.a(this.S(), this.S(), k, worldtype, s2);
                  long i1 = System.nanoTime() - j;
@@ -8385,7 +8385,7 @@ index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e
  
                  DedicatedServer.LOGGER.info("Done ({})! For help, type \"help\" or \"?\"", s3);
                  if (this.propertyManager.a("announce-player-achievements")) {
-@@ -396,7 +395,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -400,7 +399,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
              public String a() throws Exception {
                  String s = DedicatedServer.this.getServerModName();
  
@@ -8394,7 +8394,7 @@ index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e
              }
  
              public Object call() throws Exception {
-@@ -603,7 +602,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -607,7 +606,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                  this.aV();
              }
  
@@ -8403,7 +8403,7 @@ index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e
          }
  
          boolean flag1 = false;
-@@ -614,7 +613,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -618,7 +617,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                  this.aV();
              }
  
@@ -8412,7 +8412,7 @@ index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e
          }
  
          boolean flag2 = false;
-@@ -625,7 +624,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -629,7 +628,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                  this.aV();
              }
  
@@ -8421,7 +8421,7 @@ index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e
          }
  
          boolean flag3 = false;
-@@ -636,7 +635,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -640,7 +639,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                  this.aV();
              }
  
@@ -8430,7 +8430,7 @@ index 6a8292ce4537392bc511419df565e238ac04acb1..09f5197392c8c3c5b0cda614fca86a7e
          }
  
          boolean flag4 = false;
-@@ -657,7 +656,6 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -661,7 +660,6 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
          try {
              Thread.sleep(5000L);
          } catch (InterruptedException interruptedexception) {
@@ -22245,7 +22245,7 @@ index 84a1f9c8612640bb3a9d392c27ef07ae4f327ad4..a227e497df977e2eed55d0907a765af7
              return null;
          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index adf8c52fbdced52546df868be250deccc951bb96..eb15b319600abe65510b7e55aa437c6b5387a536 100644
+index a1fbda2e61afac93a85d4f2e606ed313b0020525..6bfd3749629a17a8947cfa685f5360e0e606b239 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -174,8 +174,8 @@ public final class CraftServer implements Server {
@@ -22259,7 +22259,7 @@ index adf8c52fbdced52546df868be250deccc951bb96..eb15b319600abe65510b7e55aa437c6b
      private final List<CraftPlayer> playerView;
      public int reloadCount;
      public static Exception excessiveVelEx; // Paper - Velocity warnings
-@@ -843,7 +843,7 @@ public final class CraftServer implements Server {
+@@ -844,7 +844,7 @@ public final class CraftServer implements Server {
          Map<String, Map<String, Object>> perms;
  
          try {
@@ -22268,7 +22268,7 @@ index adf8c52fbdced52546df868be250deccc951bb96..eb15b319600abe65510b7e55aa437c6b
          } catch (MarkedYAMLException ex) {
              getLogger().log(Level.WARNING, "Server permissions file " + file + " is not valid YAML: " + ex.toString());
              return;
-@@ -1048,7 +1048,7 @@ public final class CraftServer implements Server {
+@@ -1049,7 +1049,7 @@ public final class CraftServer implements Server {
          }
  
          worlds.remove(world.getName().toLowerCase(java.util.Locale.ENGLISH));
@@ -22277,7 +22277,7 @@ index adf8c52fbdced52546df868be250deccc951bb96..eb15b319600abe65510b7e55aa437c6b
  
          File parentFolder = world.getWorldFolder().getAbsoluteFile();
  
-@@ -1702,7 +1702,7 @@ public final class CraftServer implements Server {
+@@ -1703,7 +1703,7 @@ public final class CraftServer implements Server {
              getLogger().log(Level.SEVERE, "Exception when " + player.getName() + " attempted to tab complete " + message, ex);
          }
  
