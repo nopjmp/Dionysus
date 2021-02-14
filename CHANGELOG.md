@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 
 * Velocity Native compression/crypto from Tuinity!
 * NBT Compression Levels (Chunks use NBT)
+* New Networking System based on Yatopia and Velocity
 
 ### Changed
 
