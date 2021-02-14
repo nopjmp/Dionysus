@@ -138,7 +138,7 @@ index 822beed68f0f07c1ce905ee7edfd6ba32b272f28..3876f2cb0f7f0ad5d8c734e9da5b312c
      public void setSpawnNPCs(boolean flag) {
          this.spawnNPCs = flag;
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index c5a2aad1c19993e9903cfc6f0decb85a3b68cebf..607132e145d981082ef67ca355cf32bc3b282c68 100644
+index c5a2aad1c19993e9903cfc6f0decb85a3b68cebf..1e181f497317fa6e25017490d3d18af9c4816a33 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -304,3 +304,19 @@ index c5a2aad1c19993e9903cfc6f0decb85a3b68cebf..607132e145d981082ef67ca355cf32bc
              try {
                  channelfuture.channel().close().sync();
              } catch (InterruptedException interruptedexception) {
+@@ -138,6 +157,15 @@ public class ServerConnection {
+             }
+         }
+ 
++        try {
++            this.boss.shutdownGracefully();
++            this.worker.shutdownGracefully();
++
++            this.boss.terminationFuture().sync();
++            this.worker.terminationFuture().sync();
++        } catch (InterruptedException e) {
++            ServerConnection.e.error("Interrupted while closing EventLoopGroups ", e);
++        }
+     }
+ 
+     public void c() {
