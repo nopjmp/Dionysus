@@ -7,13 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-* Velocity Native compression/crypto from Tuinity!
-* NBT Compression Levels (Chunks use NBT)
-* New Networking System based on Yatopia and Velocity
-
 ### Changed
-
-* Paperclip was updated to the latest version
 
 ### Deprecated
 
@@ -22,6 +16,18 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 ### Security
+
+## [0.1.4] - 2020-02-13
+
+### Added
+
+* Velocity Native compression/crypto from Tuinity!
+* NBT Compression Levels (Chunks use NBT)
+* New Networking System based on Yatopia and Velocity
+
+### Changed
+
+* Paperclip was updated to the latest version
 
 ## [0.1.3] - 2020-02-10
 
