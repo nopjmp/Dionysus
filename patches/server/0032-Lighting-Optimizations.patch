@@ -1,12 +1,25 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Fri, 5 Mar 2021 22:53:52 -0600
+Date: Fri, 5 Mar 2021 23:18:21 -0600
 Subject: [PATCH] Lighting Optimizations
 
 Semi-Experimental as this gets rid of lambda creations and replaces it with only a single allocation of a Triple in one path.
 
 Additionally remove some sync'd functions.
 
+diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+index acb925d323b29c8c4fd78517d0cf5ab60e2fd7a2..296682fbd97f836ca4ec76185588cc8e091a7fae 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+@@ -140,7 +140,7 @@ public class PaperWorldConfig {
+ 
+     public boolean queueLightUpdates;
+     private void queueLightUpdates() {
+-        queueLightUpdates = getBoolean("queue-light-updates", false);
++        queueLightUpdates = getBoolean("queue-light-updates", true);
+         log("Lighting Queue enabled: " + queueLightUpdates);
+     }
+ 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
 index 38f95b12103134967781db6b05ed7eb37b456b28..385c37342f16778bdf6af337760d7943ac2ae041 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
@@ -356,7 +369,7 @@ diff --git a/src/main/java/net/minecraft/server/PaperLightingQueue.java b/src/ma
 similarity index 60%
 rename from src/main/java/net/minecraft/server/PaperLightingQueue.java
 rename to src/main/java/net/minecraft/server/DionysusLightingQueue.java
-index f1c013116fc05b7abe7184eae01b715c02c7a058..2ac4ba60db5d042eaa007b8c3202577ace5f67f7 100644
+index f1c013116fc05b7abe7184eae01b715c02c7a058..20171393024eb8d12773a073a2ce0f9431fca989 100644
 --- a/src/main/java/net/minecraft/server/PaperLightingQueue.java
 +++ b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
 @@ -1,11 +1,11 @@
@@ -423,7 +436,7 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..2ac4ba60db5d042eaa007b8c3202577a
 +                        return true;
 +                    }
 +
-+                    Triple<BlockPosition, IBlockData,  IBlockData> triple = replacementUpdates.elements()[i];
++                    Triple<BlockPosition, IBlockData,  IBlockData> triple = replacementUpdates.get(i);
 +                    chunk.updateReplacementLight(triple.getLeft(), triple.getMiddle(), triple.getRight());
 +                }
 +                replacementUpdates.clear();
@@ -434,7 +447,7 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..2ac4ba60db5d042eaa007b8c3202577a
                          return true;
                      }
 +
-+                    BlockPosition blockPos = updates.elements()[i];
++                    BlockPosition blockPos = updates.get(i);
 +                    chunk.world.updateLightingAtBlockPos(blockPos);
                  }
 +                updates.clear();
