@@ -5,10 +5,10 @@ Subject: [PATCH] Customizable Deflate Compression
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index b8f11dbb22215abe9958ead0db33031471099752..d59ee191dc511a382947d4ee6495c0b493f0ea88 100644
+index 0e542ad19d2e3d8c2762091d22f32f62056ddd1c..48464f4d1b3da414d3f9b9d86c0e53c08e774a80 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -194,4 +194,13 @@ public class DionysusConfig {
+@@ -195,4 +195,13 @@ public class DionysusConfig {
          animalAiLimitTPS = getDouble("ai-limit.animal.tps", 6);
          animalAiLimitPlayerCount = getInt("ai-limit.animal.player-count", 120);
      }

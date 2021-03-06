@@ -1,18 +1,85 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Thu, 11 Feb 2021 01:47:40 -0600
+Date: Sat, 6 Mar 2021 00:58:44 -0600
 Subject: [PATCH] Add Dionysus Config
 
 
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusCommand.java b/src/main/java/dev/pomf/dionysus/DionysusCommand.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..ccd40bd122937a862d531ad2c8f3bed090054874
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/DionysusCommand.java
+@@ -0,0 +1,59 @@
++package dev.pomf.dionysus;
++
++import com.google.common.collect.ImmutableList;
++import net.minecraft.server.MinecraftServer;
++import org.bukkit.Bukkit;
++import org.bukkit.ChatColor;
++import org.bukkit.Location;
++import org.bukkit.command.Command;
++import org.bukkit.command.CommandSender;
++import org.bukkit.util.StringUtil;
++
++import java.io.File;
++import java.util.ArrayList;
++import java.util.List;
++
++public class DionysusCommand extends Command {
++    private static final List<String> SUBCOMMANDS = ImmutableList.of("reload", "version");
++
++    public DionysusCommand() {
++        super("dionysus");
++        this.description = "Dionysus related commands";
++        this.usageMessage = "/dionysus [reload | version]";
++        this.setPermission("bukkit.command.dionysus");
++    }
++
++    @Override
++    public List<String> tabComplete(CommandSender sender, String alias, String[] args, Location location) throws IllegalArgumentException {
++        if (args.length == 1) {
++            return StringUtil.copyPartialMatches(args[0], SUBCOMMANDS,
++                    new ArrayList<>(SUBCOMMANDS.size()));
++        }
++        return ImmutableList.of();
++    }
++
++    @Override
++    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
++        if (!testPermission(sender)) return true;
++
++        if (args.length != 1) {
++            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
++            return true;
++        }
++
++        if (args[0].equalsIgnoreCase("reload")) {
++            Command.broadcastCommandMessage(sender, ChatColor.RED + "Please note that this command is not supported and may cause issues.");
++            Command.broadcastCommandMessage(sender, ChatColor.RED + "If you encounter any issues please use the /stop command to restart your server.");
++
++            MinecraftServer console = MinecraftServer.getServer();
++            DionysusConfig.init((File) console.options.valueOf("dionysus-settings"));
++            console.server.reloadCount++;
++
++            Command.broadcastCommandMessage(sender, ChatColor.GREEN + "Dionysus config reload complete.");
++        } else if (args[0].equalsIgnoreCase("version")) {
++            Command.broadcastCommandMessage(sender, "This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
++        }
++
++        return true;
++    }
++}
+\ No newline at end of file
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..c8ed8652eef62fa438fb6f9a14160c67cb04796b
+index 0000000000000000000000000000000000000000..91dac5ebc8b2fa3964fbdae0150afdc45e7935fb
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -0,0 +1,184 @@
+@@ -0,0 +1,185 @@
 +package dev.pomf.dionysus;
 +
 +import com.google.common.base.Throwables;
++import com.google.common.collect.ImmutableMap;
 +import net.minecraft.server.MinecraftServer;
 +import org.bukkit.Bukkit;
 +import org.bukkit.command.Command;
@@ -63,7 +130,7 @@ index 0000000000000000000000000000000000000000..c8ed8652eef62fa438fb6f9a14160c67
 +        config.options().copyDefaults(true);
 +        verbose = getBoolean("verbose", false);
 +
-+        commands = new HashMap<String, Command>();
++        commands = ImmutableMap.of("dionysus", new DionysusCommand());
 +
 +        version = getInt("config-version", 1);
 +        set("config-version", 1);

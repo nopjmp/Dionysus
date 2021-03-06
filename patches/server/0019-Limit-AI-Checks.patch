@@ -11,10 +11,10 @@ Inspiration taken from https://github.com/oldfagorg/MobOptimizer
 Credit to: John200410
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index c8ed8652eef62fa438fb6f9a14160c67cb04796b..b8f11dbb22215abe9958ead0db33031471099752 100644
+index 91dac5ebc8b2fa3964fbdae0150afdc45e7935fb..0e542ad19d2e3d8c2762091d22f32f62056ddd1c 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -177,8 +177,21 @@ public class DionysusConfig {
+@@ -178,8 +178,21 @@ public class DionysusConfig {
          return config.getString(path, config.getString(path));
      }
  

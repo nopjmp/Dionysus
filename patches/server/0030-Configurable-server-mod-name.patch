@@ -6,10 +6,10 @@ Subject: [PATCH] Configurable server mod name
 This is untested on Paperbin and may break it.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index d59ee191dc511a382947d4ee6495c0b493f0ea88..f1add0a0ae3a7e68244a78f431b1e038c1e1bc01 100644
+index 48464f4d1b3da414d3f9b9d86c0e53c08e774a80..d4f104eedd1bbb8b96491f5e6e8ab05489cfd4c3 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -203,4 +203,9 @@ public class DionysusConfig {
+@@ -204,4 +204,9 @@ public class DionysusConfig {
              compressionLevel = -1;
          }
      }
