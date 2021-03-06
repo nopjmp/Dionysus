@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Fri, 5 Mar 2021 19:13:11 -0600
+Subject: [PATCH] Configurable server mod name
+
+This is untested on Paperbin and may break it.
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index d59ee191dc511a382947d4ee6495c0b493f0ea88..f1add0a0ae3a7e68244a78f431b1e038c1e1bc01 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -203,4 +203,9 @@ public class DionysusConfig {
+             compressionLevel = -1;
+         }
+     }
++
++    public static String serverModName = "Dionysus";
++    private static void serverModName() {
++        serverModName = getString("settings.server-mod-name", serverModName);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 3876f2cb0f7f0ad5d8c734e9da5b312cd078ebe1..adea5ab01bc5c1305d2c5990e42f49fcbdce8a24 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -9,6 +9,8 @@ import com.mojang.authlib.GameProfile;
+ import com.mojang.authlib.GameProfileRepository;
+ import com.mojang.authlib.minecraft.MinecraftSessionService;
+ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
++
++import dev.pomf.dionysus.DionysusConfig;
+ import dev.pomf.dionysus.util.random.Xorshift;
+ import io.netty.buffer.ByteBuf;
+ import io.netty.buffer.ByteBufOutputStream;
+@@ -1173,7 +1175,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+     }
+ 
+     public String getServerModName() {
+-        return "Dionysus"; //Dionysus on top > //Paper - Paper > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
++        return DionysusConfig.serverModName; //Dionysus on top > //Paper - Paper > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
+     }
+ 
+     public CrashReport b(CrashReport crashreport) {
