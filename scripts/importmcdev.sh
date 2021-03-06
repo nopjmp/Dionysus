@@ -63,7 +63,9 @@ for f in $files; do
     if [ "$?" == "1" ]; then
         if [ ! -f "$basedir/Paper/Paper-Server/src/main/java/net/minecraft/server/$f.java" ]; then
             if [ ! -f "$decompiledir/$nms/$f.java" ]; then
-                echo "$(bashColor 1 31) ERROR!!! Missing NMS$(bashColor 1 34) $f $(bashColorReset)";
+                if [[ ! $f == Dionysus* ]]; then
+                    echo "$(bashColor 1 31) ERROR!!! Missing NMS$(bashColor 1 34) $f $(bashColorReset)";
+                fi
             else
                 import $f
             fi
