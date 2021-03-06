@@ -23,10 +23,10 @@ index cc8167479bfc398d3f7af8bb554817650a01ca0c..7a5648f214040a1329e5fbc2a6af4b1e
          this.setYawPitch(f, f1);
      }
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index e49fa6e4f228555e276128d85a1cac665dc42e7b..64654186f152b531a71eceb01680352debf47d84 100644
+index 2f9fe3cad3b2be7972886c614e0eabf94416da4a..ac6e2bbd85dd2cfa2a026961ccd00b621aebfc92 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -36,6 +36,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -32,6 +32,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
      public String locale = null; // PAIL: private -> public // Paper - default to null
      public long lastSave = MinecraftServer.currentTick; // Paper
      public PlayerConnection playerConnection;
@@ -34,7 +34,7 @@ index e49fa6e4f228555e276128d85a1cac665dc42e7b..64654186f152b531a71eceb01680352d
      public final MinecraftServer server;
      public final PlayerInteractManager playerInteractManager;
      public double d;
-@@ -97,6 +98,10 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -93,6 +94,10 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
      public boolean sentListPacket = false;
      // CraftBukkit end
  
