@@ -1,0 +1,61 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Sun, 7 Mar 2021 17:44:35 -0600
+Subject: [PATCH] Fair Natural Spawning
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index d4f104eedd1bbb8b96491f5e6e8ab05489cfd4c3..5ab81fbb379a447d16f423fa0b8f03407e28e655 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -209,4 +209,12 @@ public class DionysusConfig {
+     private static void serverModName() {
+         serverModName = getString("settings.server-mod-name", serverModName);
+     }
++
++    public static boolean fairNaturalSpawns = true;
++    private static void fairNaturalSpawns() {
++        fairNaturalSpawns = getBoolean("fair-natural-spawns", fairNaturalSpawns);
++        if (fairNaturalSpawns) {
++            Bukkit.getLogger().info("Fair natural spawns enabled, using the Spigot world mob-spawn-range for search and Bukkit spawn-limits for the count");
++        }
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
+index 75a36bf997a5867024ca00fd56ea9e551d559dad..f60c0e1ca8cbbd7cc9e3ff6227c6c74f8d064536 100644
+--- a/src/main/java/net/minecraft/server/SpawnerCreature.java
++++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
+@@ -6,6 +6,7 @@ import java.util.Random;
+ 
+ // CraftBukkit start
+ import com.destroystokyo.paper.exception.ServerInternalException;
++import dev.pomf.dionysus.DionysusConfig;
+ import it.unimi.dsi.fastutil.longs.LongArraySet;
+ import it.unimi.dsi.fastutil.longs.LongIterator;
+ import org.bukkit.craftbukkit.util.LongHash;
+@@ -71,6 +72,25 @@ public final class SpawnerCreature {
+                     byte b0 = worldserver.spigotConfig.mobSpawnRange;
+                     b0 = ( b0 > worldserver.spigotConfig.viewDistance ) ? (byte) worldserver.spigotConfig.viewDistance : b0;
+                     b0 = ( b0 > 8 ) ? 8 : b0;
++
++                    // Dionysus start - Limit spawning based on nearby mobs
++                    // NOTE: this incorrectly assumes all player affecting spawning will be monsters.
++                    if (DionysusConfig.fairNaturalSpawns) {
++                        int searchRange = worldserver.spigotConfig.mobSpawnRange << 4;
++                        AxisAlignedBB bb = new AxisAlignedBB(entityhuman.getX() - searchRange, entityhuman.getY() - searchRange, entityhuman.getZ() - searchRange,
++                                entityhuman.getX() + searchRange, entityhuman.getY() + searchRange, entityhuman.getZ() + searchRange);
++
++                        int nearbyCount = worldserver
++                                // this should cover anything that is considered a monster
++                                // EntityFlying doesn't implement IMonster, but EntityGhast does
++                                .getEntities(entityhuman, bb, entity -> entity instanceof IMonster)
++                                .size();
++                        if (nearbyCount > worldserver.getWorld().getMonsterSpawnLimit()) {
++                            continue;
++                        }
++                    }
++                    // Dionysus End
++
+                     // Paper start
+                     com.destroystokyo.paper.event.entity.PlayerNaturallySpawnCreaturesEvent event;
+                     event = new com.destroystokyo.paper.event.entity.PlayerNaturallySpawnCreaturesEvent(
