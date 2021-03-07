@@ -5,17 +5,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.5] - 2020-03-07
+
 ### Added
+
+* Fair natural spawning
+  * Searches around the players to avoid their locations for spawning in monsters if they are hitting the limit.
+* Load Chunks for login asyncronously
+* Removed EnumSet allocations in crafting checks
+* Lighting system optimizations
+  * currently around lambda allocations being removed, need to work on the algorithm and making it more async
+* Added a dionysus commands reload and version
 
 ### Changed
 
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+* Change logging levels in PlayerConnection on spammy messages
 
 ## [0.1.4] - 2020-02-13
 
