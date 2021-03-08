@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sun, 7 Feb 2021 22:40:07 -0600
+Date: Sun, 7 Mar 2021 20:30:27 -0600
 Subject: [PATCH] Xorshift Random
 
 Use xorshift random where we can.
@@ -392,7 +392,7 @@ index b366885888a3b1f17030e9d17e612b26e9ddc3f7..474b4e59af85695c8b9878c2efa07107
  
      // CraftBukkit start - add fields and methods
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 43e300409d167a13c67a941ef91c21b1335d8fe9..c10404c1b08baccfd6168e219e656fde92706623 100644
+index 43e300409d167a13c67a941ef91c21b1335d8fe9..f2d320f22160ed5d65a7736379f69c65110eca18 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -20,6 +20,8 @@ import javax.annotation.Nullable;
@@ -409,7 +409,7 @@ index 43e300409d167a13c67a941ef91c21b1335d8fe9..c10404c1b08baccfd6168e219e656fde
      protected float q;
      private int M;
 -    public final Random random = new Random();
-+    public final Random random = new Xorshift();
++    public final Xorshift random = new Xorshift();
      public WorldProvider worldProvider;
      protected NavigationListener t = new NavigationListener();
      protected List<IWorldAccess> u;
