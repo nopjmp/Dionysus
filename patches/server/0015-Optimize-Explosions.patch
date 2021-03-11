@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Fri, 5 Feb 2021 00:17:51 -0600
+Date: Wed, 10 Mar 2021 19:58:38 -0600
 Subject: [PATCH] Optimize Explosions
 
 
@@ -65,22 +65,17 @@ index 6a81ad9e4b745813b23a806aa18a05b151961277..38f95b12103134967781db6b05ed7eb3
                  while (iterator.hasNext()) {
                      Entity entity1 = (Entity) iterator.next();
 diff --git a/src/main/java/net/minecraft/server/ChunkSection.java b/src/main/java/net/minecraft/server/ChunkSection.java
-index afdc4a779a61c1ccbf6b42cf3214bfef9e819a71..de3019b45337851a196d30136002b3c373661a58 100644
+index afdc4a779a61c1ccbf6b42cf3214bfef9e819a71..caa7779ad348b25a779000519aa49db9d51678a3 100644
 --- a/src/main/java/net/minecraft/server/ChunkSection.java
 +++ b/src/main/java/net/minecraft/server/ChunkSection.java
-@@ -63,8 +63,11 @@ public class ChunkSection {
+@@ -63,6 +63,7 @@ public class ChunkSection {
          this.blockIds.setBlock(i, j, k, iblockdata);
      }
  
 +    public boolean isEmpty() { return a(); } // Dionysus - OBFHELPER
      public boolean a() {
--        return false; // CraftBukkit - MC-80966
-+        //return false; // CraftBukkit - MC-80966
-+        // Dionysus - for explosion and network optimization
-+        return this.nonEmptyBlockCount == 0;
+         return false; // CraftBukkit - MC-80966
      }
- 
-     public boolean shouldTick() {
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
 index 8f881eeb6b7395f54f887e94020a15e495c080d8..589da0e5a34565cf03bb4b8a5ded5b09ee74925b 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
