@@ -470,7 +470,7 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..20171393024eb8d12773a073a2ce0f94
  
      private static boolean isOutOfTime(long maxTickTime, long startTime) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index adea5ab01bc5c1305d2c5990e42f49fcbdce8a24..5281fae63f8e9a558012e4cef4410211d7131c83 100644
+index c0dbb3a212e0ba7603b9bdf53dff766e94588595..3036f32e0488747cde7fcb252ba86f4d8cf95fe1 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1,7 +1,6 @@
@@ -507,7 +507,7 @@ index adea5ab01bc5c1305d2c5990e42f49fcbdce8a24..5281fae63f8e9a558012e4cef4410211
  // CraftBukkit end
  import org.spigotmc.SlackActivityAccountant; // Spigot
  import co.aikar.timings.MinecraftTimings; // Paper
-@@ -838,7 +832,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -834,7 +828,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          this.methodProfiler.b();
  
          org.spigotmc.WatchdogThread.tick(); // Spigot

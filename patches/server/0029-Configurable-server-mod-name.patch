@@ -20,7 +20,7 @@ index 48464f4d1b3da414d3f9b9d86c0e53c08e774a80..d4f104eedd1bbb8b96491f5e6e8ab054
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 3876f2cb0f7f0ad5d8c734e9da5b312cd078ebe1..adea5ab01bc5c1305d2c5990e42f49fcbdce8a24 100644
+index 822beed68f0f07c1ce905ee7edfd6ba32b272f28..c0dbb3a212e0ba7603b9bdf53dff766e94588595 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -9,6 +9,8 @@ import com.mojang.authlib.GameProfile;
@@ -32,7 +32,7 @@ index 3876f2cb0f7f0ad5d8c734e9da5b312cd078ebe1..adea5ab01bc5c1305d2c5990e42f49fc
  import dev.pomf.dionysus.util.random.Xorshift;
  import io.netty.buffer.ByteBuf;
  import io.netty.buffer.ByteBufOutputStream;
-@@ -1173,7 +1175,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -1169,7 +1171,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
      }
  
      public String getServerModName() {
