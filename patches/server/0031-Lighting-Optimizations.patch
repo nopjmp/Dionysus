@@ -761,7 +761,7 @@ index e6337d12964cf3aeef8bd707e964344002391df4..064422e5e2a702855eb04cc52c55203f
          this.a(world);
          int i = (chunkcoordintpair.x << 4) + 8;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 89345f022cd006876c05c50aced3cc00384b1db0..ba6a73168269cc664a2d1b05d9a8b73fc6d7bf1d 100644
+index 4521d8a051409489dd194b83be88cee4d63ab24e..49074a895c129eda6b2af42dbb023b6bd79bf78b 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -409,7 +409,7 @@ public abstract class World implements IBlockAccess {
