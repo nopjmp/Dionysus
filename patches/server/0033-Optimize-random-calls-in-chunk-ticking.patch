@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sun, 7 Mar 2021 20:47:24 -0600
+Date: Thu, 11 Mar 2021 23:21:10 -0600
 Subject: [PATCH] Optimize random calls in chunk ticking
 
 Especially at over 30,000 chunks these random calls are fairly heavy. We
@@ -34,25 +34,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 385c37342f16778bdf6af337760d7943ac2ae041..39ab38581d7503e05a5e10d11c6bb0eb6986bb5b 100644
+index 385c37342f16778bdf6af337760d7943ac2ae041..a81a3ee787713f69514d20024f4a5f4de1b14883 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
-@@ -11,6 +11,7 @@ import java.util.Random;
- import java.util.concurrent.ConcurrentLinkedQueue;
- import javax.annotation.Nullable;
- 
-+import dev.pomf.dionysus.util.random.Xorshift;
- import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
- import org.apache.logging.log4j.LogManager;
- import org.apache.logging.log4j.Logger;
-@@ -115,6 +116,18 @@ public class Chunk {
+@@ -115,6 +115,18 @@ public class Chunk {
      }
      // CraftBukkit end
  
 +    // Airplane start - instead of using a random every time the chunk is ticked, define when lightning strikes preemptively
 +    private int lightningTick;
 +    // shouldDoLightning compiles down to 29 bytes, which with the default of 35 byte inlining should guarantee an inline
-+    public final boolean shouldDoLightning(Xorshift random) {
++    public final boolean shouldDoLightning(Random random) {
 +        if (this.lightningTick-- <= 0) {
 +            this.lightningTick = random.nextInt(100000) << 1;
 +            return true;
@@ -64,7 +56,7 @@ index 385c37342f16778bdf6af337760d7943ac2ae041..39ab38581d7503e05a5e10d11c6bb0eb
      public Chunk(World world, int i, int j) {
          this.sections = new ChunkSection[16];
          this.g = new byte[256];
-@@ -138,6 +151,8 @@ public class Chunk {
+@@ -138,6 +150,8 @@ public class Chunk {
          // CraftBukkit start
          this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
          this.chunkKey = ChunkCoordIntPair.a(this.locX, this.locZ);
