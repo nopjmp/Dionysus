@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.6] - 2020-03-12
+
+### Added
+
+* Add the ability to redact player ip addresses and coords
+  * Banning a player by ip will still work, just not display in the logs.
+  * Further customization should come later
+
+### Fixed
+
+* Fixed players getting kicked due to improper change for World.random
+  * This was only in the dev builds but still was given out to some users
+
+### Removed
+
+* Networking System based on Velocity and Yatopia
+  * This unfortunately touched a few areas that a version agnostic packet manipulation framework was using.
+* Shapeless crafting from Airplane backport
+  * This was only in dev builds and was a bad, broken port
+
 ## [0.1.5] - 2020-03-07
 
 ### Added
