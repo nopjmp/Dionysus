@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.1.6] - 2020-03-12
+## [0.1.7] - 2021-03-13
+
+Hotfix for Structure generation
+
+## Fixed
+
+* Removed Xorshift on World.random
+  * This is tied to structure generation for some reason in 1.12.2.
+  * Will add a shared global random and do testing on moving entity and block behavior to a faster random source.
+
+## [0.1.6] - 2021-03-12
 
 ### Added
 
@@ -25,7 +35,7 @@ All notable changes to this project will be documented in this file.
 * Shapeless crafting from Airplane backport
   * This was only in dev builds and was a bad, broken port
 
-## [0.1.5] - 2020-03-07
+## [0.1.5] - 2021-03-07
 
 ### Added
 
@@ -41,7 +51,7 @@ All notable changes to this project will be documented in this file.
 
 * Change logging levels in PlayerConnection on spammy messages
 
-## [0.1.4] - 2020-02-13
+## [0.1.4] - 2021-02-13
 
 ### Added
 
@@ -53,20 +63,20 @@ All notable changes to this project will be documented in this file.
 
 * Paperclip was updated to the latest version
 
-## [0.1.3] - 2020-02-10
+## [0.1.3] - 2021-02-10
 
 ### Fixed
 
 * Dispenser Shulker Box Crash
 
-## [0.1.2] - 2020-02-10
+## [0.1.2] - 2021-02-10
 
 ### Removed
 
 * AntiPhysics crash
   * this was half baked and not fully tested, needs more work.
 
-## [0.1.0] - 2020-02-09
+## [0.1.0] - 2021-02-09
 
 ### New Features 
 

@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Thu, 11 Mar 2021 23:20:04 -0600
+Date: Sat, 13 Mar 2021 15:39:19 -0600
 Subject: [PATCH] Xorshift Random
 
 Use xorshift random where we can.
@@ -392,7 +392,7 @@ index b366885888a3b1f17030e9d17e612b26e9ddc3f7..474b4e59af85695c8b9878c2efa07107
  
      // CraftBukkit start - add fields and methods
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 43e300409d167a13c67a941ef91c21b1335d8fe9..c10404c1b08baccfd6168e219e656fde92706623 100644
+index 43e300409d167a13c67a941ef91c21b1335d8fe9..64da1b6edcc35d8a43f7f34cc6314430b5b73005 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -20,6 +20,8 @@ import javax.annotation.Nullable;
@@ -404,15 +404,6 @@ index 43e300409d167a13c67a941ef91c21b1335d8fe9..c10404c1b08baccfd6168e219e656fde
  import org.bukkit.Bukkit;
  import org.bukkit.block.BlockState;
  import org.bukkit.craftbukkit.CraftServer;
-@@ -85,7 +87,7 @@ public abstract class World implements IBlockAccess {
-     protected float p;
-     protected float q;
-     private int M;
--    public final Random random = new Random();
-+    public final Random random = new Xorshift();
-     public WorldProvider worldProvider;
-     protected NavigationListener t = new NavigationListener();
-     protected List<IWorldAccess> u;
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 index 7ebb3714d711f8f0190cb2d4b5656a3295c3a74d..3d6a3bd946c36cbd54945f9c5f5190d65198d151 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java

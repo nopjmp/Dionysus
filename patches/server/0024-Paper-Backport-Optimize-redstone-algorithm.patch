@@ -1121,7 +1121,7 @@ index 2a10359a3e65a0548e59f9081dceaead1e4e98f9..6ff05735624d22409d08e6d4c255f2d3
                  this.b(world, blockposition, iblockdata, 0);
                  world.setAir(blockposition);
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 42f245db040092d61e46417c3e1ba4e724ae23b8..4521d8a051409489dd194b83be88cee4d63ab24e 100644
+index 642fa668453236f2e9b77f8e9e78df9362a1a017..b8a6d46b65b6180bf7d280e5826eb3af9702bb43 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -578,6 +578,7 @@ public abstract class World implements IBlockAccess {
