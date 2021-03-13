@@ -106,7 +106,7 @@ index df7b6d3ee9831b85f498e64a1117a41a384d02b3..2b54448a8846402625e6df5ba56925ec
 -        PlayerList.f.info(entityplayer.getName() + "[" + s1 + "] logged in with entity id " + entityplayer.getId() + " at ([" + entityplayer.world.worldData.getName() + "]" + entityplayer.locX + ", " + entityplayer.locY + ", " + entityplayer.locZ + ")");
 +        // Dionysus - anonymize logs
 +        if (DionysusConfig.redactPlayerData) {
-+            PlayerList.f.info(entityplayer.getName() + "[/0.0.0.0:0] logged in with entity id " + entityplayer.getId() + " at ([REACTED] 0.0, 0.0, 0.0)");
++            PlayerList.f.info(entityplayer.getName() + "[/0.0.0.0:0] logged in with entity id " + entityplayer.getId() + " at ([REDACTED] 0.0, 0.0, 0.0)");
 +        } else {
 +            PlayerList.f.info(entityplayer.getName() + "[" + s1 + "] logged in with entity id " + entityplayer.getId() + " at ([" + entityplayer.world.worldData.getName() + "]" + entityplayer.locX + ", " + entityplayer.locY + ", " + entityplayer.locZ + ")");
 +        }
