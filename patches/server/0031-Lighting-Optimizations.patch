@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Fri, 5 Mar 2021 23:18:21 -0600
+Date: Fri, 12 Mar 2021 23:08:53 -0600
 Subject: [PATCH] Lighting Optimizations
 
 Semi-Experimental as this gets rid of lambda creations and replaces it with only a single allocation of a Triple in one path.
@@ -20,6 +20,22 @@ index acb925d323b29c8c4fd78517d0cf5ab60e2fd7a2..296682fbd97f836ca4ec76185588cc8e
          log("Lighting Queue enabled: " + queueLightUpdates);
      }
  
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index d4f104eedd1bbb8b96491f5e6e8ab05489cfd4c3..bde1d8e5f003bc9aef9131a5f22f624e42955e12 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -178,6 +178,11 @@ public class DionysusConfig {
+         return config.getString(path, config.getString(path));
+     }
+ 
++    public static long maxLightTimePerTick;
++    private static void maxLightTimePerTickMs() {
++        maxLightTimePerTick = getInt("light-updates-max-ms-per-tick", 30) * 1000000L;
++    }
++
+     public static boolean customNameAiLimitBypass = true;
+     public static boolean tamableAiLimitBypass = true;
+     public static boolean spawnerAiLimitBypass = true;
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
 index 38f95b12103134967781db6b05ed7eb37b456b28..385c37342f16778bdf6af337760d7943ac2ae041 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
@@ -366,16 +382,17 @@ index 5468c3b723b75dc590c87b759d81a4ee066c1776..f2a0bbbc993b5a7d58acfbeaf46eb20e
          // Paper start - Chunk queue improvements
          QueuedChunk chunk = queue.poll();
 diff --git a/src/main/java/net/minecraft/server/PaperLightingQueue.java b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
-similarity index 60%
+similarity index 57%
 rename from src/main/java/net/minecraft/server/PaperLightingQueue.java
 rename to src/main/java/net/minecraft/server/DionysusLightingQueue.java
-index f1c013116fc05b7abe7184eae01b715c02c7a058..20171393024eb8d12773a073a2ce0f9431fca989 100644
+index f1c013116fc05b7abe7184eae01b715c02c7a058..9d902c04b8f085c08c0a2eb656e6050d12d06c5f 100644
 --- a/src/main/java/net/minecraft/server/PaperLightingQueue.java
 +++ b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
-@@ -1,11 +1,11 @@
+@@ -1,28 +1,27 @@
  package net.minecraft.server;
  
  import co.aikar.timings.Timing;
++import dev.pomf.dionysus.DionysusConfig;
 +import it.unimi.dsi.fastutil.objects.ObjectArrayList;
  import it.unimi.dsi.fastutil.objects.ObjectCollection;
 +import org.apache.commons.lang3.tuple.Triple;
@@ -383,11 +400,16 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..20171393024eb8d12773a073a2ce0f94
 -import java.util.ArrayDeque;
 -
 -class PaperLightingQueue {
+-    private static final long MAX_TIME = (long) (1000000000 / 20 * 1.15);
+-
 +final class DionysusLightingQueue {
-     private static final long MAX_TIME = (long) (1000000000 / 20 * 1.15);
- 
      static void processQueue(long curTime) {
-@@ -17,12 +17,12 @@ class PaperLightingQueue {
+         final long startTime = System.nanoTime();
+-        final long maxTickTime = MAX_TIME - (startTime - curTime);
++        final long maxTickTime = DionysusConfig.maxLightTimePerTick - (startTime - curTime);
+ 
+         if (maxTickTime <= 0) {
+             return;
          }
  
          START:
@@ -402,7 +424,7 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..20171393024eb8d12773a073a2ce0f94
              for (Chunk chunk : loadedChunks.toArray(new Chunk[0])) {
                  if (chunk.lightingQueue.processQueue(startTime, maxTickTime)) {
                      break START;
-@@ -31,8 +31,10 @@ class PaperLightingQueue {
+@@ -31,8 +30,10 @@ class PaperLightingQueue {
          }
      }
  
@@ -414,7 +436,7 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..20171393024eb8d12773a073a2ce0f94
  
          LightingQueue(Chunk chunk) {
              super();
-@@ -47,20 +49,35 @@ class PaperLightingQueue {
+@@ -47,20 +48,35 @@ class PaperLightingQueue {
           * @return true to abort processing furthur lighting updates
           */
          private boolean processQueue(long startTime, long maxTickTime) {
@@ -431,30 +453,30 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..20171393024eb8d12773a073a2ce0f94
 -                    lightUpdate.run();
 +                int i;
 +                for (i = 0; i < replacementUpdates.size(); i++) {
-+                    if (isOutOfTime(maxTickTime, startTime)) {
-+                        replacementUpdates.removeElements(0, i);
-+                        return true;
-+                    }
-+
-+                    Triple<BlockPosition, IBlockData,  IBlockData> triple = replacementUpdates.get(i);
-+                    chunk.updateReplacementLight(triple.getLeft(), triple.getMiddle(), triple.getRight());
-+                }
-+                replacementUpdates.clear();
-+
-+                for (i = 0; i < updates.size(); i++) {
                      if (isOutOfTime(maxTickTime, startTime)) {
-+                        updates.removeElements(0, i);
++                        replacementUpdates.removeElements(0, i);
                          return true;
                      }
 +
++                    Triple<BlockPosition, IBlockData,  IBlockData> triple = replacementUpdates.get(i);
++                    chunk.updateReplacementLight(triple.getLeft(), triple.getMiddle(), triple.getRight());
+                 }
++                replacementUpdates.clear();
++
++                for (i = 0; i < updates.size(); i++) {
++                    if (isOutOfTime(maxTickTime, startTime)) {
++                        updates.removeElements(0, i);
++                        return true;
++                    }
++
 +                    BlockPosition blockPos = updates.get(i);
 +                    chunk.world.updateLightingAtBlockPos(blockPos);
-                 }
++                }
 +                updates.clear();
              }
  
              return false;
-@@ -89,6 +106,14 @@ class PaperLightingQueue {
+@@ -89,6 +105,14 @@ class PaperLightingQueue {
                  }
              }
          }

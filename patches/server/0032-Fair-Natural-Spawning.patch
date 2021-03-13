@@ -5,10 +5,10 @@ Subject: [PATCH] Fair Natural Spawning
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index d4f104eedd1bbb8b96491f5e6e8ab05489cfd4c3..5ab81fbb379a447d16f423fa0b8f03407e28e655 100644
+index bde1d8e5f003bc9aef9131a5f22f624e42955e12..e3ca26e90e956cca655f3449e3985079cc842f46 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -209,4 +209,12 @@ public class DionysusConfig {
+@@ -214,4 +214,12 @@ public class DionysusConfig {
      private static void serverModName() {
          serverModName = getString("settings.server-mod-name", serverModName);
      }

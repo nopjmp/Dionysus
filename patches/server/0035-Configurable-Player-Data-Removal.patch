@@ -8,10 +8,10 @@ This allows the server operator to remove player information from the logs.
 This is currently enabled by default since many anarchy server owners want this.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 5ab81fbb379a447d16f423fa0b8f03407e28e655..ca26b011388bec3c43f03f271f65607dcb675856 100644
+index e3ca26e90e956cca655f3449e3985079cc842f46..81f24b09bfc127226918aea6215a79022307d8af 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -217,4 +217,12 @@ public class DionysusConfig {
+@@ -222,4 +222,12 @@ public class DionysusConfig {
              Bukkit.getLogger().info("Fair natural spawns enabled, using the Spigot world mob-spawn-range for search and Bukkit spawn-limits for the count");
          }
      }
