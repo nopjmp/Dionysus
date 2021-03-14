@@ -10,7 +10,7 @@ This is not as robust as the newer chunk async changes, but this should get us 9
 https://github.com/PaperMC/Paper/blob/master/Spigot-Server-Patches/0452-Load-Chunks-for-Login-Asynchronously.patch
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index cc8167479bfc398d3f7af8bb554817650a01ca0c..7a5648f214040a1329e5fbc2a6af4b1efa29d7ed 100644
+index 3aa8e827707c25b841bb0ca48b463e49b221903b..ea729f634ce569561bc46cfd0861eeac4ed71c0e 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -1311,7 +1311,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper

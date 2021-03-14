@@ -6,7 +6,7 @@ Subject: [PATCH] Paper Backport: Faster redstone torch rapid clock removal
 Only resize the the redstone torch list once, since resizing arrays / lists is costly
 
 diff --git a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
-index 7ace5c940ebe7bf1ccce39ad4b521672d4e2b278..e02cb861e0fb9af573cc916106654a6cbb754d8d 100644
+index 2162a2bb474d4876d2fa0ea7113205cf7a41bcb4..28a79b6808b5b80e906b13d33d2809c543c40bc9 100644
 --- a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
 +++ b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
 @@ -2,6 +2,8 @@ package net.minecraft.server;
@@ -75,10 +75,10 @@ index 7ace5c940ebe7bf1ccce39ad4b521672d4e2b278..e02cb861e0fb9af573cc916106654a6c
          }
          // Paper end
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index de35d599413145479a46c61876d2588b75a39432..642fa668453236f2e9b77f8e9e78df9362a1a017 100644
+index a9abd48e8e8b2d759944008d4210618d648b4aac..86ea3e0ac78fbc3a1b4074a9857c706713f65131 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -149,6 +149,7 @@ public abstract class World implements IBlockAccess {
+@@ -148,6 +148,7 @@ public abstract class World implements IBlockAccess {
      private final org.spigotmc.TickLimiter tileLimiter;
      private int tileTickPosition;
      public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<>(); // Paper - Optimize explosions

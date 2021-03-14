@@ -5,7 +5,7 @@ Subject: [PATCH] Paper Backports
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index d8753dffa478a4050434dfc326f646b6e9573b29..282239028b64e29cd953b8441a924912b47b5269 100644
+index 51a2db5133634fd7c8e84b66967953c84ee26093..26df0d016e8e740ed5588a30c54af34906056edf 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -1557,6 +1557,7 @@ public abstract class EntityLiving extends Entity {
@@ -190,10 +190,10 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
  
          }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e22575917a0004cfae986d144fd62d1c9de29bb4..822beed68f0f07c1ce905ee7edfd6ba32b272f28 100644
+index 306d49a73a7d214d5b82ee4eb90fca2f5c9789bf..e63ff4e8c07126de881eea03ba1fc8ab756a17f3 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -485,6 +485,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -484,6 +484,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          // CraftBukkit start
          if (this.server != null) {
              this.server.disablePlugins();
@@ -201,7 +201,7 @@ index e22575917a0004cfae986d144fd62d1c9de29bb4..822beed68f0f07c1ce905ee7edfd6ba3
          }
          // CraftBukkit end
          if (this.an() != null) {
-@@ -868,13 +869,24 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -867,13 +868,24 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          MinecraftTimings.chunkIOTickTimer.stopTiming(); // Spigot
  
          MinecraftTimings.timeUpdateTimer.startTiming(); // Spigot
@@ -344,10 +344,10 @@ index d7ba50f2ccf764a40d78be2c626efbafc5a02187..ddeb68f2b3b0ac45639103f57ee07ce0
      }
  
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 64da1b6edcc35d8a43f7f34cc6314430b5b73005..de35d599413145479a46c61876d2588b75a39432 100644
+index d95193b04025c52e8e178f35a869253e7274643e..a9abd48e8e8b2d759944008d4210618d648b4aac 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -2104,20 +2104,19 @@ public abstract class World implements IBlockAccess {
+@@ -2103,20 +2103,19 @@ public abstract class World implements IBlockAccess {
          }
      }
  

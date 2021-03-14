@@ -485,10 +485,10 @@ index 668d470894e72bf867d9b3ecab2c53931f0636b3..c433cd1eba14f81d33d49a609a9b47bc
      default boolean packetTooLarge(NetworkManager manager) {
          return false;
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 0365ea262118a61b0af0277db366c9af0b81f499..9a108ed5db98dea0209ae9ca83922f29be506543 100644
+index 200805b6b595b43c35f6d9ef074632c4bcbbe639..fab051c6988b0099dd1ce36324d4c7b5681d95d6 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
-@@ -16,6 +16,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
+@@ -15,6 +15,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
  import io.netty.channel.local.LocalEventLoopGroup;
  import io.netty.channel.nio.NioEventLoopGroup;
  import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -496,17 +496,16 @@ index 0365ea262118a61b0af0277db366c9af0b81f499..9a108ed5db98dea0209ae9ca83922f29
  import io.netty.handler.timeout.ReadTimeoutHandler;
  import io.netty.util.concurrent.Future;
  import io.netty.util.concurrent.GenericFutureListener;
-@@ -24,6 +25,9 @@ import java.net.InetAddress;
+@@ -23,6 +24,8 @@ import java.net.InetAddress;
  import java.util.Collections;
  import java.util.Iterator;
  import java.util.List;
 +import java.util.Queue;
 +import java.util.concurrent.ConcurrentLinkedQueue;
-+
- import org.apache.logging.log4j.LogManager;
- import org.apache.logging.log4j.Logger;
  
-@@ -62,11 +66,13 @@ public class ServerConnection {
+ import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
+ import org.apache.logging.log4j.LogManager;
+@@ -63,11 +66,13 @@ public class ServerConnection {
      private final List<ChannelFuture> g = Collections.synchronizedList(Lists.newArrayList());
      private final List<NetworkManager> h = Collections.synchronizedList(Lists.newArrayList());
      // Paper start - prevent blocking on adding a new network manager while the server is ticking
@@ -524,7 +523,7 @@ index 0365ea262118a61b0af0277db366c9af0b81f499..9a108ed5db98dea0209ae9ca83922f29
          }
      }
      // Paper end
-@@ -101,6 +107,7 @@ public class ServerConnection {
+@@ -102,6 +107,7 @@ public class ServerConnection {
                      }
  
                      // Dionysus - remove legacy server handler

@@ -492,7 +492,7 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..9d902c04b8f085c08c0a2eb656e6050d
  
      private static boolean isOutOfTime(long maxTickTime, long startTime) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index c0dbb3a212e0ba7603b9bdf53dff766e94588595..3036f32e0488747cde7fcb252ba86f4d8cf95fe1 100644
+index 6239a47f7c8ecf7e88d3f116cec401c76fe9480b..b84430b5295e82c54a412c4d5d6081b25f426a09 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1,7 +1,6 @@
@@ -503,7 +503,7 @@ index c0dbb3a212e0ba7603b9bdf53dff766e94588595..3036f32e0488747cde7fcb252ba86f4d
  import com.google.common.util.concurrent.Futures;
  import com.google.common.util.concurrent.ListenableFuture;
  import com.google.common.util.concurrent.ListenableFutureTask;
-@@ -30,7 +29,6 @@ import java.util.ArrayList;
+@@ -28,7 +27,6 @@ import java.util.ArrayList;
  import java.util.Arrays;
  import java.util.Collections;
  import java.util.Date;
@@ -511,7 +511,7 @@ index c0dbb3a212e0ba7603b9bdf53dff766e94588595..3036f32e0488747cde7fcb252ba86f4d
  import java.util.List;
  import java.util.Queue;
  import java.util.Random;
-@@ -38,7 +36,6 @@ import java.util.UUID;
+@@ -36,7 +34,6 @@ import java.util.UUID;
  import java.util.concurrent.Callable;
  import java.util.concurrent.Executors;
  import java.util.concurrent.FutureTask;
@@ -519,7 +519,7 @@ index c0dbb3a212e0ba7603b9bdf53dff766e94588595..3036f32e0488747cde7fcb252ba86f4d
  import javax.annotation.Nullable;
  import javax.imageio.ImageIO;
  import org.apache.commons.lang3.Validate;
-@@ -46,9 +43,6 @@ import org.apache.logging.log4j.LogManager;
+@@ -44,9 +41,6 @@ import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  // CraftBukkit start
  import joptsimple.OptionSet;
@@ -529,7 +529,7 @@ index c0dbb3a212e0ba7603b9bdf53dff766e94588595..3036f32e0488747cde7fcb252ba86f4d
  // CraftBukkit end
  import org.spigotmc.SlackActivityAccountant; // Spigot
  import co.aikar.timings.MinecraftTimings; // Paper
-@@ -834,7 +828,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -832,7 +826,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          this.methodProfiler.b();
  
          org.spigotmc.WatchdogThread.tick(); // Spigot
@@ -783,10 +783,10 @@ index e6337d12964cf3aeef8bd707e964344002391df4..064422e5e2a702855eb04cc52c55203f
          this.a(world);
          int i = (chunkcoordintpair.x << 4) + 8;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index b8a6d46b65b6180bf7d280e5826eb3af9702bb43..c5d7382859028f614a2ff6ab2b4aa77edba9bf23 100644
+index 65e009be29de90e225787b8f6d002c762b21b048..7719a2d2a013d36cfad9505661f4e81f06181fa9 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -409,7 +409,7 @@ public abstract class World implements IBlockAccess {
+@@ -408,7 +408,7 @@ public abstract class World implements IBlockAccess {
              } else {
                  if (iblockdata.c() != iblockdata1.c() || iblockdata.d() != iblockdata1.d()) {
                      this.methodProfiler.a("checkLight");
@@ -795,7 +795,7 @@ index b8a6d46b65b6180bf7d280e5826eb3af9702bb43..c5d7382859028f614a2ff6ab2b4aa77e
                      this.methodProfiler.b();
                  }
  
-@@ -2396,6 +2396,7 @@ public abstract class World implements IBlockAccess {
+@@ -2395,6 +2395,7 @@ public abstract class World implements IBlockAccess {
          }
      }
  

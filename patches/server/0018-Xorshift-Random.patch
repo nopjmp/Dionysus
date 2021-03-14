@@ -1,19 +1,36 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sat, 13 Mar 2021 15:39:19 -0600
+Date: Sat, 13 Mar 2021 19:16:42 -0600
 Subject: [PATCH] Xorshift Random
 
 Use xorshift random where we can.
 
+diff --git a/pom.xml b/pom.xml
+index 4b61a9154d14e4a0a52eafdc54cb8ed4c2e05635..c55208d76463679f876aa680e459232a04627545 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -112,6 +112,12 @@
+             <scope>runtime</scope>
+         </dependency>
+ 
++        <dependency>
++            <groupId>it.unimi.dsi</groupId>
++            <artifactId>dsiutils</artifactId>
++            <version>2.6.17</version>
++        </dependency>
++
+         <!-- testing -->
+         <dependency>
+             <groupId>junit</groupId>
 diff --git a/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java b/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java
-index be4b53b4111259382e425a87719d75adf93f28b5..819b1c15f2118328624e94f94c5454a0b4da33fc 100644
+index be4b53b4111259382e425a87719d75adf93f28b5..1dddc9f912c0545fef7a06e2f72463153fe830c0 100644
 --- a/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java
 +++ b/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java
 @@ -1,6 +1,7 @@
  package com.destroystokyo.paper.loottable;
  
  import com.destroystokyo.paper.PaperWorldConfig;
-+import dev.pomf.dionysus.util.random.Xorshift;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
  import net.minecraft.server.*;
  import org.bukkit.entity.Player;
  
@@ -22,207 +39,57 @@ index be4b53b4111259382e425a87719d75adf93f28b5..819b1c15f2118328624e94f94c5454a0
  public class CraftLootableInventoryData {
  
 -    private static final Random RANDOM = new Random();
-+    private static final Random RANDOM = new Xorshift();
++    private static final Random RANDOM = new XoShiRo256PlusPlusRandom();
  
      private long lastFill = -1;
      private long nextRefill = -1;
-diff --git a/src/main/java/dev/pomf/dionysus/util/random/Xorshift.java b/src/main/java/dev/pomf/dionysus/util/random/Xorshift.java
-new file mode 100644
-index 0000000000000000000000000000000000000000..d81da4f2b482adbc012fca922cf5b1fa476f263d
---- /dev/null
-+++ b/src/main/java/dev/pomf/dionysus/util/random/Xorshift.java
-@@ -0,0 +1,182 @@
-+package dev.pomf.dionysus.util.random;
-+
+diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
+index a715edb53fe883d224bc1feb03da5c74fa7eb61c..d996ced70bcfed3687367a13a393917dfe04483f 100644
+--- a/src/main/java/net/minecraft/server/Block.java
++++ b/src/main/java/net/minecraft/server/Block.java
+@@ -2,6 +2,9 @@ package net.minecraft.server;
+ 
+ import com.google.common.collect.Sets;
+ import com.google.common.collect.UnmodifiableIterator;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
 +import org.apache.logging.log4j.LogManager;
-+import org.apache.logging.log4j.Logger;
 +
-+import java.util.Random;
-+import java.util.concurrent.atomic.AtomicLong;
-+
-+/*
-+  The MIT License (MIT)
-+
-+  Copyright (c) 2016 Nils Löhndorf
-+
-+  Permission is hereby granted, free of charge, to any person obtaining a copy
-+  of this software and associated documentation files (the "Software"), to deal
-+  in the Software without restriction, including without limitation the rights
-+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-+  copies of the Software, and to permit persons to whom the Software is
-+  furnished to do so, subject to the following conditions:
-+
-+  The above copyright notice and this permission notice shall be included in all
-+  copies or substantial portions of the Software.
-+
-+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-+  SOFTWARE.
-+ */
-+
-+/** <p>Xorshift provides a fast and thread-safe implementation of George Marsaglia's Xorshift
-+ * peudo-random number generator (see <a href="http://www.jstatsoft.org/v08/i14/paper/">&ldquo;Xorshift RNGs&rdquo;</a>,
-+ * <i>Journal of Statistical Software</i>, 8:1&minus;6, 2003) with a cycle length of
-+ * 2<sup>1024</sup>&nbsp;&minus;&nbsp;1.</p>
-+ *
-+ * <p> The implementation is identical to <a href="http://dsiutils.di.unimi.it/docs/it/unimi/dsi/util/XorShiftStarRandom.html">XorShiftStarRandom1024</a>, but synchronizes calls to {@link #nextLong(long)} and {@link #setSeed(long)} to ensure thread-safety.</p>
-+ *
-+ * <p> The following information is provided by the original author:</p> <p>"The quality of this generator is high: for instance, it performs better than <samp>WELL1024a</samp>
-+ * or <samp>MT19937</samp> in suites like
-+ * <a href="http://www.iro.umontreal.ca/~simardr/testu01/tu01.html">TestU01</a> and
-+ * <a href="http://www.phy.duke.edu/~rgb/General/dieharder.php">Dieharder</a>. More precisely, over 100 runs of the BigCrush test suite
-+ * starting from equispaced points of the state space:
-+ * <ul>
-+ * <li>this generator and its reverse fail 351 tests (the only test failed at all points is MatrixRank);
-+ * <li>the best generator of this family suggested by William H. Press in <em>Numerical Recipes</em>, third edition,
-+ * Cambridge University Press, 2007, and its reverse fail 463 tests
-+ * (the tests failed at all points are MatrixRank and BirthdaySpacing);
-+ * <li><samp>WELL1024a</samp> and its reverse fail 882 tests (the only test failed at all points is MatrixRank);
-+ * <li><samp>MT19937</samp> and its reverse fail 516 tests (the only test failed at all points is LinearComp);
-+ * <li>{@link Random} and its reverse fail 13564 tests of all kind."
-+ * </ul>
-+ * </p>
-+ * <p>The class extends {@link Random}, overriding the {@link Random#next(int)} method.
-+ *
-+ * @author Sebastiano Vigna
-+ * @author Nils Loehndorf
-+ */
-+public class Xorshift extends Random {
-+    private static final long serialVersionUID = 1L;
-+
-+    private static final Logger LOGGER = LogManager.getLogger();
-+
-+    /** 2<sup>-53</sup>. */
-+    private static final double NORM_53 = 1. / ( 1L << 53 );
-+    /** 2<sup>-24</sup>. */
-+    private static final double NORM_24 = 1. / ( 1L << 24 );
-+
-+    /** The internal state of the algorithm. */
-+    private long[] s;
-+    private int p;
-+
-+    /** Creates a new generator seeded using {@link #randomSeed()}. */
-+    public Xorshift() {
-+        this( randomSeed() );
-+    }
-+
-+    /** Creates a new generator using a given seed.
-+     *
-+     * @param seed a nonzero seed for the generator (if zero, the generator will be seeded with -1).
-+     */
-+    public Xorshift( final long seed ) {
-+        super( seed );
-+    }
-+
-+    @Override
-+    protected int next( int bits ) {
-+        return (int)( nextLong() >>> 64 - bits );
-+    }
-+
-+    @Override
-+    public synchronized long nextLong() {
-+        long s0 = s[ p ];
-+        long s1 = s[ p = ( p + 1 ) & 15 ];
-+        s1 ^= s1 << 1;
-+        return 1181783497276652981L * ( s[ p ] = s1 ^ s0 ^ ( s1 >>> 13 ) ^ ( s0 >>> 7 ) );
-+    }
-+
-+    @Override
-+    public int nextInt() {
-+        return (int)nextLong();
-+    }
-+
-+    @Override
-+    public int nextInt( final int n ) {
-+        return (int)nextLong( n );
-+    }
-+
-+    /** Returns a pseudorandom uniformly distributed {@code long} value
-+     * between 0 (inclusive) and the specified value (exclusive), drawn from
-+     * this random number generator's sequence. The algorithm used to generate
-+     * the value guarantees that the result is uniform, provided that the
-+     * sequence of 64-bit values produced by this generator is.
-+     *
-+     * @param n the positive bound on the random number to be returned.
-+     * @return the next pseudorandom {@code long} value between {@code 0} (inclusive) and {@code n} (exclusive).
-+     */
-+    public long nextLong( final long n ) {
-+        if ( n <= 0 ) throw new IllegalArgumentException();
-+        // No special provision for n power of two: all our bits are good.
-+        for(;;) {
-+            final long bits = nextLong() >>> 1;
-+            final long value = bits % n;
-+            if ( bits - value + ( n - 1 ) >= 0 ) return value;
+ import java.util.HashSet;
+ import java.util.Iterator;
+ import java.util.List;
+@@ -44,6 +47,24 @@ public class Block {
+         return timing;
+     }
+     // Paper end
++    // Dionysus start
++    public static XoShiRo256PlusPlusRandom SHARED_RANDOM = new XoShiRo256PlusPlusRandom() {
++        private boolean locked = false;
++        @Override
++        public synchronized void setSeed(long seed) {
++            if (locked) {
++                LogManager.getLogger().error("Ignoring setSeed on Block.SHARED_RANDOM", new Throwable());
++            } else {
++                super.setSeed(seed);
++                locked = true;
++            }
 +        }
++    };
++    protected XoShiRo256PlusPlusRandom random = SHARED_RANDOM;
++    public XoShiRo256PlusPlusRandom getRandom() {
++        return this.random;
 +    }
-+
-+    @Override
-+    public double nextDouble() {
-+        return ( nextLong() >>> 11 ) * NORM_53;
-+    }
-+
-+    @Override
-+    public float nextFloat() {
-+        return (float)( ( nextLong() >>> 40 ) * NORM_24 );
-+    }
-+
-+    @Override
-+    public boolean nextBoolean() {
-+        return ( nextLong() & 1 ) != 0;
-+    }
-+
-+    @Override
-+    public void nextBytes( final byte[] bytes ) {
-+        int i = bytes.length, n = 0;
-+        while( i != 0 ) {
-+            n = Math.min( i, 8 );
-+            for ( long bits = nextLong(); n-- != 0; bits >>= 8 ) bytes[ --i ] = (byte)bits;
-+        }
-+    }
-+
-+    /** Returns a random seed generated by taking a unique increasing long, adding
-+     * {@link System#nanoTime()} and scrambling the result using the finalisation step of Austin
-+     * Appleby's <a href="http://sites.google.com/site/murmurhash/">MurmurHash3</a>.
-+     *
-+     * @return a reasonably good random seed.
-+     */
-+    private static final AtomicLong seedUniquifier = new AtomicLong();
-+    public static long randomSeed() {
-+        long seed = seedUniquifier.incrementAndGet() + System.nanoTime();
-+
-+        seed ^= seed >>> 33;
-+        seed *= 0xff51afd7ed558ccdL;
-+        seed ^= seed >>> 33;
-+        seed *= 0xc4ceb9fe1a85ec53L;
-+        seed ^= seed >>> 33;
-+
-+        return seed;
-+    }
-+
-+    /** Sets the seed of this generator.
-+     *
-+     * @param seed a nonzero seed for the generator (if zero, the generator will be seeded with -1).
-+     */
-+    @Override
-+    public synchronized void setSeed( final long seed ) {
-+        if ( s == null ) s = new long[ 16 ];
-+        for( int i = s.length; i-- != 0; ) s[ i ] = seed == 0 ? -1 : seed;
-+        for( int i = s.length * 4; i-- != 0; ) nextLong(); // Warmup.
-+    }
-+}
-\ No newline at end of file
++    // Dionysus end
+ 
+     public static int getId(Block block) {
+         return Block.REGISTRY.a(block); // CraftBukkit - decompile error
 diff --git a/src/main/java/net/minecraft/server/BlockDispenser.java b/src/main/java/net/minecraft/server/BlockDispenser.java
-index 3e758a81a1de408ed98c042f55fa2b3871877cc0..6f6c1dac31ee2544eefac02e5aea59af4a519b13 100644
+index 3e758a81a1de408ed98c042f55fa2b3871877cc0..f7b031f0ad398220499d307276e2465c116f9f03 100644
 --- a/src/main/java/net/minecraft/server/BlockDispenser.java
 +++ b/src/main/java/net/minecraft/server/BlockDispenser.java
 @@ -1,5 +1,7 @@
  package net.minecraft.server;
  
-+import dev.pomf.dionysus.util.random.Xorshift;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
 +
  import java.util.Random;
  
@@ -232,12 +99,112 @@ index 3e758a81a1de408ed98c042f55fa2b3871877cc0..6f6c1dac31ee2544eefac02e5aea59af
      public static final BlockStateBoolean TRIGGERED = BlockStateBoolean.of("triggered");
      public static final RegistryDefault<Item, IDispenseBehavior> REGISTRY = new RegistryDefault(new DispenseBehaviorItem());
 -    protected Random d = new Random();
-+    protected Random d = new Xorshift();
++    //protected Random d = new XoShiRo256PlusPlusRandom();
      public static boolean eventFired = false; // CraftBukkit
  
      protected BlockDispenser() {
+diff --git a/src/main/java/net/minecraft/server/BlockDragonEgg.java b/src/main/java/net/minecraft/server/BlockDragonEgg.java
+index fd53f98d354cc9be2b97a6fd30e4f4858cdd5273..7cf2f11908f2d6980bf7c553b10a06214cd66d5d 100644
+--- a/src/main/java/net/minecraft/server/BlockDragonEgg.java
++++ b/src/main/java/net/minecraft/server/BlockDragonEgg.java
+@@ -81,13 +81,13 @@ public class BlockDragonEgg extends Block {
+                     // CraftBukkit end
+                     if (world.isClientSide) {
+                         for (int j = 0; j < 128; ++j) {
+-                            double d0 = world.random.nextDouble();
+-                            float f = (world.random.nextFloat() - 0.5F) * 0.2F;
+-                            float f1 = (world.random.nextFloat() - 0.5F) * 0.2F;
+-                            float f2 = (world.random.nextFloat() - 0.5F) * 0.2F;
+-                            double d1 = (double) blockposition1.getX() + (double) (blockposition.getX() - blockposition1.getX()) * d0 + (world.random.nextDouble() - 0.5D) + 0.5D;
+-                            double d2 = (double) blockposition1.getY() + (double) (blockposition.getY() - blockposition1.getY()) * d0 + world.random.nextDouble() - 0.5D;
+-                            double d3 = (double) blockposition1.getZ() + (double) (blockposition.getZ() - blockposition1.getZ()) * d0 + (world.random.nextDouble() - 0.5D) + 0.5D;
++                            double d0 = this.random.nextDoubleFast();
++                            float f = (this.random.nextFloat() - 0.5F) * 0.2F;
++                            float f1 = (this.random.nextFloat() - 0.5F) * 0.2F;
++                            float f2 = (this.random.nextFloat() - 0.5F) * 0.2F;
++                            double d1 = (double) blockposition1.getX() + (double) (blockposition.getX() - blockposition1.getX()) * d0 + (this.random.nextDoubleFast() - 0.5D) + 0.5D;
++                            double d2 = (double) blockposition1.getY() + (double) (blockposition.getY() - blockposition1.getY()) * d0 + this.random.nextDoubleFast() - 0.5D;
++                            double d3 = (double) blockposition1.getZ() + (double) (blockposition.getZ() - blockposition1.getZ()) * d0 + (this.random.nextDoubleFast() - 0.5D) + 0.5D;
+ 
+                             world.addParticle(EnumParticle.PORTAL, d1, d2, d3, f, f1, f2);
+                         }
+diff --git a/src/main/java/net/minecraft/server/BlockPumpkin.java b/src/main/java/net/minecraft/server/BlockPumpkin.java
+index 595032a769dac8fce9715a4586c0379695328924..564e57cdededa08828cab2e2f84625d3b61ee145 100644
+--- a/src/main/java/net/minecraft/server/BlockPumpkin.java
++++ b/src/main/java/net/minecraft/server/BlockPumpkin.java
+@@ -76,7 +76,7 @@ public class BlockPumpkin extends BlockFacingHorizontal {
+             }
+ 
+             for (j = 0; j < 120; ++j) {
+-                world.addParticle(EnumParticle.SNOW_SHOVEL, (double) blockposition1.getX() + world.random.nextDouble(), (double) blockposition1.getY() + world.random.nextDouble() * 2.5D, (double) blockposition1.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D);
++                world.addParticle(EnumParticle.SNOW_SHOVEL, (double) blockposition1.getX() + this.random.nextDoubleFast(), (double) blockposition1.getY() + this.random.nextDoubleFast() * 2.5D, (double) blockposition1.getZ() + this.random.nextDoubleFast(), 0.0D, 0.0D, 0.0D);
+             }
+ 
+             for (j = 0; j < this.getDetectorSnowGolem().b(); ++j) {
+@@ -114,7 +114,7 @@ public class BlockPumpkin extends BlockFacingHorizontal {
+                 }
+ 
+                 for (j = 0; j < 120; ++j) {
+-                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition2.getX() + world.random.nextDouble(), (double) blockposition2.getY() + world.random.nextDouble() * 3.9D, (double) blockposition2.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D);
++                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition2.getX() + this.random.nextDoubleFast(), (double) blockposition2.getY() + this.random.nextDoubleFast() * 3.9D, (double) blockposition2.getZ() + this.random.nextDoubleFast(), 0.0D, 0.0D, 0.0D);
+                 }
+ 
+                 for (j = 0; j < this.getDetectorIronGolem().c(); ++j) {
+diff --git a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
+index 7ace5c940ebe7bf1ccce39ad4b521672d4e2b278..2162a2bb474d4876d2fa0ea7113205cf7a41bcb4 100644
+--- a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
++++ b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
+@@ -130,9 +130,9 @@ public class BlockRedstoneTorch extends BlockTorch {
+                     world.a(null, blockposition, SoundEffects.gm, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
+ 
+                     for (int i = 0; i < 5; ++i) {
+-                        double d0 = (double) blockposition.getX() + random.nextDouble() * 0.6D + 0.2D;
+-                        double d1 = (double) blockposition.getY() + random.nextDouble() * 0.6D + 0.2D;
+-                        double d2 = (double) blockposition.getZ() + random.nextDouble() * 0.6D + 0.2D;
++                        double d0 = (double) blockposition.getX() + this.random.nextDoubleFast() * 0.6D + 0.2D;
++                        double d1 = (double) blockposition.getY() + this.random.nextDoubleFast() * 0.6D + 0.2D;
++                        double d2 = (double) blockposition.getZ() + this.random.nextDoubleFast() * 0.6D + 0.2D;
+ 
+                         world.addParticle(EnumParticle.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D);
+                     }
+diff --git a/src/main/java/net/minecraft/server/BlockSkull.java b/src/main/java/net/minecraft/server/BlockSkull.java
+index 88fdc062a0d5aa14476fb7f686f8079dfc551d2f..4af290dfaf3d884da7970efa73a271565fac6bc1 100644
+--- a/src/main/java/net/minecraft/server/BlockSkull.java
++++ b/src/main/java/net/minecraft/server/BlockSkull.java
+@@ -212,7 +212,7 @@ public class BlockSkull extends BlockTileEntity {
+                 int k;
+ 
+                 for (k = 0; k < 120; ++k) {
+-                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition1.getX() + world.random.nextDouble(), (double) (blockposition1.getY() - 2) + world.random.nextDouble() * 3.9D, (double) blockposition1.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D);
++                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition1.getX() + this.random.nextDoubleFast(), (double) (blockposition1.getY() - 2) + this.random.nextDoubleFast() * 3.9D, (double) blockposition1.getZ() + this.random.nextDoubleFast(), 0.0D, 0.0D, 0.0D);
+                 }
+ 
+                 for (k = 0; k < shapedetector.c(); ++k) {
+diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorItem.java b/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
+index b007f7c29bdfb86ac75920f288759ecf70a5c802..c5c1810fced97c52dd42e9d9b6be274248e0f2ba 100644
+--- a/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
++++ b/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
+@@ -45,14 +45,14 @@ public class DispenseBehaviorItem implements IDispenseBehavior {
+         }
+ 
+         EntityItem entityitem = new EntityItem(world, d0, d1, d2, itemstack);
+-        double d3 = world.random.nextDouble() * 0.1D + 0.2D;
++        double d3 = entityitem.random.nextDoubleFast() * 0.1D + 0.2D;
+ 
+         entityitem.motX = (double) enumdirection.getAdjacentX() * d3;
+         entityitem.motY = 0.20000000298023224D;
+         entityitem.motZ = (double) enumdirection.getAdjacentZ() * d3;
+-        entityitem.motX += world.random.nextGaussian() * 0.007499999832361937D * (double) i;
+-        entityitem.motY += world.random.nextGaussian() * 0.007499999832361937D * (double) i;
+-        entityitem.motZ += world.random.nextGaussian() * 0.007499999832361937D * (double) i;
++        entityitem.motX += entityitem.random.nextGaussian() * 0.007499999832361937D * (double) i;
++        entityitem.motY += entityitem.random.nextGaussian() * 0.007499999832361937D * (double) i;
++        entityitem.motZ += entityitem.random.nextGaussian() * 0.007499999832361937D * (double) i;
+ 
+         // CraftBukkit start
+         org.bukkit.block.Block block = world.getWorld().getBlockAt(isourceblock.getBlockPosition().getX(), isourceblock.getBlockPosition().getY(), isourceblock.getBlockPosition().getZ());
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 3034756a2f3032cb6fe44512e6d168b47bfd7342..cc8167479bfc398d3f7af8bb554817650a01ca0c 100644
+index 3034756a2f3032cb6fe44512e6d168b47bfd7342..3aa8e827707c25b841bb0ca48b463e49b221903b 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -13,6 +13,8 @@ import java.util.Random;
@@ -245,7 +212,7 @@ index 3034756a2f3032cb6fe44512e6d168b47bfd7342..cc8167479bfc398d3f7af8bb55481765
  import java.util.UUID;
  import javax.annotation.Nullable;
 +
-+import dev.pomf.dionysus.util.random.Xorshift;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -254,22 +221,300 @@ index 3034756a2f3032cb6fe44512e6d168b47bfd7342..cc8167479bfc398d3f7af8bb55481765
      private static final int CURRENT_LEVEL = 2;
      // Paper start
 -    public static Random SHARED_RANDOM = new Random() {
-+    public static Random SHARED_RANDOM = new Xorshift() {
++    public static XoShiRo256PlusPlusRandom SHARED_RANDOM = new XoShiRo256PlusPlusRandom() {
          private boolean locked = false;
          @Override
          public synchronized void setSeed(long seed) {
+@@ -139,7 +141,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     public float P;
+     public boolean noclip;
+     public float R;
+-    protected Random random;
++    protected XoShiRo256PlusPlusRandom random;
+     public int ticksLived;
+     public int fireTicks;
+     public boolean inWater; // Spigot - protected -> public // PAIL
+diff --git a/src/main/java/net/minecraft/server/EntityAreaEffectCloud.java b/src/main/java/net/minecraft/server/EntityAreaEffectCloud.java
+index 6c18117e8d89a564751cee78d00a649d479f001c..c5c8e31514925e45bef552422e11a2f964007d60 100644
+--- a/src/main/java/net/minecraft/server/EntityAreaEffectCloud.java
++++ b/src/main/java/net/minecraft/server/EntityAreaEffectCloud.java
+@@ -237,7 +237,7 @@ public class EntityAreaEffectCloud extends Entity {
+ 
+                         this.world.a(EnumParticle.SPELL_MOB.c(), this.locX + (double) f3, this.locY, this.locZ + (double) f6, (float) j / 255.0F, (float) k / 255.0F, (float) k1 / 255.0F);
+                     } else {
+-                        this.world.a(enumparticle.c(), this.locX + (double) f3, this.locY, this.locZ + (double) f6, (0.5D - this.random.nextDouble()) * 0.15D, 0.009999999776482582D, (0.5D - this.random.nextDouble()) * 0.15D, aint);
++                        this.world.a(enumparticle.c(), this.locX + (double) f3, this.locY, this.locZ + (double) f6, (0.5D - this.random.nextDoubleFast()) * 0.15D, 0.009999999776482582D, (0.5D - this.random.nextDoubleFast()) * 0.15D, aint);
+                     }
+                 }
+             }
+diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+index 34021e4fe7a070cc878f3177fb73b8c36de2e269..6369ee962e7f111fbe3db3374dd71dc8531f2a26 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
++++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+@@ -59,7 +59,7 @@ public class EntityEnderPearl extends EntityProjectile {
+         }
+ 
+         for (int i = 0; i < 32; ++i) {
+-            this.world.addParticle(EnumParticle.PORTAL, this.locX, this.locY + this.random.nextDouble() * 2.0D, this.locZ, this.random.nextGaussian(), 0.0D, this.random.nextGaussian());
++            this.world.addParticle(EnumParticle.PORTAL, this.locX, this.locY + this.random.nextDoubleFast() * 2.0D, this.locZ, this.random.nextGaussian(), 0.0D, this.random.nextGaussian());
+         }
+ 
+         if (!this.world.isClientSide) {
+diff --git a/src/main/java/net/minecraft/server/EntityEnderSignal.java b/src/main/java/net/minecraft/server/EntityEnderSignal.java
+index 5d7b85759db9cc439968dadaf46520fb1c6a706f..4b67e124242abacaea6accb40f71b6ab26f58ee3 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderSignal.java
++++ b/src/main/java/net/minecraft/server/EntityEnderSignal.java
+@@ -101,7 +101,7 @@ public class EntityEnderSignal extends Entity {
+                 this.world.addParticle(EnumParticle.WATER_BUBBLE, this.locX - this.motX * 0.25D, this.locY - this.motY * 0.25D, this.locZ - this.motZ * 0.25D, this.motX, this.motY, this.motZ);
+             }
+         } else {
+-            this.world.addParticle(EnumParticle.PORTAL, this.locX - this.motX * 0.25D + this.random.nextDouble() * 0.6D - 0.3D, this.locY - this.motY * 0.25D - 0.5D, this.locZ - this.motZ * 0.25D + this.random.nextDouble() * 0.6D - 0.3D, this.motX, this.motY, this.motZ);
++            this.world.addParticle(EnumParticle.PORTAL, this.locX - this.motX * 0.25D + this.random.nextDoubleFast() * 0.6D - 0.3D, this.locY - this.motY * 0.25D - 0.5D, this.locZ - this.motZ * 0.25D + this.random.nextDoubleFast() * 0.6D - 0.3D, this.motX, this.motY, this.motZ);
+         }
+ 
+         if (!this.world.isClientSide) {
+diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
+index 2671af33e518b3470f507ec439e57533c2165bb6..09538ef4153c9f19dffe81e3896894fcefb34429 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderman.java
++++ b/src/main/java/net/minecraft/server/EntityEnderman.java
+@@ -5,6 +5,7 @@ import com.google.common.base.Function;
+ import com.google.common.base.Optional;
+ import com.google.common.base.Predicate;
+ import com.google.common.collect.Sets;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
+ import org.bukkit.event.entity.EntityTargetEvent;
+ 
+ import java.util.Random;
+@@ -181,7 +182,7 @@ public class EntityEnderman extends EntityMonster {
+     public void n() {
+         if (this.world.isClientSide) {
+             for (int i = 0; i < 2; ++i) {
+-                this.world.addParticle(EnumParticle.PORTAL, this.locX + (this.random.nextDouble() - 0.5D) * (double) this.width, this.locY + this.random.nextDouble() * (double) this.length - 0.25D, this.locZ + (this.random.nextDouble() - 0.5D) * (double) this.width, (this.random.nextDouble() - 0.5D) * 2.0D, -this.random.nextDouble(), (this.random.nextDouble() - 0.5D) * 2.0D);
++                this.world.addParticle(EnumParticle.PORTAL, this.locX + (this.random.nextDoubleFast() - 0.5D) * (double) this.width, this.locY + this.random.nextDoubleFast() * (double) this.length - 0.25D, this.locZ + (this.random.nextDoubleFast() - 0.5D) * (double) this.width, (this.random.nextDoubleFast() - 0.5D) * 2.0D, -this.random.nextDoubleFast(), (this.random.nextDoubleFast() - 0.5D) * 2.0D);
+             }
+         }
+ 
+@@ -208,9 +209,9 @@ public class EntityEnderman extends EntityMonster {
+ 
+     public boolean teleportRandomly() { return dm(); } // Paper - OBFHELPER
+     protected boolean dm() {
+-        double d0 = this.locX + (this.random.nextDouble() - 0.5D) * 64.0D;
++        double d0 = this.locX + (this.random.nextDoubleFast() - 0.5D) * 64.0D;
+         double d1 = this.locY + (double) (this.random.nextInt(64) - 32);
+-        double d2 = this.locZ + (this.random.nextDouble() - 0.5D) * 64.0D;
++        double d2 = this.locZ + (this.random.nextDoubleFast() - 0.5D) * 64.0D;
+ 
+         return this.k(d0, d1, d2);
+     }
+@@ -220,9 +221,9 @@ public class EntityEnderman extends EntityMonster {
+ 
+         vec3d = vec3d.a();
+         double d0 = 16.0D;
+-        double d1 = this.locX + (this.random.nextDouble() - 0.5D) * 8.0D - vec3d.x * 16.0D;
++        double d1 = this.locX + (this.random.nextDoubleFast() - 0.5D) * 8.0D - vec3d.x * 16.0D;
+         double d2 = this.locY + (double) (this.random.nextInt(16) - 8) - vec3d.y * 16.0D;
+-        double d3 = this.locZ + (this.random.nextDouble() - 0.5D) * 8.0D - vec3d.z * 16.0D;
++        double d3 = this.locZ + (this.random.nextDoubleFast() - 0.5D) * 8.0D - vec3d.z * 16.0D;
+ 
+         return this.k(d1, d2, d3);
+     }
+@@ -334,11 +335,11 @@ public class EntityEnderman extends EntityMonster {
+         }
+ 
+         public void e() {
+-            Random random = this.enderman.getRandom();
++            XoShiRo256PlusPlusRandom random = this.enderman.random;
+             World world = this.enderman.world;
+-            int i = MathHelper.floor(this.enderman.locX - 2.0D + random.nextDouble() * 4.0D);
+-            int j = MathHelper.floor(this.enderman.locY + random.nextDouble() * 3.0D);
+-            int k = MathHelper.floor(this.enderman.locZ - 2.0D + random.nextDouble() * 4.0D);
++            int i = MathHelper.floor(this.enderman.locX - 2.0D + random.nextDoubleFast() * 4.0D);
++            int j = MathHelper.floor(this.enderman.locY + random.nextDoubleFast() * 3.0D);
++            int k = MathHelper.floor(this.enderman.locZ - 2.0D + random.nextDoubleFast() * 4.0D);
+             BlockPosition blockposition = new BlockPosition(i, j, k);
+             IBlockData iblockdata = world.getType(blockposition);
+             Block block = iblockdata.getBlock();
+@@ -370,11 +371,11 @@ public class EntityEnderman extends EntityMonster {
+         }
+ 
+         public void e() {
+-            Random random = this.a.getRandom();
++            XoShiRo256PlusPlusRandom random = this.a.random;
+             World world = this.a.world;
+-            int i = MathHelper.floor(this.a.locX - 1.0D + random.nextDouble() * 2.0D);
+-            int j = MathHelper.floor(this.a.locY + random.nextDouble() * 2.0D);
+-            int k = MathHelper.floor(this.a.locZ - 1.0D + random.nextDouble() * 2.0D);
++            int i = MathHelper.floor(this.a.locX - 1.0D + random.nextDoubleFast() * 2.0D);
++            int j = MathHelper.floor(this.a.locY + random.nextDoubleFast() * 2.0D);
++            int k = MathHelper.floor(this.a.locZ - 1.0D + random.nextDoubleFast() * 2.0D);
+             BlockPosition blockposition = new BlockPosition(i, j, k);
+             IBlockData iblockdata = world.getType(blockposition);
+             IBlockData iblockdata1 = world.getType(blockposition.down());
+diff --git a/src/main/java/net/minecraft/server/EntityEvokerFangs.java b/src/main/java/net/minecraft/server/EntityEvokerFangs.java
+index 6feba35d515c9bfae218e0a3ef114b2f10c4084f..9f76d1f00b051ee52e4c4f8bedb6c452ab4339c4 100644
+--- a/src/main/java/net/minecraft/server/EntityEvokerFangs.java
++++ b/src/main/java/net/minecraft/server/EntityEvokerFangs.java
+@@ -68,12 +68,12 @@ public class EntityEvokerFangs extends Entity {
+                 --this.c;
+                 if (this.c == 14) {
+                     for (int i = 0; i < 12; ++i) {
+-                        double d0 = this.locX + (this.random.nextDouble() * 2.0D - 1.0D) * (double) this.width * 0.5D;
+-                        double d1 = this.locY + 0.05D + this.random.nextDouble() * 1.0D;
+-                        double d2 = this.locZ + (this.random.nextDouble() * 2.0D - 1.0D) * (double) this.width * 0.5D;
+-                        double d3 = (this.random.nextDouble() * 2.0D - 1.0D) * 0.3D;
+-                        double d4 = 0.3D + this.random.nextDouble() * 0.3D;
+-                        double d5 = (this.random.nextDouble() * 2.0D - 1.0D) * 0.3D;
++                        double d0 = this.locX + (this.random.nextDoubleFast() * 2.0D - 1.0D) * (double) this.width * 0.5D;
++                        double d1 = this.locY + 0.05D + this.random.nextDoubleFast();
++                        double d2 = this.locZ + (this.random.nextDoubleFast() * 2.0D - 1.0D) * (double) this.width * 0.5D;
++                        double d3 = (this.random.nextDoubleFast() * 2.0D - 1.0D) * 0.3D;
++                        double d4 = 0.3D + this.random.nextDoubleFast() * 0.3D;
++                        double d5 = (this.random.nextDoubleFast() * 2.0D - 1.0D) * 0.3D;
+ 
+                         this.world.addParticle(EnumParticle.CRIT, d0, d1 + 1.0D, d2, d3, d4, d5);
+                     }
+diff --git a/src/main/java/net/minecraft/server/EntityHorseAbstract.java b/src/main/java/net/minecraft/server/EntityHorseAbstract.java
+index eb924ddaa62dc8fe36a0d3bbafa59ada349da59c..7eb0a5ec98036a29123b394f05ebe11102931556 100644
+--- a/src/main/java/net/minecraft/server/EntityHorseAbstract.java
++++ b/src/main/java/net/minecraft/server/EntityHorseAbstract.java
+@@ -855,11 +855,11 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
+     }
+ 
+     protected double dN() {
+-        return 0.4000000059604645D + this.random.nextDouble() * 0.2D + this.random.nextDouble() * 0.2D + this.random.nextDouble() * 0.2D;
++        return 0.4000000059604645D + this.random.nextDoubleFast() * 0.2D + this.random.nextDoubleFast() * 0.2D + this.random.nextDoubleFast() * 0.2D;
+     }
+ 
+     protected double dO() {
+-        return (0.44999998807907104D + this.random.nextDouble() * 0.3D + this.random.nextDouble() * 0.3D + this.random.nextDouble() * 0.3D) * 0.25D;
++        return (0.44999998807907104D + this.random.nextDoubleFast() * 0.3D + this.random.nextDoubleFast() * 0.3D + this.random.nextDoubleFast() * 0.3D) * 0.25D;
+     }
+ 
+     public boolean m_() {
+diff --git a/src/main/java/net/minecraft/server/EntityIllagerIllusioner.java b/src/main/java/net/minecraft/server/EntityIllagerIllusioner.java
+index 1fe874e1ba19f28beaba99f108ff0f949f92a1e3..2e0e508cee82e81ff90f2e484aacb1193e4e6437 100644
+--- a/src/main/java/net/minecraft/server/EntityIllagerIllusioner.java
++++ b/src/main/java/net/minecraft/server/EntityIllagerIllusioner.java
+@@ -86,7 +86,7 @@ public class EntityIllagerIllusioner extends EntityIllagerWizard implements IRan
+                 }
+ 
+                 for (j = 0; j < 16; ++j) {
+-                    this.world.addParticle(EnumParticle.CLOUD, this.locX + (this.random.nextDouble() - 0.5D) * (double) this.width, this.locY + this.random.nextDouble() * (double) this.length, this.locZ + (this.random.nextDouble() - 0.5D) * (double) this.width, 0.0D, 0.0D, 0.0D);
++                    this.world.addParticle(EnumParticle.CLOUD, this.locX + (this.random.nextDoubleFast() - 0.5D) * (double) this.width, this.locY + this.random.nextDoubleFast() * (double) this.length, this.locZ + (this.random.nextDoubleFast() - 0.5D) * (double) this.width, 0.0D, 0.0D, 0.0D);
+                 }
+ 
+                 this.world.a(this.locX, this.locY, this.locZ, SoundEffects.dg, this.bK(), 1.0F, 1.0F, false);
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index d8753dffa478a4050434dfc326f646b6e9573b29..51a2db5133634fd7c8e84b66967953c84ee26093 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -615,7 +615,7 @@ public abstract class EntityLiving extends Entity {
+                 double d1 = (double) (i >> 8 & 255) / 255.0D;
+                 double d2 = (double) (i >> 0 & 255) / 255.0D;
+ 
+-                this.world.addParticle(flag ? EnumParticle.SPELL_MOB_AMBIENT : EnumParticle.SPELL_MOB, this.locX + (this.random.nextDouble() - 0.5D) * (double) this.width, this.locY + this.random.nextDouble() * (double) this.length, this.locZ + (this.random.nextDouble() - 0.5D) * (double) this.width, d0, d1, d2);
++                this.world.addParticle(flag ? EnumParticle.SPELL_MOB_AMBIENT : EnumParticle.SPELL_MOB, this.locX + (this.random.nextDoubleFast() - 0.5D) * (double) this.width, this.locY + this.random.nextDoubleFast() * (double) this.length, this.locZ + (this.random.nextDoubleFast() - 0.5D) * (double) this.width, d0, d1, d2);
+             }
+         }
+ 
+@@ -1178,7 +1178,7 @@ public abstract class EntityLiving extends Entity {
+     protected void dropEquipment(boolean flag, int i) {}
+ 
+     public void a(Entity entity, float f, double d0, double d1) {
+-        if (this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
++        if (this.random.nextDoubleFast() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
+             this.impulse = true;
+             float f1 = MathHelper.sqrt(d0 * d0 + d1 * d1);
+ 
+@@ -2317,7 +2317,7 @@ public abstract class EntityLiving extends Entity {
+     }
+ 
+     protected void ax() {
+-        this.velocityChanged = this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue();
++        this.velocityChanged = this.random.nextDoubleFast() >= this.getAttributeInstance(GenericAttributes.c).getValue();
+     }
+ 
+     public float getHeadRotation() {
+@@ -2546,7 +2546,6 @@ public abstract class EntityLiving extends Entity {
+         boolean flag = false;
+         BlockPosition blockposition = new BlockPosition(this);
+         World world = this.world;
+-        Random random = this.getRandom();
+         boolean flag1;
+ 
+         if (world.isLoaded(blockposition)) {
+@@ -2591,9 +2590,9 @@ public abstract class EntityLiving extends Entity {
+                 float f = (random.nextFloat() - 0.5F) * 0.2F;
+                 float f1 = (random.nextFloat() - 0.5F) * 0.2F;
+                 float f2 = (random.nextFloat() - 0.5F) * 0.2F;
+-                double d7 = d3 + (this.locX - d3) * d6 + (random.nextDouble() - 0.5D) * (double) this.width * 2.0D;
+-                double d8 = d4 + (this.locY - d4) * d6 + random.nextDouble() * (double) this.length;
+-                double d9 = d5 + (this.locZ - d5) * d6 + (random.nextDouble() - 0.5D) * (double) this.width * 2.0D;
++                double d7 = d3 + (this.locX - d3) * d6 + (random.nextDoubleFast() - 0.5D) * (double) this.width * 2.0D;
++                double d8 = d4 + (this.locY - d4) * d6 + random.nextDoubleFast() * (double) this.length;
++                double d9 = d5 + (this.locZ - d5) * d6 + (random.nextDoubleFast() - 0.5D) * (double) this.width * 2.0D;
+ 
+                 world.addParticle(EnumParticle.PORTAL, d7, d8, d9, f, f1, f2);
+             }
+diff --git a/src/main/java/net/minecraft/server/EntityTippedArrow.java b/src/main/java/net/minecraft/server/EntityTippedArrow.java
+index 08d53d3587fa5257b91fb1829f8c06653bcaca7c..47084f75ab4043b9160198e7665e9fb9f5479a8e 100644
+--- a/src/main/java/net/minecraft/server/EntityTippedArrow.java
++++ b/src/main/java/net/minecraft/server/EntityTippedArrow.java
+@@ -110,7 +110,7 @@ public class EntityTippedArrow extends EntityArrow {
+             double d2 = (double) (j >> 0 & 255) / 255.0D;
+ 
+             for (int k = 0; k < i; ++k) {
+-                this.world.addParticle(EnumParticle.SPELL_MOB, this.locX + (this.random.nextDouble() - 0.5D) * (double) this.width, this.locY + this.random.nextDouble() * (double) this.length, this.locZ + (this.random.nextDouble() - 0.5D) * (double) this.width, d0, d1, d2);
++                this.world.addParticle(EnumParticle.SPELL_MOB, this.locX + (this.random.nextDoubleFast() - 0.5D) * (double) this.width, this.locY + this.random.nextDoubleFast() * (double) this.length, this.locZ + (this.random.nextDoubleFast() - 0.5D) * (double) this.width, d0, d1, d2);
+             }
+ 
+         }
+diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
+index 85793cc93f15dd008306b7a393d4ef3258774fb5..9ee53f01fd1869d726e760ffc84eedb1d52fab14 100644
+--- a/src/main/java/net/minecraft/server/EntityZombie.java
++++ b/src/main/java/net/minecraft/server/EntityZombie.java
+@@ -54,7 +54,7 @@ public class EntityZombie extends EntityMonster {
+         this.getAttributeInstance(GenericAttributes.MOVEMENT_SPEED).setValue(0.23000000417232513D);
+         this.getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(3.0D);
+         this.getAttributeInstance(GenericAttributes.h).setValue(2.0D);
+-        this.getAttributeMap().b(EntityZombie.a).setValue(this.random.nextDouble() * 0.10000000149011612D);
++        this.getAttributeMap().b(EntityZombie.a).setValue(this.random.nextDoubleFast() * 0.10000000149011612D);
+     }
+ 
+     protected void i() {
+@@ -373,16 +373,16 @@ public class EntityZombie extends EntityMonster {
+             }
+         }
+ 
+-        this.getAttributeInstance(GenericAttributes.c).b(new AttributeModifier("Random spawn bonus", this.random.nextDouble() * 0.05000000074505806D, 0));
+-        double d0 = this.random.nextDouble() * 1.5D * (double) f;
++        this.getAttributeInstance(GenericAttributes.c).b(new AttributeModifier("Random spawn bonus", this.random.nextDoubleFast() * 0.05000000074505806D, 0));
++        double d0 = this.random.nextDoubleFast() * 1.5D * (double) f;
+ 
+         if (d0 > 1.0D) {
+             this.getAttributeInstance(GenericAttributes.FOLLOW_RANGE).b(new AttributeModifier("Random zombie-spawn bonus", d0, 2));
+         }
+ 
+         if (this.random.nextFloat() < f * 0.05F) {
+-            this.getAttributeInstance(EntityZombie.a).b(new AttributeModifier("Leader zombie bonus", this.random.nextDouble() * 0.25D + 0.5D, 0));
+-            this.getAttributeInstance(GenericAttributes.maxHealth).b(new AttributeModifier("Leader zombie bonus", this.random.nextDouble() * 3.0D + 1.0D, 2));
++            this.getAttributeInstance(EntityZombie.a).b(new AttributeModifier("Leader zombie bonus", this.random.nextDoubleFast() * 0.25D + 0.5D, 0));
++            this.getAttributeInstance(GenericAttributes.maxHealth).b(new AttributeModifier("Leader zombie bonus", this.random.nextDoubleFast() * 3.0D + 1.0D, 2));
+             this.p(true);
+         }
+ 
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index 589da0e5a34565cf03bb4b8a5ded5b09ee74925b..35dd465de29e9cabb34bd8dcd6cd997d48eab524 100644
+index 589da0e5a34565cf03bb4b8a5ded5b09ee74925b..4f3045003ec14244823a9ffb964755f2a98df49d 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
-@@ -2,6 +2,7 @@ package net.minecraft.server;
- 
+@@ -3,6 +3,7 @@ package net.minecraft.server;
  import com.google.common.collect.Lists;
  import com.google.common.collect.Maps;
-+import dev.pomf.dionysus.util.random.Xorshift;
  import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
  import org.bukkit.Location;
  import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.event.block.BlockExplodeEvent;
 @@ -10,18 +11,12 @@ import org.bukkit.event.entity.EntityExplodeEvent;
  
  import javax.annotation.Nullable;
@@ -286,53 +531,15 @@ index 589da0e5a34565cf03bb4b8a5ded5b09ee74925b..35dd465de29e9cabb34bd8dcd6cd997d
      private final boolean a; private boolean explodeAirBlocks() { return a; } // Dionysus - OBFHELPER
      private final boolean b;
 -    private final Random c = new Random();
-+    private final Random c = new Xorshift();
++    private final Random c = new XoShiRo256PlusPlusRandom();
      private final World world;
      private final double posX;
      private final double posY;
-diff --git a/src/main/java/net/minecraft/server/MathHelper.java b/src/main/java/net/minecraft/server/MathHelper.java
-index 4dafb190e6490f7e1f8dfc546cf9a6fc55e19615..aaa47879d6629eb83e18c9cf3104213a46e11d05 100644
---- a/src/main/java/net/minecraft/server/MathHelper.java
-+++ b/src/main/java/net/minecraft/server/MathHelper.java
-@@ -1,6 +1,7 @@
- package net.minecraft.server;
- 
- import dev.pomf.dionysus.util.math.CompactSineLUT;
-+import dev.pomf.dionysus.util.random.Xorshift;
- 
- import java.util.Random;
- import java.util.UUID;
-@@ -9,7 +10,7 @@ public class MathHelper {
- 
-     public static final float a = c(2.0F);
-     private static final float[] b = new float[65536]; public static float[] getSinTable() { return b; } // Dionysus - OBFSHELPER
--    private static final Random c = new Random();
-+    private static final Random c = new Xorshift();
-     private static final int[] d;
-     private static final double e;
-     private static final double[] f;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index de456592d3d6acfc2832591d621cabdd1888930e..e22575917a0004cfae986d144fd62d1c9de29bb4 100644
+index de456592d3d6acfc2832591d621cabdd1888930e..306d49a73a7d214d5b82ee4eb90fca2f5c9789bf 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -9,6 +9,7 @@ import com.mojang.authlib.GameProfile;
- import com.mojang.authlib.GameProfileRepository;
- import com.mojang.authlib.minecraft.MinecraftSessionService;
- import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-+import dev.pomf.dionysus.util.random.Xorshift;
- import io.netty.buffer.ByteBuf;
- import io.netty.buffer.ByteBufOutputStream;
- import io.netty.buffer.Unpooled;
-@@ -63,7 +64,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
-     public final MethodProfiler methodProfiler = new MethodProfiler();
-     private ServerConnection p; // Spigot
-     private final ServerPing q = new ServerPing();
--    private final Random r = new Random();
-+    private final Random r = new Xorshift();
-     public final DataConverterManager dataConverterManager;
-     private String serverIp;
-     private int u = -1;
-@@ -782,7 +783,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -782,7 +782,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
                  agameprofile[k] = this.v.v().get(j + k).getProfile();
              }
  
@@ -341,28 +548,62 @@ index de456592d3d6acfc2832591d621cabdd1888930e..e22575917a0004cfae986d144fd62d1c
              this.q.b().a(agameprofile);
          }
  
-diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index b88e9083b3ab82d00924c6329ae247df1089d6ed..0365ea262118a61b0af0277db366c9af0b81f499 100644
---- a/src/main/java/net/minecraft/server/ServerConnection.java
-+++ b/src/main/java/net/minecraft/server/ServerConnection.java
-@@ -2,6 +2,7 @@ package net.minecraft.server;
+diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+index b52500355a456985b66a67cabdd7750240a42da9..5532c77b80422deb28c7b92d9cdd2c7e2d3c3473 100644
+--- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
++++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
  
  import com.google.common.collect.Lists;
- import com.google.common.util.concurrent.ThreadFactoryBuilder;
-+import dev.pomf.dionysus.util.random.Xorshift;
- import io.netty.bootstrap.ServerBootstrap;
- import io.netty.channel.Channel;
- import io.netty.channel.ChannelException;
-@@ -27,7 +28,7 @@ import org.apache.logging.log4j.LogManager;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
+ 
+ import java.util.Iterator;
+ import java.util.List;
+@@ -22,6 +23,10 @@ public abstract class MobSpawnerAbstract {
+     public int spawnRange = 4; // CraftBukkit private -> public
+     private int tickDelay = 0; // Paper
+ 
++    // Dionysus start
++    private XoShiRo256PlusPlusRandom random = new XoShiRo256PlusPlusRandom();
++    // Dionysus end
++
+     public MobSpawnerAbstract() {}
+ 
+     @Nullable
+@@ -85,9 +90,9 @@ public abstract class MobSpawnerAbstract {
+                     NBTTagList nbttaglist = nbttagcompound.getList("Pos", 6);
+                     World world = this.a();
+                     int j = nbttaglist.size();
+-                    double d3 = j >= 1 ? nbttaglist.f(0) : (double) blockposition.getX() + (world.random.nextDouble() - world.random.nextDouble()) * (double) this.spawnRange + 0.5D;
+-                    double d4 = j >= 2 ? nbttaglist.f(1) : (double) (blockposition.getY() + world.random.nextInt(3) - 1);
+-                    double d5 = j >= 3 ? nbttaglist.f(2) : (double) blockposition.getZ() + (world.random.nextDouble() - world.random.nextDouble()) * (double) this.spawnRange + 0.5D;
++                    double d3 = j >= 1 ? nbttaglist.f(0) : (double) blockposition.getX() + (random.nextDoubleFast() - random.nextDoubleFast()) * (double) this.spawnRange + 0.5D;
++                    double d4 = j >= 2 ? nbttaglist.f(1) : (double) (blockposition.getY() + random.nextInt(3) - 1);
++                    double d5 = j >= 3 ? nbttaglist.f(2) : (double) blockposition.getZ() + (random.nextDoubleFast() - random.nextDoubleFast()) * (double) this.spawnRange + 0.5D;
+                     // Paper start
+                     if (this.getMobName() == null) {
+                         return;
+diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
+index b88e9083b3ab82d00924c6329ae247df1089d6ed..200805b6b595b43c35f6d9ef074632c4bcbbe639 100644
+--- a/src/main/java/net/minecraft/server/ServerConnection.java
++++ b/src/main/java/net/minecraft/server/ServerConnection.java
+@@ -23,11 +23,13 @@ import java.net.InetAddress;
+ import java.util.Collections;
+ import java.util.Iterator;
+ import java.util.List;
++
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
+ import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
  public class ServerConnection {
 -
-+    private static final Xorshift RANDOM = new Xorshift();
++    private static final XoShiRo256PlusPlusRandom RANDOM = new XoShiRo256PlusPlusRandom();
      private static final Logger e = LogManager.getLogger();
      public static final LazyInitVar<NioEventLoopGroup> a = new LazyInitVar() {
          protected NioEventLoopGroup a() {
-@@ -136,7 +137,7 @@ public class ServerConnection {
+@@ -136,7 +138,7 @@ public class ServerConnection {
              // This prevents players from 'gaming' the server, and strategically relogging to increase their position in the tick order
              if ( org.spigotmc.SpigotConfig.playerShuffle > 0 && MinecraftServer.currentTick % org.spigotmc.SpigotConfig.playerShuffle == 0 )
              {
@@ -372,14 +613,14 @@ index b88e9083b3ab82d00924c6329ae247df1089d6ed..0365ea262118a61b0af0277db366c9af
              // Spigot End
              Iterator iterator = this.h.iterator();
 diff --git a/src/main/java/net/minecraft/server/TileEntityDispenser.java b/src/main/java/net/minecraft/server/TileEntityDispenser.java
-index b366885888a3b1f17030e9d17e612b26e9ddc3f7..474b4e59af85695c8b9878c2efa071078216ecd7 100644
+index b366885888a3b1f17030e9d17e612b26e9ddc3f7..ce98bde259892adb320ff97b48a4e5c2b8971f1c 100644
 --- a/src/main/java/net/minecraft/server/TileEntityDispenser.java
 +++ b/src/main/java/net/minecraft/server/TileEntityDispenser.java
 @@ -5,13 +5,14 @@ import java.util.Random;
  // CraftBukkit start
  import java.util.List;
  
-+import dev.pomf.dionysus.util.random.Xorshift;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
  import org.bukkit.craftbukkit.entity.CraftHumanEntity;
  import org.bukkit.entity.HumanEntity;
  // CraftBukkit end
@@ -387,32 +628,31 @@ index b366885888a3b1f17030e9d17e612b26e9ddc3f7..474b4e59af85695c8b9878c2efa07107
  public class TileEntityDispenser extends TileEntityLootable {
  
 -    private static final Random a = new Random();
-+    private static final Random a = new Xorshift();
++    private static final Random a = new XoShiRo256PlusPlusRandom();
      private NonNullList<ItemStack> items;
  
      // CraftBukkit start - add fields and methods
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 43e300409d167a13c67a941ef91c21b1335d8fe9..64da1b6edcc35d8a43f7f34cc6314430b5b73005 100644
+index 43e300409d167a13c67a941ef91c21b1335d8fe9..d95193b04025c52e8e178f35a869253e7274643e 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -20,6 +20,8 @@ import javax.annotation.Nullable;
+@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
  import com.google.common.collect.Maps;
  import java.util.HashMap; // Paper
  import java.util.Map;
 +
-+import dev.pomf.dionysus.util.random.Xorshift;
  import org.bukkit.Bukkit;
  import org.bukkit.block.BlockState;
  import org.bukkit.craftbukkit.CraftServer;
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index 7ebb3714d711f8f0190cb2d4b5656a3295c3a74d..3d6a3bd946c36cbd54945f9c5f5190d65198d151 100644
+index 7ebb3714d711f8f0190cb2d4b5656a3295c3a74d..109b22da0b5a7d468850ccc943c5f8bcb910aff3 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -12,6 +12,7 @@ import java.util.Random;
  import java.util.Set;
  import java.util.UUID;
  
-+import dev.pomf.dionysus.util.random.Xorshift;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
  import net.minecraft.server.*;
  
  import org.apache.commons.lang.Validate;
@@ -421,18 +661,18 @@ index 7ebb3714d711f8f0190cb2d4b5656a3295c3a74d..3d6a3bd946c36cbd54945f9c5f5190d6
      // Paper end
  
 -    private static final Random rand = new Random();
-+    private static final Random rand = new Xorshift();
++    private static final Random rand = new XoShiRo256PlusPlusRandom();
  
      public CraftWorld(WorldServer world, ChunkGenerator gen, Environment env) {
          this.world = world;
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftFirework.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftFirework.java
-index d4fbe31d61048af1c6ea996783c384b1ae33e11b..b4401c75ef9c94a797fa67045736232a365a436c 100644
+index d4fbe31d61048af1c6ea996783c384b1ae33e11b..4d735270b659c25a81b4179d6b2b0347398d1b39 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftFirework.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftFirework.java
 @@ -1,5 +1,6 @@
  package org.bukkit.craftbukkit.entity;
  
-+import dev.pomf.dionysus.util.random.Xorshift;
++import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
  import net.minecraft.server.EntityFireworks;
  import net.minecraft.server.EntityLiving;
  import net.minecraft.server.ItemStack;
@@ -441,7 +681,7 @@ index d4fbe31d61048af1c6ea996783c384b1ae33e11b..b4401c75ef9c94a797fa67045736232a
  public class CraftFirework extends CraftEntity implements Firework {
  
 -    private final Random random = new Random();
-+    private final Random random = new Xorshift();
++    private final Random random = new XoShiRo256PlusPlusRandom();
      private final CraftItemStack item;
  
      public CraftFirework(CraftServer server, EntityFireworks entity) {
