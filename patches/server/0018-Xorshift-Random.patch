@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sat, 13 Mar 2021 19:57:21 -0600
+Date: Sat, 13 Mar 2021 20:00:46 -0600
 Subject: [PATCH] Xorshift Random
 
 Use xorshift random where we can.
@@ -243,32 +243,24 @@ index 3034756a2f3032cb6fe44512e6d168b47bfd7342..61c91557a7ea66c43035914581542416
      List<Entity> entitySlice = null;
      // Paper end
 diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
-index 2671af33e518b3470f507ec439e57533c2165bb6..e7b1cb31b6147c4bf7dcbda1c139f35486a01fee 100644
+index 2671af33e518b3470f507ec439e57533c2165bb6..486b28e7d0e65b969d31f2525305a71bde4b700d 100644
 --- a/src/main/java/net/minecraft/server/EntityEnderman.java
 +++ b/src/main/java/net/minecraft/server/EntityEnderman.java
-@@ -5,6 +5,7 @@ import com.google.common.base.Function;
- import com.google.common.base.Optional;
- import com.google.common.base.Predicate;
- import com.google.common.collect.Sets;
-+import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
- import org.bukkit.event.entity.EntityTargetEvent;
- 
- import java.util.Random;
-@@ -334,7 +335,7 @@ public class EntityEnderman extends EntityMonster {
+@@ -334,7 +334,7 @@ public class EntityEnderman extends EntityMonster {
          }
  
          public void e() {
 -            Random random = this.enderman.getRandom();
-+            XoShiRo256PlusPlusRandom random = this.enderman.random;
++            Random random = this.enderman.random;
              World world = this.enderman.world;
              int i = MathHelper.floor(this.enderman.locX - 2.0D + random.nextDouble() * 4.0D);
              int j = MathHelper.floor(this.enderman.locY + random.nextDouble() * 3.0D);
-@@ -370,7 +371,7 @@ public class EntityEnderman extends EntityMonster {
+@@ -370,7 +370,7 @@ public class EntityEnderman extends EntityMonster {
          }
  
          public void e() {
 -            Random random = this.a.getRandom();
-+            XoShiRo256PlusPlusRandom random = this.a.random;
++            Random random = this.a.random;
              World world = this.a.world;
              int i = MathHelper.floor(this.a.locX - 1.0D + random.nextDouble() * 2.0D);
              int j = MathHelper.floor(this.a.locY + random.nextDouble() * 2.0D);
