@@ -5,7 +5,7 @@ Subject: [PATCH] Paper Backports
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 51a2db5133634fd7c8e84b66967953c84ee26093..26df0d016e8e740ed5588a30c54af34906056edf 100644
+index 1375742e98a3f2b381e3c969d79882e092409df7..19a950762304ff93ea7b43c8f57ceab7eab39d4a 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -1557,6 +1557,7 @@ public abstract class EntityLiving extends Entity {
