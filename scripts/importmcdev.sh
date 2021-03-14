@@ -75,6 +75,7 @@ done
 
 # Dionysus Modifications
 import MathHelper
+import EntityBat
 import EnumDirection
 import PacketCompressor
 import PacketDecompressor
