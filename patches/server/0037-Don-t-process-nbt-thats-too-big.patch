@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RemainingToast <remainingtoast@gmail.com>
+Date: Sat, 8 May 2021 22:14:59 -0500
+Subject: [PATCH] Don't process nbt thats too big
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index e172491020e7a734e2d43007e9feb816628e50be..e396bb9cecb8085b949ce025178969b01991218e 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -239,4 +239,8 @@ public class DionysusConfig {
+         }
+     }
+ 
++    public static int maxProcessedNBTSize = 80000;
++    private static void maxProcessedNBTSize() {
++        maxProcessedNBTSize = getInt("max-processed-nbt-size", 80000);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 19a950762304ff93ea7b43c8f57ceab7eab39d4a..3db8179012a140506a573f84d81ece823e0d91e2 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -34,6 +34,8 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
+ 
+ import co.aikar.timings.MinecraftTimings; // Paper
+ 
++import dev.pomf.dionysus.DionysusConfig; // Dionysus
++
+ public abstract class EntityLiving extends Entity {
+ 
+     private static final Logger a = LogManager.getLogger();
+@@ -1974,6 +1976,20 @@ public abstract class EntityLiving extends Entity {
+ 
+                 ItemStack itemstack1 = this.getEquipment(enumitemslot);
+ 
++                // Dionysus start - Don't process large NBTs
++                NBTTagCompound tag1 = itemstack1.getTag();
++                if (tag1 != null && tag1.toString().length() > DionysusConfig.maxProcessedNBTSize) {
++                    itemstack1.setCount(0);
++                    itemstack1.setTag(new NBTTagCompound());
++                }
++
++                NBTTagCompound tag = itemstack.getTag();
++                if (tag != null && tag.toString().length() > DionysusConfig.maxProcessedNBTSize) {
++                    itemstack.setCount(0);
++                    itemstack.setTag(new NBTTagCompound());
++                }
++                // Dionysus end - Don't process large NBTs
++
+                 if (!ItemStack.matches(itemstack1, itemstack)) {
+                     // Paper start - PlayerArmorChangeEvent
+                     if (this instanceof EntityPlayer && enumitemslot.getType() == EnumItemSlot.Function.ARMOR) {

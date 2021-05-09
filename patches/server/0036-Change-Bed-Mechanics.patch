@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RemainingToast <remainingtoast@gmail.com>
+Date: Fri, 7 May 2021 15:23:50 +1000
+Subject: [PATCH] Change Bed Mechanics
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 81f24b09bfc127226918aea6215a79022307d8af..e172491020e7a734e2d43007e9feb816628e50be 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -230,4 +230,13 @@ public class DionysusConfig {
+             Bukkit.getLogger().info("Redact player data enabled, IP Address and location data will be removed.");
+         }
+     }
++
++    public static boolean alternativeBedMechanics = true;
++    private static void alternativeBedMechanics() {
++        alternativeBedMechanics = getBoolean("alternative-bed-mechanics", alternativeBedMechanics);
++        if (alternativeBedMechanics) {
++            Bukkit.getLogger().info("Alternative Bed Mechanics actived. Respawn is set when bed is clicked on.");
++        }
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockBed.java b/src/main/java/net/minecraft/server/BlockBed.java
+index 4ea34b1a23202737c3a2527ae97ecd47bf176c43..34c46aeb7e8ffead20623bee8469ca3e89d0bcb4 100644
+--- a/src/main/java/net/minecraft/server/BlockBed.java
++++ b/src/main/java/net/minecraft/server/BlockBed.java
+@@ -43,6 +43,13 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
+             }
+ 
+             if (world.worldProvider.e() && world.getBiome(blockposition) != Biomes.j) {
++
++                // Dionysus - alternative bed mechanics
++                if (dev.pomf.dionysus.DionysusConfig.alternativeBedMechanics) {
++                    entityhuman.bedPosition = blockposition;
++                    entityhuman.a(new ChatComponentText("Respawn point set"), true);
++                }
++
+                 if (iblockdata.get(BlockBed.OCCUPIED).booleanValue()) {
+                     EntityHuman entityhuman1 = this.c(world, blockposition);
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index e06d65a32b3755dddafae1a2cc136ec79d3d6abe..48a0efbcf8d9b4725b03ad44004e4a3905018171 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -1282,7 +1282,11 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+         this.sleeping = true;
+         this.sleepTicks = 0;
+-        this.bedPosition = blockposition;
++        // Dionysus - alternative bed mechanics
++        if (!dev.pomf.dionysus.DionysusConfig.alternativeBedMechanics) {
++            this.bedPosition = blockposition;
++        }
++
+         this.motX = 0.0D;
+         this.motY = 0.0D;
+         this.motZ = 0.0D;
