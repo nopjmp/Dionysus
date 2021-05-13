@@ -382,10 +382,10 @@ index 5468c3b723b75dc590c87b759d81a4ee066c1776..f2a0bbbc993b5a7d58acfbeaf46eb20e
          // Paper start - Chunk queue improvements
          QueuedChunk chunk = queue.poll();
 diff --git a/src/main/java/net/minecraft/server/PaperLightingQueue.java b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
-similarity index 57%
+similarity index 50%
 rename from src/main/java/net/minecraft/server/PaperLightingQueue.java
 rename to src/main/java/net/minecraft/server/DionysusLightingQueue.java
-index f1c013116fc05b7abe7184eae01b715c02c7a058..9d902c04b8f085c08c0a2eb656e6050d12d06c5f 100644
+index f1c013116fc05b7abe7184eae01b715c02c7a058..33df884c049726c9ebaad7d61ba905ee6946611c 100644
 --- a/src/main/java/net/minecraft/server/PaperLightingQueue.java
 +++ b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
 @@ -1,28 +1,27 @@
@@ -453,30 +453,59 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..9d902c04b8f085c08c0a2eb656e6050d
 -                    lightUpdate.run();
 +                int i;
 +                for (i = 0; i < replacementUpdates.size(); i++) {
-                     if (isOutOfTime(maxTickTime, startTime)) {
-+                        replacementUpdates.removeElements(0, i);
-                         return true;
-                     }
-+
-+                    Triple<BlockPosition, IBlockData,  IBlockData> triple = replacementUpdates.get(i);
-+                    chunk.updateReplacementLight(triple.getLeft(), triple.getMiddle(), triple.getRight());
-                 }
-+                replacementUpdates.clear();
-+
-+                for (i = 0; i < updates.size(); i++) {
 +                    if (isOutOfTime(maxTickTime, startTime)) {
-+                        updates.removeElements(0, i);
++                        replacementUpdates.removeElements(0, i);
 +                        return true;
 +                    }
 +
++                    Triple<BlockPosition, IBlockData,  IBlockData> triple = replacementUpdates.get(i);
++                    chunk.updateReplacementLight(triple.getLeft(), triple.getMiddle(), triple.getRight());
++                }
++                replacementUpdates.clear();
++
++                for (i = 0; i < updates.size(); i++) {
+                     if (isOutOfTime(maxTickTime, startTime)) {
++                        updates.removeElements(0, i);
+                         return true;
+                     }
++
 +                    BlockPosition blockPos = updates.get(i);
 +                    chunk.world.updateLightingAtBlockPos(blockPos);
-+                }
+                 }
 +                updates.clear();
              }
  
              return false;
-@@ -89,6 +105,14 @@ class PaperLightingQueue {
+@@ -73,7 +89,18 @@ class PaperLightingQueue {
+             if (!chunk.world.paperConfig.queueLightUpdates) {
+                 return;
+             }
+-            processQueue(0, 0); // No timeout
++
++            final long startTime = System.nanoTime();
++            final long maxTickTime = DionysusConfig.maxLightTimePerTick - (startTime - MinecraftServer.getServer().tickStartTime);
++
++            if (maxTickTime <= 0) {
++                return;
++            }
++
++            if (processQueue(startTime, maxTickTime)) {
++                // ran out of time
++                return;
++            }
+ 
+             final int radius = 1;
+             for (int x = chunk.locX - radius; x <= chunk.locX + radius; ++x) {
+@@ -84,11 +111,22 @@ class PaperLightingQueue {
+ 
+                     Chunk neighbor = MCUtil.getLoadedChunkWithoutMarkingActive(chunk.world, x, z);
+                     if (neighbor != null) {
+-                        neighbor.lightingQueue.processQueue(0, 0); // No timeout
++                        if (neighbor.lightingQueue.processQueue(startTime, maxTickTime)) {
++                            // ran out of time
++                            return;
++                        }
+                     }
                  }
              }
          }
@@ -492,7 +521,7 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..9d902c04b8f085c08c0a2eb656e6050d
  
      private static boolean isOutOfTime(long maxTickTime, long startTime) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 6239a47f7c8ecf7e88d3f116cec401c76fe9480b..b84430b5295e82c54a412c4d5d6081b25f426a09 100644
+index 6239a47f7c8ecf7e88d3f116cec401c76fe9480b..41aa4caaf6c8029835cd5021ef3bc304d4a1e1d6 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1,7 +1,6 @@
@@ -529,7 +558,26 @@ index 6239a47f7c8ecf7e88d3f116cec401c76fe9480b..b84430b5295e82c54a412c4d5d6081b2
  // CraftBukkit end
  import org.spigotmc.SlackActivityAccountant; // Spigot
  import co.aikar.timings.MinecraftTimings; // Paper
-@@ -832,7 +826,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -126,6 +120,10 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+     public final SlackActivityAccountant slackActivityAccountant = new SlackActivityAccountant();
+     // Spigot end
+ 
++    // Dionysus start
++    public Long tickStartTime;
++    // Dionysus end
++
+     public MinecraftServer(OptionSet options, Proxy proxy, DataConverterManager dataconvertermanager, YggdrasilAuthenticationService yggdrasilauthenticationservice, MinecraftSessionService minecraftsessionservice, GameProfileRepository gameprofilerepository, UserCache usercache) {
+         SERVER = this; // Paper - better singleton
+         io.netty.util.ResourceLeakDetector.setEnabled( false ); // Spigot - disable
+@@ -764,6 +762,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+         co.aikar.timings.TimingsManager.FULL_SERVER_TICK.startTiming(); // Paper
+         this.slackActivityAccountant.tickStarted(); // Spigot
+         long i = System.nanoTime(); long startTime = i; // Paper
++        tickStartTime = startTime; // Dionysus
+ 
+         ++this.ticks;
+         if (this.T) {
+@@ -832,7 +831,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          this.methodProfiler.b();
  
          org.spigotmc.WatchdogThread.tick(); // Spigot
