@@ -20,10 +20,19 @@ index 0fe33eb470ad0be018d127194273b39cb42be0ff..cb4ea7c903a0ffc6d82fdb7b0b089344
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/WorldMap.java b/src/main/java/net/minecraft/server/WorldMap.java
-index 13c06e94ed5e9afd23afd4336dc5280e353beb0d..b0dcb070abef7bf5693d847ef2f8621d9f4ab886 100644
+index 13c06e94ed5e9afd23afd4336dc5280e353beb0d..f5de64f2729c72a58188570565d17d9dac5eaa4a 100644
 --- a/src/main/java/net/minecraft/server/WorldMap.java
 +++ b/src/main/java/net/minecraft/server/WorldMap.java
-@@ -282,6 +282,11 @@ public class WorldMap extends PersistentBase {
+@@ -16,6 +16,8 @@ import org.bukkit.craftbukkit.CraftWorld;
+ import org.bukkit.craftbukkit.map.CraftMapView;
+ // CraftBukkit end
+ 
++import dev.pomf.dionysus.DionysusConfig; // Dionysus
++
+ public class WorldMap extends PersistentBase {
+ 
+     public int centerX;
+@@ -282,6 +284,11 @@ public class WorldMap extends PersistentBase {
              }
          }
  
