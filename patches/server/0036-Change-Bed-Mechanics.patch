@@ -23,37 +23,31 @@ index 81f24b09bfc127226918aea6215a79022307d8af..e172491020e7a734e2d43007e9feb816
 +
  }
 diff --git a/src/main/java/net/minecraft/server/BlockBed.java b/src/main/java/net/minecraft/server/BlockBed.java
-index 4ea34b1a23202737c3a2527ae97ecd47bf176c43..34c46aeb7e8ffead20623bee8469ca3e89d0bcb4 100644
+index 4ea34b1a23202737c3a2527ae97ecd47bf176c43..8363fc0feefd66ac480a4ff3da3736c39edb7266 100644
 --- a/src/main/java/net/minecraft/server/BlockBed.java
 +++ b/src/main/java/net/minecraft/server/BlockBed.java
-@@ -43,6 +43,13 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
-             }
- 
-             if (world.worldProvider.e() && world.getBiome(blockposition) != Biomes.j) {
-+
-+                // Dionysus - alternative bed mechanics
-+                if (dev.pomf.dionysus.DionysusConfig.alternativeBedMechanics) {
-+                    entityhuman.bedPosition = blockposition;
-+                    entityhuman.a(new ChatComponentText("Respawn point set"), true);
-+                }
-+
-                 if (iblockdata.get(BlockBed.OCCUPIED).booleanValue()) {
-                     EntityHuman entityhuman1 = this.c(world, blockposition);
- 
+@@ -60,6 +60,10 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
+                 if (entityhuman_enumbedresult == EntityHuman.EnumBedResult.OK) {
+                     iblockdata = iblockdata.set(BlockBed.OCCUPIED, Boolean.valueOf(true));
+                     world.setTypeAndData(blockposition, iblockdata, 4);
++                    // Dionysus - alternative bed mechanics
++                    if (dev.pomf.dionysus.DionysusConfig.alternativeBedMechanics) {
++                        entityhuman.a(new ChatComponentText("Respawn point set"), true);
++                    }
+                     return true;
+                 } else {
+                     if (entityhuman_enumbedresult == EntityHuman.EnumBedResult.NOT_POSSIBLE_NOW) {
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index e06d65a32b3755dddafae1a2cc136ec79d3d6abe..48a0efbcf8d9b4725b03ad44004e4a3905018171 100644
+index e06d65a32b3755dddafae1a2cc136ec79d3d6abe..e98077c8caf0fe4e31bf9fbaea1f3a1a3aeb0e76 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
-@@ -1282,7 +1282,11 @@ public abstract class EntityHuman extends EntityLiving {
+@@ -1233,7 +1233,8 @@ public abstract class EntityHuman extends EntityLiving {
+                 return EntityHuman.EnumBedResult.NOT_POSSIBLE_HERE;
+             }
  
-         this.sleeping = true;
-         this.sleepTicks = 0;
--        this.bedPosition = blockposition;
-+        // Dionysus - alternative bed mechanics
-+        if (!dev.pomf.dionysus.DionysusConfig.alternativeBedMechanics) {
-+            this.bedPosition = blockposition;
-+        }
-+
-         this.motX = 0.0D;
-         this.motY = 0.0D;
-         this.motZ = 0.0D;
+-            if (this.world.D()) {
++            // Dionysus - alternative bed mechanics
++            if (this.world.D() && !dev.pomf.dionysus.DionysusConfig.alternativeBedMechanics) {
+                 return EntityHuman.EnumBedResult.NOT_POSSIBLE_NOW;
+             }
+ 
