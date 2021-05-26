@@ -6,7 +6,7 @@ Subject: [PATCH] Map Decoration Limit
 The root cause is the map icon not being removed from the decorations hash map after the item frame is removed.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 0fe33eb470ad0be018d127194273b39cb42be0ff..cb4ea7c903a0ffc6d82fdb7b0b089344863e780b 100644
+index 0fe33eb470ad0be018d127194273b39cb42be0ff..b9b330b29b529b6390f8e69b7acd0fce9121bfbf 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -251,4 +251,9 @@ public class DionysusConfig {
@@ -16,7 +16,7 @@ index 0fe33eb470ad0be018d127194273b39cb42be0ff..cb4ea7c903a0ffc6d82fdb7b0b089344
 +
 +    public static int mapDecorationsLimit = 20;
 +    private static void mapDecorationsLimit() {
-+        mapDecorationsLimit = getBoolean("map-decoration-limit", alternativeBlockPlacement);
++        mapDecorationsLimit = getInt("map-decoration-limit", mapDecorationsLimit);
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/WorldMap.java b/src/main/java/net/minecraft/server/WorldMap.java
