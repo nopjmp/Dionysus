@@ -2,9 +2,19 @@
 
 Fork of 1.12.2 [Paper](https://github.com/PaperMC/Paper) aimed at improving server performance for anarchy servers.
 
+I do not actively work on this due to "real life" activities. I'm willing to assistant people as possible, but a community should grow around anarchy server administration.
+
+## Contributing
+
+Anyone can contribute, even if your patches are not perfectly formated for the EmpireMC/Tuinity system. Assistant will be given to get PRs working correctly.
+
+I want this to be a community project that will evolve as Anarchy server evolve, even if I'm not fully invested in 1.12.2 with my own communities anymore.
+
 ## Contact
 
-TBD
+nopjmp#1337 on Discord
+
+Email is on git commits
 
 ## How To (Server Admins)
 
