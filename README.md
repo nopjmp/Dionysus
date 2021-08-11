@@ -4,6 +4,35 @@ Fork of 1.12.2 [Paper](https://github.com/PaperMC/Paper) aimed at improving serv
 
 I do not actively work on this due to "real life" activities. I'm willing to assistant people as possible, but a community should grow around anarchy server administration.
 
+## Config
+
+```yml
+
+verbose: false
+config-version: 1
+ai-limit:
+  bypass:
+    custom-name: true
+    tamable: true
+    spawner: false
+  monster:
+    tps: 18.0
+    player-count: 80
+  animal:
+    tps: 17.0
+    player-count: 90
+settings:
+  server-mod-name: Dionysus
+fair-natural-spawns: true
+tickless-block-placement: true
+light-updates-max-ms-per-tick: 10
+compression-level: -1
+map-decoration-limit: 5
+alternative-bed-mechanics: true
+max-processed-nbt-size: 80000
+redact-player-data: true
+```
+
 ## Contributing
 
 Anyone can contribute, even if your patches are not perfectly formated for the EmpireMC/Tuinity system. Assistant will be given to get PRs working correctly.
