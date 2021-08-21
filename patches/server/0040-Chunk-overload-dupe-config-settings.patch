@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nothub <48992448+nothub@users.noreply.github.com>
+Date: Sat, 21 Aug 2021 17:25:52 +0200
+Subject: [PATCH] Chunk overload dupe config settings
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index b9b330b29b529b6390f8e69b7acd0fce9121bfbf..fd8e7d1caa7ef2ba0854f277497232215819eb40 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -256,4 +256,13 @@ public class DionysusConfig {
+     private static void mapDecorationsLimit() {
+         mapDecorationsLimit = getInt("map-decoration-limit", mapDecorationsLimit);
+     }
++
++    public static boolean chunkOverloadDupe = false;
++    public static boolean chunkOverloadDupeLog = true;
++    private static void chunkOverloadDupe() {
++        chunkOverloadDupe = getBoolean("chunk-overload-dupe", chunkOverloadDupe);
++        if (chunkOverloadDupe) Bukkit.getLogger().info("Chunk overload dupe activated.");
++        chunkOverloadDupeLog = getBoolean("chunk-overload-dupe-log", chunkOverloadDupeLog);
++        if (chunkOverloadDupeLog) Bukkit.getLogger().info("Chunk overload dupes will be logged.");
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/RegionFile.java b/src/main/java/net/minecraft/server/RegionFile.java
+index c185e2ef5d34e48bd41c69e7523294574e7b69d8..0bf1219beb531200bac84a22c7ee0fbc17559ba5 100644
+--- a/src/main/java/net/minecraft/server/RegionFile.java
++++ b/src/main/java/net/minecraft/server/RegionFile.java
+@@ -20,6 +20,8 @@ import java.util.zip.GZIPInputStream;
+ import java.util.zip.InflaterInputStream;
+ import javax.annotation.Nullable;
+ 
++import dev.pomf.dionysus.DionysusConfig; // Dionysus
++
+ public class RegionFile {
+ 
+     // Spigot start
+@@ -198,6 +200,14 @@ public class RegionFile {
+             int k1 = (k + 5) / 4096 + 1;
+ 
+             if (k1 >= 256) {
++                // Dionysus start - chunk overload dupe
++                if (DionysusConfig.chunkOverloadDupe) {
++                    if (DionysusConfig.chunkOverloadDupeLog) {
++                        org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.WARNING, "Chunk dupe Detected: ({0}, {1}) {2}", new Object[]{i, j, this.b});
++                    }
++                    return;
++                }
++                // Dionysus end
+                 // Spigot start
+                 if (!USE_SPIGOT_OVERSIZED_METHOD && !RegionFileCache.isOverzealous()) throw new ChunkTooLargeException(i, j, k1); // Paper - throw error instead
+                 org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.WARNING,"Large Chunk Detected: ({0}, {1}) Size: {2} {3}", new Object[]{i, j, k1, this.b});
