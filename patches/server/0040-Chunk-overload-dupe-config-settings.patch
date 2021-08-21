@@ -14,11 +14,11 @@ index b9b330b29b529b6390f8e69b7acd0fce9121bfbf..fd8e7d1caa7ef2ba0854f27749723221
      }
 +
 +    public static boolean chunkOverloadDupe = false;
-+    public static boolean chunkOverloadDupeLog = true;
++    public static boolean chunkOverloadDupeLog = false;
 +    private static void chunkOverloadDupe() {
-+        chunkOverloadDupe = getBoolean("chunk-overload-dupe", chunkOverloadDupe);
++        chunkOverloadDupe = getBoolean("chunk-overload-dupe.allow", chunkOverloadDupe);
 +        if (chunkOverloadDupe) Bukkit.getLogger().info("Chunk overload dupe activated.");
-+        chunkOverloadDupeLog = getBoolean("chunk-overload-dupe-log", chunkOverloadDupeLog);
++        chunkOverloadDupeLog = getBoolean("chunk-overload-dupe.log", chunkOverloadDupeLog);
 +        if (chunkOverloadDupeLog) Bukkit.getLogger().info("Chunk overload dupes will be logged.");
 +    }
  }
@@ -42,7 +42,7 @@ index c185e2ef5d34e48bd41c69e7523294574e7b69d8..0bf1219beb531200bac84a22c7ee0fbc
 +                // Dionysus start - chunk overload dupe
 +                if (DionysusConfig.chunkOverloadDupe) {
 +                    if (DionysusConfig.chunkOverloadDupeLog) {
-+                        org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.WARNING, "Chunk dupe Detected: ({0}, {1}) {2}", new Object[]{i, j, this.b});
++                        org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.INFO, "Chunk dupe detected: ({0}, {1}) {2}", new Object[]{i, j, this.b});
 +                    }
 +                    return;
 +                }
