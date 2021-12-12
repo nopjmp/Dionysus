@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sat, 11 Dec 2021 13:52:59 -0600
+Date: Sat, 11 Dec 2021 23:21:41 -0600
 Subject: [PATCH] Xorshift Random
 
 Use xorshift random where we can.
@@ -58,7 +58,7 @@ index be4b53b4111259382e425a87719d75adf93f28b5..1dddc9f912c0545fef7a06e2f7246315
      private long lastFill = -1;
      private long nextRefill = -1;
 diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
-index a715edb53fe883d224bc1feb03da5c74fa7eb61c..693bcec7686e12fa017c7644ca3a005d1a8714e0 100644
+index a715edb53fe883d224bc1feb03da5c74fa7eb61c..7a07774d744b2bab609b2c9b742915d46855c4da 100644
 --- a/src/main/java/net/minecraft/server/Block.java
 +++ b/src/main/java/net/minecraft/server/Block.java
 @@ -2,6 +2,9 @@ package net.minecraft.server;
@@ -81,7 +81,7 @@ index a715edb53fe883d224bc1feb03da5c74fa7eb61c..693bcec7686e12fa017c7644ca3a005d
 +        @Override
 +        public synchronized void setSeed(long seed) {
 +            if (locked) {
-+                LogManager.getLogger().error("Ignoring setSeed on Block.SHARED_RANDOM", new Throwable());
++                LogManager.getLogger().debug("Ignoring setSeed on Block.SHARED_RANDOM", new Throwable());
 +            } else {
 +                super.setSeed(seed);
 +                locked = true;
