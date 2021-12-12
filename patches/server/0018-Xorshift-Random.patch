@@ -1,15 +1,15 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sat, 13 Mar 2021 20:00:46 -0600
+Date: Sat, 11 Dec 2021 13:52:59 -0600
 Subject: [PATCH] Xorshift Random
 
 Use xorshift random where we can.
 
 diff --git a/pom.xml b/pom.xml
-index 4b61a9154d14e4a0a52eafdc54cb8ed4c2e05635..c55208d76463679f876aa680e459232a04627545 100644
+index 9cf84383915ecab3c67fd8037b6e30748613d2b7..54b2e136f8a04b20d84c55d5c419c48fa39a775a 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -112,6 +112,12 @@
+@@ -113,6 +113,18 @@
              <scope>runtime</scope>
          </dependency>
  
@@ -19,9 +19,23 @@ index 4b61a9154d14e4a0a52eafdc54cb8ed4c2e05635..c55208d76463679f876aa680e459232a
 +            <version>2.6.17</version>
 +        </dependency>
 +
++        <dependency>
++            <groupId>it.unimi.dsi</groupId>
++            <artifactId>fastutil</artifactId>
++            <version>8.5.6</version>
++        </dependency>
++
          <!-- testing -->
          <dependency>
              <groupId>junit</groupId>
+@@ -225,6 +237,7 @@
+                                     <excludes>
+                                         <exclude>io/netty/**</exclude>
+                                         <exclude>org/apache/logging/log4j/**</exclude>
++                                        <exclude>it/unimi/dsi/fastutil/**</exclude>
+                                     </excludes>
+                                 </filter>
+                             </filters>
 diff --git a/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java b/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java
 index be4b53b4111259382e425a87719d75adf93f28b5..1dddc9f912c0545fef7a06e2f72463153fe830c0 100644
 --- a/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java

@@ -1,11 +1,11 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Wed, 3 Feb 2021 00:18:25 -0600
+Date: Sat, 11 Dec 2021 13:43:36 -0600
 Subject: [PATCH] Update Dependencies
 
 
 diff --git a/pom.xml b/pom.xml
-index 28b7e39b46361c00dd5bb47fdbe2edb2f39259bc..7b127347f861378322dedd6208a1569f44e45db5 100644
+index 28b7e39b46361c00dd5bb47fdbe2edb2f39259bc..4f90b0d48dc2012def8f6bc6898dc5ce02ba713e 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -32,7 +32,7 @@
@@ -13,7 +13,7 @@ index 28b7e39b46361c00dd5bb47fdbe2edb2f39259bc..7b127347f861378322dedd6208a1569f
              <groupId>io.netty</groupId>
              <artifactId>netty-all</artifactId>
 -            <version>4.1.24.Final</version>
-+            <version>4.1.58.Final</version>
++            <version>4.1.71.Final</version>
              <scope>compile</scope>
          </dependency>
          <dependency>
@@ -48,3 +48,54 @@ index 28b7e39b46361c00dd5bb47fdbe2edb2f39259bc..7b127347f861378322dedd6208a1569f
          </dependency>
  
          <!--
+@@ -93,7 +87,7 @@
+         <dependency>
+             <groupId>org.apache.logging.log4j</groupId>
+             <artifactId>log4j-core</artifactId>
+-            <version>2.8.1</version>
++            <version>2.15.0</version>
+             <scope>compile</scope>
+         </dependency>
+ 
+@@ -101,20 +95,21 @@
+         <dependency>
+             <groupId>org.apache.logging.log4j</groupId>
+             <artifactId>log4j-slf4j-impl</artifactId>
+-            <version>2.8.1</version>
+-            <scope>runtime</scope>
++            <version>2.15.0</version>
++            <scope>compile</scope>
+         </dependency>
+         <dependency>
+             <groupId>org.apache.logging.log4j</groupId>
+             <artifactId>log4j-iostreams</artifactId>
+-            <version>2.8.1</version>
++            <version>2.15.0</version>
++            <scope>compile</scope>
+         </dependency>
+ 
+         <!-- Paper - Async loggers -->
+         <dependency>
+             <groupId>com.lmax</groupId>
+             <artifactId>disruptor</artifactId>
+-            <version>3.4.2</version>
++            <version>3.4.4</version>
+             <scope>runtime</scope>
+         </dependency>
+ 
+@@ -220,6 +215,15 @@
+                         </goals>
+                         <configuration>
+                             <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation> <!-- Paper -->
++                            <filters>
++                                <filter>
++                                    <artifact>org.spigotmc:minecraft-server:**</artifact>
++                                    <excludes>
++                                        <exclude>io/netty/**</exclude>
++                                        <exclude>org/apache/logging/log4j/**</exclude>
++                                    </excludes>
++                                </filter>
++                            </filters>
+                             <relocations>
+                                 <!-- Paper - Workaround for hardcoded path lookup in dependency, easier than forking it - GH-189 -->
+                                 <!--<relocation>-->
