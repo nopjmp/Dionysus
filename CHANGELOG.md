@@ -5,11 +5,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.8] - 2021-12-12
+
+### Fixed
+
+* Log4j exploit by updating to 2.15.0
+* O(N^2) Advancement Daya Player Interaction to be O(N)
+
+### Added 
+* configurable chunk dupe
+
 ## [0.1.7] - 2021-03-13
 
 Hotfix for Structure generation
 
-## Fixed
+### Fixed
 
 * Removed Xorshift on World.random
   * This is tied to structure generation for some reason in 1.12.2.
