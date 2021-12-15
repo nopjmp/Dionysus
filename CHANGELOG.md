@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.10] - 2021-12-15
+
+### Fixed
+
+* Typos
+* Don't count some map decorations
+* TileEntity config didn't completely work
+
 ## [0.1.9] - 2021-12-14
 
 ### Fixed
