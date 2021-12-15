@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RemainingToast <59129680+RemainingToast@users.noreply.github.com>
+Date: Wed, 15 Dec 2021 19:39:21 +1000
+Subject: [PATCH] fix typo
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 2b54448a8846402625e6df5ba56925eceaa440b1..daeb40f61769ee2b2b5c91bae093db0724ad39b8 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -295,7 +295,7 @@ public abstract class PlayerList {
+         // CraftBukkit - Moved from above, added world
+         // Dionysus - anonymize logs
+         if (DionysusConfig.redactPlayerData) {
+-            PlayerList.f.info(entityplayer.getName() + "[/0.0.0.0:0] logged in with entity id " + entityplayer.getId() + " at ([REACTED] 0.0, 0.0, 0.0)");
++            PlayerList.f.info(entityplayer.getName() + "[/0.0.0.0:0] logged in with entity id " + entityplayer.getId() + " at ([REDACTED] 0.0, 0.0, 0.0)");
+         } else {
+             PlayerList.f.info(entityplayer.getName() + "[" + s1 + "] logged in with entity id " + entityplayer.getId() + " at ([" + entityplayer.world.worldData.getName() + "]" + entityplayer.locX + ", " + entityplayer.locY + ", " + entityplayer.locZ + ")");
+         }
