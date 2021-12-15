@@ -1,11 +1,11 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sat, 11 Dec 2021 13:43:36 -0600
+Date: Tue, 14 Dec 2021 23:43:16 -0600
 Subject: [PATCH] Update Dependencies
 
 
 diff --git a/pom.xml b/pom.xml
-index 40229142661ddb4e68efce83a528289e3c3a1518..35490fb3e678a182c2fd5b28df76fdf4e0454d39 100644
+index 224ab807365cb4f5403c2cab12603f32bc3a0826..0510101ff52364486893e1750c1e5685397ae115 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -1,322 +1,326 @@
@@ -420,7 +420,7 @@ index 40229142661ddb4e68efce83a528289e3c3a1518..35490fb3e678a182c2fd5b28df76fdf4
 +        <dependency>
 +            <groupId>org.apache.logging.log4j</groupId>
 +            <artifactId>log4j-core</artifactId>
-+            <version>2.15.0</version>
++            <version>2.16.0</version>
 +            <scope>compile</scope>
 +        </dependency>
 +
@@ -428,13 +428,13 @@ index 40229142661ddb4e68efce83a528289e3c3a1518..35490fb3e678a182c2fd5b28df76fdf4
 +        <dependency>
 +            <groupId>org.apache.logging.log4j</groupId>
 +            <artifactId>log4j-slf4j-impl</artifactId>
-+            <version>2.15.0</version>
++            <version>2.16.0</version>
 +            <scope>compile</scope>
 +        </dependency>
 +        <dependency>
 +            <groupId>org.apache.logging.log4j</groupId>
 +            <artifactId>log4j-iostreams</artifactId>
-+            <version>2.15.0</version>
++            <version>2.16.0</version>
 +            <scope>compile</scope>
 +        </dependency>
 +
