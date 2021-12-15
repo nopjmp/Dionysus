@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.9] - 2021-12-14
+
+### Fixed
+
+* CVE-2021-45046 - Apache Log4j2 updated to 2.16.0
+
 ## [0.1.8] - 2021-12-12
 
 ### Fixed
