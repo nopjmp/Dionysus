@@ -6,10 +6,10 @@ Subject: [PATCH] Xorshift Random
 Use xorshift random where we can.
 
 diff --git a/pom.xml b/pom.xml
-index 05e6453ebbc192a2961ef39f1b4f82dd328fb5c5..1cbdd44b8636b6b488eb5f2a30ff09483cf8c5c6 100644
+index 99a5edb9c6929c3de32da5c2ada412a86c3726a0..3d1a3c11b631d51a5b18626f917b4cc7cb0fefe3 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -113,6 +113,18 @@
+@@ -115,6 +115,18 @@
              <scope>runtime</scope>
          </dependency>
  
@@ -28,7 +28,7 @@ index 05e6453ebbc192a2961ef39f1b4f82dd328fb5c5..1cbdd44b8636b6b488eb5f2a30ff0948
          <!-- testing -->
          <dependency>
              <groupId>junit</groupId>
-@@ -226,6 +238,7 @@
+@@ -228,6 +240,7 @@
                                      <excludes>
                                          <exclude>io/netty/**</exclude>
                                          <exclude>org/apache/logging/log4j/**</exclude>
