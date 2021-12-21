@@ -1,12 +1,16 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: RemainingToast <59129680+RemainingToast@users.noreply.github.com>
-Date: Wed, 15 Dec 2021 23:03:34 +1000
-Subject: [PATCH] Don't count some map decorations, Config fo tile entities and
- some clean up
+Date: Wed, 15 Dec 2021 19:39:21 +1000
+Subject: [PATCH] Map Decoration Limit
 
+The root cause is the map icon not being removed from the decorations hash map after the item frame is removed.
+
+Don't count some map decorations
+
+TODO: move modifications to other patches out of this patch.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 305cb81401e28e97e7043cf1de37676421003fce..043bccf726c5a4cc5455e7eeb65224237addb021 100644
+index e0832d7f3a5e8fc992eafc824642b518c1e2810f..043bccf726c5a4cc5455e7eeb65224237addb021 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -22,6 +22,7 @@ import java.util.regex.Pattern;
@@ -29,7 +33,7 @@ index 305cb81401e28e97e7043cf1de37676421003fce..043bccf726c5a4cc5455e7eeb6522423
      }
  
      public static boolean customNameAiLimitBypass = true;
-@@ -246,13 +247,13 @@ public class DionysusConfig {
+@@ -246,12 +247,17 @@ public class DionysusConfig {
  
      public static boolean alternativeBlockPlacement = true;
      private static void alternativeBlockPlacement() {
@@ -40,12 +44,15 @@ index 305cb81401e28e97e7043cf1de37676421003fce..043bccf726c5a4cc5455e7eeb6522423
          }
      }
  
--    public static int mapDecorationsLimit = 20;
 +    public static int mapDecorationsLimit = 10;
-     private static void mapDecorationsLimit() {
-         mapDecorationsLimit = getInt("map-decoration-limit", mapDecorationsLimit);
-     }
-@@ -265,4 +266,13 @@ public class DionysusConfig {
++    private static void mapDecorationsLimit() {
++        mapDecorationsLimit = getInt("map-decoration-limit", mapDecorationsLimit);
++    }
++
+     public static boolean chunkOverloadDupe = false;
+     public static boolean chunkOverloadDupeLog = false;
+     private static void chunkOverloadDupe() {
+@@ -260,4 +266,13 @@ public class DionysusConfig {
          chunkOverloadDupeLog = getBoolean("chunk-overload-dupe.log", chunkOverloadDupeLog);
          if (chunkOverloadDupeLog) Bukkit.getLogger().info("Chunk overload dupes will be logged.");
      }
@@ -195,10 +202,10 @@ index e37627fff51f4161231213ad08f7b411bd0874a5..c797f103bf68dfe5e281ca4344a47926
              for (int a = 0, len = Integer.bitCount(chunkSectionBitSet); a < len; ++a) {
                  // IntegerUtil.getTrailingBit (-n & n)
 diff --git a/src/main/java/net/minecraft/server/WorldMap.java b/src/main/java/net/minecraft/server/WorldMap.java
-index f5de64f2729c72a58188570565d17d9dac5eaa4a..a3f61121dca1fbc28a2f073a974d2130212ed925 100644
+index 13c06e94ed5e9afd23afd4336dc5280e353beb0d..a3f61121dca1fbc28a2f073a974d2130212ed925 100644
 --- a/src/main/java/net/minecraft/server/WorldMap.java
 +++ b/src/main/java/net/minecraft/server/WorldMap.java
-@@ -10,13 +10,15 @@ import javax.annotation.Nullable;
+@@ -10,12 +10,16 @@ import javax.annotation.Nullable;
  
  // CraftBukkit start
  import java.util.UUID;
@@ -211,20 +218,20 @@ index f5de64f2729c72a58188570565d17d9dac5eaa4a..a3f61121dca1fbc28a2f073a974d2130
  import org.bukkit.craftbukkit.map.CraftMapView;
  // CraftBukkit end
  
--import dev.pomf.dionysus.DionysusConfig; // Dionysus
- 
++
  public class WorldMap extends PersistentBase {
  
-@@ -285,13 +287,39 @@ public class WorldMap extends PersistentBase {
+     public int centerX;
+@@ -282,9 +286,40 @@ public class WorldMap extends PersistentBase {
+             }
          }
  
-         // Dionysus start - limit decorations
--        if (this.decorations.size() >= DionysusConfig.mapDecorationsLimit) {
++        // Dionysus start - limit decorations
 +        if (countMapIcon(this.decorations) >= DionysusConfig.mapDecorationsLimit) {
-             return;
-         }
++            return;
++        }
 +
-         // Dionysus end
++        // Dionysus end
          this.decorations.put(s, new MapIcon(mapicon_type, b0, b1, b2));
      }
  

@@ -1,16 +1,16 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: nothub <48992448+nothub@users.noreply.github.com>
-Date: Sat, 21 Aug 2021 17:25:52 +0200
+From: RemainingToast <59129680+RemainingToast@users.noreply.github.com>
+Date: Wed, 15 Dec 2021 19:39:21 +1000
 Subject: [PATCH] Chunk overload dupe config settings
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index b9b330b29b529b6390f8e69b7acd0fce9121bfbf..305cb81401e28e97e7043cf1de37676421003fce 100644
+index 0fe33eb470ad0be018d127194273b39cb42be0ff..e0832d7f3a5e8fc992eafc824642b518c1e2810f 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -256,4 +256,13 @@ public class DionysusConfig {
-     private static void mapDecorationsLimit() {
-         mapDecorationsLimit = getInt("map-decoration-limit", mapDecorationsLimit);
+@@ -251,4 +251,13 @@ public class DionysusConfig {
+             Bukkit.getLogger().info("Tickless Block Placement Mechanics activated. Block placement based on time instead of ticks.");
+         }
      }
 +
 +    public static boolean chunkOverloadDupe = false;

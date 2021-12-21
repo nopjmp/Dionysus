@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Fri, 12 Mar 2021 20:52:00 -0600
+Date: Mon, 20 Dec 2021 18:15:01 -0600
 Subject: [PATCH] Configurable Player Data Removal
 
 This allows the server operator to remove player information from the logs.
@@ -88,7 +88,7 @@ index abcd062371372f07b00a732ca4cf479491d961e3..99a803bc45a18420fb3e30e35ad1eb94
                                      return;
                                  }
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index df7b6d3ee9831b85f498e64a1117a41a384d02b3..2b54448a8846402625e6df5ba56925eceaa440b1 100644
+index df7b6d3ee9831b85f498e64a1117a41a384d02b3..daeb40f61769ee2b2b5c91bae093db0724ad39b8 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
@@ -106,7 +106,7 @@ index df7b6d3ee9831b85f498e64a1117a41a384d02b3..2b54448a8846402625e6df5ba56925ec
 -        PlayerList.f.info(entityplayer.getName() + "[" + s1 + "] logged in with entity id " + entityplayer.getId() + " at ([" + entityplayer.world.worldData.getName() + "]" + entityplayer.locX + ", " + entityplayer.locY + ", " + entityplayer.locZ + ")");
 +        // Dionysus - anonymize logs
 +        if (DionysusConfig.redactPlayerData) {
-+            PlayerList.f.info(entityplayer.getName() + "[/0.0.0.0:0] logged in with entity id " + entityplayer.getId() + " at ([REACTED] 0.0, 0.0, 0.0)");
++            PlayerList.f.info(entityplayer.getName() + "[/0.0.0.0:0] logged in with entity id " + entityplayer.getId() + " at ([REDACTED] 0.0, 0.0, 0.0)");
 +        } else {
 +            PlayerList.f.info(entityplayer.getName() + "[" + s1 + "] logged in with entity id " + entityplayer.getId() + " at ([" + entityplayer.world.worldData.getName() + "]" + entityplayer.locX + ", " + entityplayer.locY + ", " + entityplayer.locZ + ")");
 +        }
