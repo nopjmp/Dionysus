@@ -1,10 +1,27 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Mon, 20 Dec 2021 19:03:50 -0600
+Date: Mon, 20 Dec 2021 19:16:11 -0600
 Subject: [PATCH] Use more fastutil data structures
 
 Use them in more places.
 
+diff --git a/pom.xml b/pom.xml
+index a93167b12194198276493cca184d5179baaa38ee..c60b54b50d4be7d7c701903f3369353f6c108b3e 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -67,12 +67,6 @@
+             <version>5.1.49</version>
+             <scope>runtime</scope>
+         </dependency>
+-        <dependency>
+-            <groupId>net.sf.trove4j</groupId>
+-            <artifactId>trove4j</artifactId>
+-            <version>3.0.3</version>
+-            <scope>compile</scope>
+-        </dependency>
+ 
+         <dependency>
+             <groupId>net.minecrell</groupId>
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 index 013b8a6489e71e52f33ff8fc2924fc0013029b49..00db28579af80c9b250048d0ce6f9f522afa4ce7 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
@@ -309,3 +326,32 @@ index 1934fd50ad103970c20ad52ac32c3a6a3353b17e..00000000000000000000000000000000
 -        super(CaseInsensitiveHashingStrategy.INSTANCE, map);
 -    }
 -}
+diff --git a/src/main/java/org/spigotmc/SpigotConfig.java b/src/main/java/org/spigotmc/SpigotConfig.java
+index 7778ebfab65ba9728ef2d8c55b7a0ec63b6f797a..1a7d4452c94c22d0f25085fabbe63cc624cf8693 100644
+--- a/src/main/java/org/spigotmc/SpigotConfig.java
++++ b/src/main/java/org/spigotmc/SpigotConfig.java
+@@ -1,6 +1,7 @@
+ package org.spigotmc;
+ 
+ import com.google.common.base.Throwables;
++import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+ import java.io.File;
+ import java.io.IOException;
+ import java.lang.reflect.InvocationTargetException;
+@@ -13,7 +14,6 @@ import java.util.List;
+ import java.util.Map;
+ import java.util.Set;
+ import java.util.logging.Level;
+-import gnu.trove.map.hash.TObjectIntHashMap;
+ import net.minecraft.server.AttributeRanged;
+ import net.minecraft.server.GenericAttributes;
+ import net.minecraft.server.MinecraftServer;
+@@ -234,7 +234,7 @@ public class SpigotConfig
+     }
+ 
+     public static boolean disableStatSaving;
+-    public static TObjectIntHashMap<String> forcedStats = new TObjectIntHashMap<String>();
++    public static Object2IntOpenHashMap<String> forcedStats = new Object2IntOpenHashMap<String>();
+     private static void stats()
+     {
+         disableStatSaving = getBoolean( "stats.disable-saving", false );
