@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Sun, 7 Mar 2021 21:23:03 -0600
+Date: Mon, 20 Dec 2021 19:03:50 -0600
 Subject: [PATCH] Use more fastutil data structures
 
 Use them in more places.
@@ -204,3 +204,108 @@ index 6e01bad470c5d00557f74a7e7af19ffc2d8c7604..750e06d641aaa2864276d6ccb9507ce8
              }
  
              if ((float) k > f) {
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index df7b6d3ee9831b85f498e64a1117a41a384d02b3..fd972ff6ab0f1162ca5cafb257a3221a5ccb4062 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -74,7 +74,19 @@ public abstract class PlayerList {
+ 
+     // CraftBukkit start
+     private final CraftServer cserver;
+-    private final Map<String,EntityPlayer> playersByName = new org.spigotmc.CaseInsensitiveMap<EntityPlayer>();
++    private final Map<String,EntityPlayer> playersByName = new it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap<String, EntityPlayer>(
++        new it.unimi.dsi.fastutil.Hash.Strategy<String>() {
++            @Override
++            public int hashCode(String o) {
++                return o.toLowerCase().hashCode();
++            }
++
++            @Override
++            public boolean equals(String a, String b) {
++                return a.equalsIgnoreCase(b);
++            }
++        }
++    );
+     @Nullable String collideRuleTeamName; // Paper - Team name used for collideRule
+ 
+     public PlayerList(MinecraftServer minecraftserver) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
+index e80e4ea85b945b499d0c6ba351ed18909faf2704..0e0d850c10326b9fe312bcc08d15aa02d34608a6 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
+@@ -308,19 +308,22 @@ class CraftMetaItem implements ItemMeta, Repairable {
+             NBTTagList nbttaglist = tag.getList(ATTRIBUTES.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND);
+ 
+             // Spigot start
+-            gnu.trove.map.hash.TObjectDoubleHashMap<String> attributeTracker = new gnu.trove.map.hash.TObjectDoubleHashMap<String>();
+-            gnu.trove.map.hash.TObjectDoubleHashMap<String> attributeTrackerX = new gnu.trove.map.hash.TObjectDoubleHashMap<String>();
+-            Map<String, IAttribute> attributesByName = new HashMap<String, IAttribute>();
++            // Dionysus - use fastutil instead of trove
++            it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap<String> attributeTracker = new it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap<String>();
++            it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap<String> attributeTrackerX = new it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap<String>();
++            final Map<String, IAttribute> attributesByName = ImmutableMap.of(
++                "generic.maxHealth", GenericAttributes.maxHealth,
++                "generic.followRange", GenericAttributes.FOLLOW_RANGE,
++                "generic.knockbackResistance", GenericAttributes.c,
++                "generic.movementSpeed", GenericAttributes.MOVEMENT_SPEED,
++                "generic.attackDamage", GenericAttributes.ATTACK_DAMAGE
++            );
+             attributeTracker.put( "generic.maxHealth", 20.0 );
+-            attributesByName.put( "generic.maxHealth", GenericAttributes.maxHealth );
+             attributeTracker.put( "generic.followRange", 32.0 );
+-            attributesByName.put( "generic.followRange", GenericAttributes.FOLLOW_RANGE );
+             attributeTracker.put( "generic.knockbackResistance", 0.0 );
+-            attributesByName.put( "generic.knockbackResistance", GenericAttributes.c );
+             attributeTracker.put( "generic.movementSpeed", 0.7 );
+-            attributesByName.put( "generic.movementSpeed", GenericAttributes.MOVEMENT_SPEED );
+             attributeTracker.put( "generic.attackDamage", 1.0 );
+-            attributesByName.put( "generic.attackDamage", GenericAttributes.ATTACK_DAMAGE );
++            // Dionysus end
+             NBTTagList oldList = nbttaglist;
+             nbttaglist = new NBTTagList();
+ 
+diff --git a/src/main/java/org/spigotmc/CaseInsensitiveHashingStrategy.java b/src/main/java/org/spigotmc/CaseInsensitiveHashingStrategy.java
+deleted file mode 100644
+index 4070162bcb8cc18ae5ce7ba710e9ad607a2070fd..0000000000000000000000000000000000000000
+--- a/src/main/java/org/spigotmc/CaseInsensitiveHashingStrategy.java
++++ /dev/null
+@@ -1,18 +0,0 @@
+-package org.spigotmc;
+-
+-import gnu.trove.strategy.HashingStrategy;
+-
+-class CaseInsensitiveHashingStrategy implements HashingStrategy {
+-
+-    static final CaseInsensitiveHashingStrategy INSTANCE = new CaseInsensitiveHashingStrategy();
+-
+-    @Override
+-    public int computeHashCode(Object object) {
+-        return ((String) object).toLowerCase().hashCode();
+-    }
+-
+-    @Override
+-    public boolean equals(Object o1, Object o2) {
+-        return o1.equals(o2) || (o1 instanceof String && o2 instanceof String && ((String) o1).equalsIgnoreCase(((String) o2)));
+-    }
+-}
+diff --git a/src/main/java/org/spigotmc/CaseInsensitiveMap.java b/src/main/java/org/spigotmc/CaseInsensitiveMap.java
+deleted file mode 100644
+index 1934fd50ad103970c20ad52ac32c3a6a3353b17e..0000000000000000000000000000000000000000
+--- a/src/main/java/org/spigotmc/CaseInsensitiveMap.java
++++ /dev/null
+@@ -1,15 +0,0 @@
+-package org.spigotmc;
+-
+-import gnu.trove.map.hash.TCustomHashMap;
+-import java.util.Map;
+-
+-public class CaseInsensitiveMap<V> extends TCustomHashMap<String, V> {
+-
+-    public CaseInsensitiveMap() {
+-        super(CaseInsensitiveHashingStrategy.INSTANCE);
+-    }
+-
+-    public CaseInsensitiveMap(Map<? extends String, ? extends V> map) {
+-        super(CaseInsensitiveHashingStrategy.INSTANCE, map);
+-    }
+-}

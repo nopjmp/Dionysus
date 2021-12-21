@@ -88,7 +88,7 @@ index abcd062371372f07b00a732ca4cf479491d961e3..99a803bc45a18420fb3e30e35ad1eb94
                                      return;
                                  }
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index df7b6d3ee9831b85f498e64a1117a41a384d02b3..daeb40f61769ee2b2b5c91bae093db0724ad39b8 100644
+index fd972ff6ab0f1162ca5cafb257a3221a5ccb4062..cd61edadf9776bea3d26ea9319389315a1b05b10 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
@@ -99,7 +99,7 @@ index df7b6d3ee9831b85f498e64a1117a41a384d02b3..daeb40f61769ee2b2b5c91bae093db07
  import io.netty.buffer.Unpooled;
  import java.io.File;
  import java.net.SocketAddress;
-@@ -292,7 +293,12 @@ public abstract class PlayerList {
+@@ -304,7 +305,12 @@ public abstract class PlayerList {
          }
          // Paper end
          // CraftBukkit - Moved from above, added world
