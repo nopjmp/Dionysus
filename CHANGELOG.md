@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.11] - 2021-12-20
+
+### Fixed
+* CVE-2021-45105 - Apache Log4j2 updated to 2.17.0
+
+### Removed
+* Trove4J - outdated library that is slower than fastutils
+
 ## [0.1.10] - 2021-12-15
 
 ### Fixed
