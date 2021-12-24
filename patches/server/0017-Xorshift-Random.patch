@@ -385,7 +385,7 @@ index b52500355a456985b66a67cabdd7750240a42da9..c74f1e20383e53a013811abade2ddbe3
                      if (this.getMobName() == null) {
                          return;
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index b88e9083b3ab82d00924c6329ae247df1089d6ed..200805b6b595b43c35f6d9ef074632c4bcbbe639 100644
+index ec4bafbc33dcd62fb4d9d476f2eee081092a302a..4e07b428991982cc2d66ac36fd44d3889e4350ba 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -23,11 +23,13 @@ import java.net.InetAddress;
@@ -403,7 +403,7 @@ index b88e9083b3ab82d00924c6329ae247df1089d6ed..200805b6b595b43c35f6d9ef074632c4
      private static final Logger e = LogManager.getLogger();
      public static final LazyInitVar<NioEventLoopGroup> a = new LazyInitVar() {
          protected NioEventLoopGroup a() {
-@@ -136,7 +138,7 @@ public class ServerConnection {
+@@ -135,7 +137,7 @@ public class ServerConnection {
              // This prevents players from 'gaming' the server, and strategically relogging to increase their position in the tick order
              if ( org.spigotmc.SpigotConfig.playerShuffle > 0 && MinecraftServer.currentTick % org.spigotmc.SpigotConfig.playerShuffle == 0 )
              {

@@ -485,7 +485,7 @@ index 668d470894e72bf867d9b3ecab2c53931f0636b3..c433cd1eba14f81d33d49a609a9b47bc
      default boolean packetTooLarge(NetworkManager manager) {
          return false;
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 200805b6b595b43c35f6d9ef074632c4bcbbe639..fab051c6988b0099dd1ce36324d4c7b5681d95d6 100644
+index 4e07b428991982cc2d66ac36fd44d3889e4350ba..ac9f51145b24aae15fba083e786b32dc13331339 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -15,6 +15,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -523,11 +523,12 @@ index 200805b6b595b43c35f6d9ef074632c4bcbbe639..fab051c6988b0099dd1ce36324d4c7b5
          }
      }
      // Paper end
-@@ -102,6 +107,7 @@ public class ServerConnection {
+@@ -100,7 +105,7 @@ public class ServerConnection {
+                         channel.config().setOption(ChannelOption.TCP_NODELAY, Boolean.valueOf(true));
+                     } catch (ChannelException channelexception) {
                      }
- 
-                     // Dionysus - remove legacy server handler
+-
 +                    if (!disableFlushConsolidation) channel.pipeline().addFirst(new FlushConsolidationHandler()); // Paper
-                     channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("splitter", new PacketSplitter()).addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND)).addLast("prepender", new PacketPrepender()).addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
+                     channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("legacy_query", new LegacyPingHandler(ServerConnection.this)).addLast("splitter", new PacketSplitter()).addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND)).addLast("prepender", new PacketPrepender()).addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
                      NetworkManager networkmanager = new NetworkManager(EnumProtocolDirection.SERVERBOUND);
  
