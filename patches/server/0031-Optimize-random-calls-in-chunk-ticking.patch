@@ -34,7 +34,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 385c37342f16778bdf6af337760d7943ac2ae041..a81a3ee787713f69514d20024f4a5f4de1b14883 100644
+index f36426f1615af411aa091c0eb536b60ed4cb91aa..6552c1ec04ff9a19548a9fe7fb7f18c25e2d01a8 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -115,6 +115,18 @@ public class Chunk {
@@ -66,7 +66,7 @@ index 385c37342f16778bdf6af337760d7943ac2ae041..a81a3ee787713f69514d20024f4a5f4d
  
      public org.bukkit.Chunk bukkitChunk;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index c1cc64256490d752215e7422c992f82ea86a7bb1..9fcc859e39e8721fe0e9bc01704d1dc46e646d3e 100644
+index 4ab42aa93c57be327fb7dd60e49eec3021eb795a..629b04da5973730468b6d8225df0008c6b578a93 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -451,6 +451,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {

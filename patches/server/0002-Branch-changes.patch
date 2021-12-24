@@ -1,8 +1,9 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Fri, 5 Feb 2021 00:07:54 -0600
+Date: Fri, 24 Dec 2021 16:05:32 -0600
 Subject: [PATCH] Branch changes
 
+Fix up mc-dev Imports
 
 diff --git a/src/main/java/com/destroystokyo/paper/Metrics.java b/src/main/java/com/destroystokyo/paper/Metrics.java
 index e257d6b36e0e78dac5b8320017d92776171e1bb0..cb833d15b3ae128b005c9dd042dacfe8a8323fdd 100644
@@ -40,6 +41,39 @@ index 3623751bf9308c21ece580158b6a722ca907e5f4..04bbf70b4eb160fc948dffd51fbb852e
          } catch (Exception exception) {
              EULA.a.warn("Failed to save {}", this.b, exception);
          } finally {
+diff --git a/src/main/java/net/minecraft/server/EnumDirection.java b/src/main/java/net/minecraft/server/EnumDirection.java
+index ef7b951b978d6b30170bb98aafd31782d1797bed..3f24307f1fe9cc0b1e871e0806eacce82ae87d87 100644
+--- a/src/main/java/net/minecraft/server/EnumDirection.java
++++ b/src/main/java/net/minecraft/server/EnumDirection.java
+@@ -213,12 +213,14 @@ public enum EnumDirection implements INamable {
+             return enumdirection != null && enumdirection.k().d() == this;
+         }
+ 
++        @Override
+         public Iterator<EnumDirection> iterator() {
+             return Iterators.forArray(this.a());
+         }
+ 
+-        public boolean apply(@Nullable Object object) {
+-            return this.a((EnumDirection) object);
++        @Override
++        public boolean apply(EnumDirection object) {
++            return this.a(object);
+         }
+     }
+ 
+@@ -284,8 +286,9 @@ public enum EnumDirection implements INamable {
+             return this.e;
+         }
+ 
+-        public boolean apply(@Nullable Object object) {
+-            return this.a((EnumDirection) object);
++        @Override
++        public boolean apply(EnumDirection object) {
++            return this.a(object);
+         }
+ 
+         static {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
 index 3b982f9906c7212779426b9fb8d9f943a8f1eb6c..014a09dbace61a57993881ccbb49662acfb97e79 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
@@ -53,6 +87,50 @@ index 3b982f9906c7212779426b9fb8d9f943a8f1eb6c..014a09dbace61a57993881ccbb49662a
      }
  
      public CrashReport b(CrashReport crashreport) {
+diff --git a/src/main/java/net/minecraft/server/PacketCompressor.java b/src/main/java/net/minecraft/server/PacketCompressor.java
+index db7dc175239193ade658f7f0fce86463fbf0432c..dc87fe47fa7f91643630f9e257e4facb1c0e592a 100644
+--- a/src/main/java/net/minecraft/server/PacketCompressor.java
++++ b/src/main/java/net/minecraft/server/PacketCompressor.java
+@@ -46,7 +46,8 @@ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
+         this.c = i;
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
++    @Override
++    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf object, ByteBuf bytebuf) throws Exception {
++        this.a(channelhandlercontext, object, bytebuf);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketDecrypter.java b/src/main/java/net/minecraft/server/PacketDecrypter.java
+index aca9356119b88b2b3b3d0e2ccf036a29bf876992..4d02db906ec31f627454fde8c5ca9f268b68e933 100644
+--- a/src/main/java/net/minecraft/server/PacketDecrypter.java
++++ b/src/main/java/net/minecraft/server/PacketDecrypter.java
+@@ -18,7 +18,7 @@ public class PacketDecrypter extends MessageToMessageDecoder<ByteBuf> {
+         list.add(this.a.a(channelhandlercontext, bytebuf));
+     }
+ 
+-    protected void decode(ChannelHandlerContext channelhandlercontext, Object object, List list) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, list);
++    protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf object, List list) throws Exception {
++        this.a(channelhandlercontext, object, list);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketEncrypter.java b/src/main/java/net/minecraft/server/PacketEncrypter.java
+index bd972ebebe43e82b0eae56882ad21fc4feae84b1..87e73ead65e023d4c75a36def83d9f27ce7b6ab1 100644
+--- a/src/main/java/net/minecraft/server/PacketEncrypter.java
++++ b/src/main/java/net/minecraft/server/PacketEncrypter.java
+@@ -17,7 +17,8 @@ public class PacketEncrypter extends MessageToByteEncoder<ByteBuf> {
+         this.a.a(bytebuf, bytebuf1);
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
++    @Override
++    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf object, ByteBuf bytebuf) throws Exception {
++        this.a(channelhandlercontext, object, bytebuf);
+     }
+ }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 index 7c82e18b9ff634175749327660b256a7e8e655af..adf8c52fbdced52546df868be250deccc951bb96 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java

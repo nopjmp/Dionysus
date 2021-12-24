@@ -22,7 +22,7 @@ index bde1d8e5f003bc9aef9131a5f22f624e42955e12..e3ca26e90e956cca655f3449e3985079
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
-index 75a36bf997a5867024ca00fd56ea9e551d559dad..f60c0e1ca8cbbd7cc9e3ff6227c6c74f8d064536 100644
+index 3b001ae0ae2f15486285a19b3b301c77eefb57e1..36b5d4343eed368003c674d635eaa3681b459914 100644
 --- a/src/main/java/net/minecraft/server/SpawnerCreature.java
 +++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
 @@ -6,6 +6,7 @@ import java.util.Random;

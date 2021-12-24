@@ -19,7 +19,7 @@ Aside from making the obvious class/function renames and obfhelpers I didn't nee
 Just added Bukkit's event system and took a few liberties with dead code and comment misspellings.
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index 6611d0b9e598f5a235ea753641ae7cf1e3436951..acb925d323b29c8c4fd78517d0cf5ab60e2fd7a2 100644
+index 20352389e74c57f7c5ef5ebf2830d4c1a2e49e37..181cfd7b955dc804234e9da633fd8c75e64efe03 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 @@ -533,4 +533,14 @@ public class PaperWorldConfig {
@@ -952,7 +952,7 @@ index 0000000000000000000000000000000000000000..7ab6a8e8dabb30c1e764fbee14558f95
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/BlockRedstoneWire.java b/src/main/java/net/minecraft/server/BlockRedstoneWire.java
-index 2a10359a3e65a0548e59f9081dceaead1e4e98f9..6ff05735624d22409d08e6d4c255f2d39472be60 100644
+index 9d90da98d1edbb9a73d23b566d4743b151811c48..330675292dc409269178e9ae5f76b0b5b732fab6 100644
 --- a/src/main/java/net/minecraft/server/BlockRedstoneWire.java
 +++ b/src/main/java/net/minecraft/server/BlockRedstoneWire.java
 @@ -1,5 +1,6 @@
@@ -1121,10 +1121,10 @@ index 2a10359a3e65a0548e59f9081dceaead1e4e98f9..6ff05735624d22409d08e6d4c255f2d3
                  this.b(world, blockposition, iblockdata, 0);
                  world.setAir(blockposition);
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 86ea3e0ac78fbc3a1b4074a9857c706713f65131..65e009be29de90e225787b8f6d002c762b21b048 100644
+index 52814e6fee7f2a9571af1cf5727367ae2f5894aa..f7f6fca0ccd8fd5f853d73d7060acafae6330a9f 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -577,6 +577,7 @@ public abstract class World implements IBlockAccess {
+@@ -578,6 +578,7 @@ public abstract class World implements IBlockAccess {
  
      }
  
@@ -1132,8 +1132,8 @@ index 86ea3e0ac78fbc3a1b4074a9857c706713f65131..65e009be29de90e225787b8f6d002c76
      public void a(BlockPosition blockposition, final Block block, BlockPosition blockposition1) {
          if (!this.isClientSide) {
              IBlockData iblockdata = this.getType(blockposition);
-@@ -2832,6 +2833,7 @@ public abstract class World implements IBlockAccess {
-         return this.getBlockFacePower(blockposition.down(), EnumDirection.DOWN) > 0 || (this.getBlockFacePower(blockposition.up(), EnumDirection.UP) > 0 || (this.getBlockFacePower(blockposition.north(), EnumDirection.NORTH) > 0 || (this.getBlockFacePower(blockposition.south(), EnumDirection.SOUTH) > 0 || (this.getBlockFacePower(blockposition.west(), EnumDirection.WEST) > 0 || this.getBlockFacePower(blockposition.east(), EnumDirection.EAST) > 0))));
+@@ -2840,6 +2841,7 @@ public abstract class World implements IBlockAccess {
+         return this.getBlockFacePower(blockposition.down(), EnumDirection.DOWN) > 0 ? true : (this.getBlockFacePower(blockposition.up(), EnumDirection.UP) > 0 ? true : (this.getBlockFacePower(blockposition.north(), EnumDirection.NORTH) > 0 ? true : (this.getBlockFacePower(blockposition.south(), EnumDirection.SOUTH) > 0 ? true : (this.getBlockFacePower(blockposition.west(), EnumDirection.WEST) > 0 ? true : this.getBlockFacePower(blockposition.east(), EnumDirection.EAST) > 0))));
      }
  
 +    public int isBlockIndirectlyGettingPowered(BlockPosition pos) { return this.z(pos); } // Paper - OBFHELPER

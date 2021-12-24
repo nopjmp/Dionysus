@@ -23,7 +23,7 @@ index 81f24b09bfc127226918aea6215a79022307d8af..e172491020e7a734e2d43007e9feb816
 +
  }
 diff --git a/src/main/java/net/minecraft/server/BlockBed.java b/src/main/java/net/minecraft/server/BlockBed.java
-index 4ea34b1a23202737c3a2527ae97ecd47bf176c43..8363fc0feefd66ac480a4ff3da3736c39edb7266 100644
+index f1a1079918ae37672b2c5978b82f6392801859d0..d01ab2998eda93808e2dc6e492d2ab86a10e628f 100644
 --- a/src/main/java/net/minecraft/server/BlockBed.java
 +++ b/src/main/java/net/minecraft/server/BlockBed.java
 @@ -60,6 +60,10 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
@@ -38,7 +38,7 @@ index 4ea34b1a23202737c3a2527ae97ecd47bf176c43..8363fc0feefd66ac480a4ff3da3736c3
                  } else {
                      if (entityhuman_enumbedresult == EntityHuman.EnumBedResult.NOT_POSSIBLE_NOW) {
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index e06d65a32b3755dddafae1a2cc136ec79d3d6abe..e98077c8caf0fe4e31bf9fbaea1f3a1a3aeb0e76 100644
+index aa0b27f0e1c6cd5168af02157ce8ce495afc6373..6c30d30ff2d7c46aa9e3e32473efc94cb243defa 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -1233,7 +1233,8 @@ public abstract class EntityHuman extends EntityLiving {

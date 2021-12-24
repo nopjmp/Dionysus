@@ -58,7 +58,7 @@ index be4b53b4111259382e425a87719d75adf93f28b5..1dddc9f912c0545fef7a06e2f7246315
      private long lastFill = -1;
      private long nextRefill = -1;
 diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
-index a715edb53fe883d224bc1feb03da5c74fa7eb61c..7a07774d744b2bab609b2c9b742915d46855c4da 100644
+index 3e2f52647c72f55cc3a624c05b86d2565b728038..8c1d78e38c63018a8109cf950797a51fd814c75d 100644
 --- a/src/main/java/net/minecraft/server/Block.java
 +++ b/src/main/java/net/minecraft/server/Block.java
 @@ -2,6 +2,9 @@ package net.minecraft.server;
@@ -102,7 +102,7 @@ index a715edb53fe883d224bc1feb03da5c74fa7eb61c..7a07774d744b2bab609b2c9b742915d4
      public static int getId(Block block) {
          return Block.REGISTRY.a(block); // CraftBukkit - decompile error
 diff --git a/src/main/java/net/minecraft/server/BlockDispenser.java b/src/main/java/net/minecraft/server/BlockDispenser.java
-index 3e758a81a1de408ed98c042f55fa2b3871877cc0..f7b031f0ad398220499d307276e2465c116f9f03 100644
+index 539b2b3ce06c239c5c5f3b88c7608a94a9454234..ffbdefdaadd5c3ff05bbbf782fbc70be2eb9d09a 100644
 --- a/src/main/java/net/minecraft/server/BlockDispenser.java
 +++ b/src/main/java/net/minecraft/server/BlockDispenser.java
 @@ -1,5 +1,7 @@
@@ -123,10 +123,10 @@ index 3e758a81a1de408ed98c042f55fa2b3871877cc0..f7b031f0ad398220499d307276e2465c
  
      protected BlockDispenser() {
 diff --git a/src/main/java/net/minecraft/server/BlockDragonEgg.java b/src/main/java/net/minecraft/server/BlockDragonEgg.java
-index fd53f98d354cc9be2b97a6fd30e4f4858cdd5273..5ea339e12b5c1d834e691068432f0e2609b41dea 100644
+index 291342c9047ec90c50c263f4f29640ac3fc26c41..d67da70ed1ad57f235de11e01e0c3326afd00542 100644
 --- a/src/main/java/net/minecraft/server/BlockDragonEgg.java
 +++ b/src/main/java/net/minecraft/server/BlockDragonEgg.java
-@@ -81,13 +81,13 @@ public class BlockDragonEgg extends Block {
+@@ -82,13 +82,13 @@ public class BlockDragonEgg extends Block {
                      // CraftBukkit end
                      if (world.isClientSide) {
                          for (int j = 0; j < 128; ++j) {
@@ -145,17 +145,17 @@ index fd53f98d354cc9be2b97a6fd30e4f4858cdd5273..5ea339e12b5c1d834e691068432f0e26
 +                            double d2 = (double) blockposition1.getY() + (double) (blockposition.getY() - blockposition1.getY()) * d0 + this.random.nextDouble() - 0.5D;
 +                            double d3 = (double) blockposition1.getZ() + (double) (blockposition.getZ() - blockposition1.getZ()) * d0 + (this.random.nextDouble() - 0.5D) + 0.5D;
  
-                             world.addParticle(EnumParticle.PORTAL, d1, d2, d3, f, f1, f2);
+                             world.addParticle(EnumParticle.PORTAL, d1, d2, d3, (double) f, (double) f1, (double) f2, new int[0]);
                          }
 diff --git a/src/main/java/net/minecraft/server/BlockPumpkin.java b/src/main/java/net/minecraft/server/BlockPumpkin.java
-index 595032a769dac8fce9715a4586c0379695328924..e4cfa2282cb6e2098c3b209e8af2105978cc9f6e 100644
+index ff9508e17a3973aea2d9f0d69d6b0f6b8c88e158..4eed086ca082b7c9ae8eec0d61f9662c28dc41ce 100644
 --- a/src/main/java/net/minecraft/server/BlockPumpkin.java
 +++ b/src/main/java/net/minecraft/server/BlockPumpkin.java
 @@ -76,7 +76,7 @@ public class BlockPumpkin extends BlockFacingHorizontal {
              }
  
              for (j = 0; j < 120; ++j) {
--                world.addParticle(EnumParticle.SNOW_SHOVEL, (double) blockposition1.getX() + world.random.nextDouble(), (double) blockposition1.getY() + world.random.nextDouble() * 2.5D, (double) blockposition1.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D);
+-                world.addParticle(EnumParticle.SNOW_SHOVEL, (double) blockposition1.getX() + world.random.nextDouble(), (double) blockposition1.getY() + world.random.nextDouble() * 2.5D, (double) blockposition1.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D, new int[0]);
 +                world.addParticle(EnumParticle.SNOW_SHOVEL, (double) blockposition1.getX() + this.random.nextDouble(), (double) blockposition1.getY() + this.random.nextDouble() * 2.5D, (double) blockposition1.getZ() + this.random.nextDouble(), 0.0D, 0.0D, 0.0D);
              }
  
@@ -164,17 +164,17 @@ index 595032a769dac8fce9715a4586c0379695328924..e4cfa2282cb6e2098c3b209e8af21059
                  }
  
                  for (j = 0; j < 120; ++j) {
--                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition2.getX() + world.random.nextDouble(), (double) blockposition2.getY() + world.random.nextDouble() * 3.9D, (double) blockposition2.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D);
+-                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition2.getX() + world.random.nextDouble(), (double) blockposition2.getY() + world.random.nextDouble() * 3.9D, (double) blockposition2.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D, new int[0]);
 +                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition2.getX() + this.random.nextDouble(), (double) blockposition2.getY() + this.random.nextDouble() * 3.9D, (double) blockposition2.getZ() + this.random.nextDouble(), 0.0D, 0.0D, 0.0D);
                  }
  
                  for (j = 0; j < this.getDetectorIronGolem().c(); ++j) {
 diff --git a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
-index 7ace5c940ebe7bf1ccce39ad4b521672d4e2b278..142e7c66175170f32b81106ed7fd44bb1e072d88 100644
+index 429f26ed5b35987aebe65e2dbdf24811521bdbbf..571ca45e6c76b95fe14359d7296b097f35fea444 100644
 --- a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
 +++ b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
 @@ -130,9 +130,9 @@ public class BlockRedstoneTorch extends BlockTorch {
-                     world.a(null, blockposition, SoundEffects.gm, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
+                     world.a((EntityHuman) null, blockposition, SoundEffects.gm, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
  
                      for (int i = 0; i < 5; ++i) {
 -                        double d0 = (double) blockposition.getX() + random.nextDouble() * 0.6D + 0.2D;
@@ -184,23 +184,23 @@ index 7ace5c940ebe7bf1ccce39ad4b521672d4e2b278..142e7c66175170f32b81106ed7fd44bb
 +                        double d1 = (double) blockposition.getY() + this.random.nextDouble() * 0.6D + 0.2D;
 +                        double d2 = (double) blockposition.getZ() + this.random.nextDouble() * 0.6D + 0.2D;
  
-                         world.addParticle(EnumParticle.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D);
+                         world.addParticle(EnumParticle.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
                      }
 diff --git a/src/main/java/net/minecraft/server/BlockSkull.java b/src/main/java/net/minecraft/server/BlockSkull.java
-index 88fdc062a0d5aa14476fb7f686f8079dfc551d2f..28d410ea8e7346e131d6a8aaff9c306c8b8a6f98 100644
+index 2c3bb3ca3b74f5f80a5f9403e4321f7689a7517a..af7a905d6678437a144f08ae5d3f41b1779726a3 100644
 --- a/src/main/java/net/minecraft/server/BlockSkull.java
 +++ b/src/main/java/net/minecraft/server/BlockSkull.java
 @@ -212,7 +212,7 @@ public class BlockSkull extends BlockTileEntity {
                  int k;
  
                  for (k = 0; k < 120; ++k) {
--                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition1.getX() + world.random.nextDouble(), (double) (blockposition1.getY() - 2) + world.random.nextDouble() * 3.9D, (double) blockposition1.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D);
+-                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition1.getX() + world.random.nextDouble(), (double) (blockposition1.getY() - 2) + world.random.nextDouble() * 3.9D, (double) blockposition1.getZ() + world.random.nextDouble(), 0.0D, 0.0D, 0.0D, new int[0]);
 +                    world.addParticle(EnumParticle.SNOWBALL, (double) blockposition1.getX() + this.random.nextDouble(), (double) (blockposition1.getY() - 2) + this.random.nextDouble() * 3.9D, (double) blockposition1.getZ() + this.random.nextDouble(), 0.0D, 0.0D, 0.0D);
                  }
  
                  for (k = 0; k < shapedetector.c(); ++k) {
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorItem.java b/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
-index b007f7c29bdfb86ac75920f288759ecf70a5c802..8f2f7abf361068dea009ef9687c5cbabeb3f782a 100644
+index e9aaddb4d6b38003bd04eebbed6413a17ed43ba5..e8b056af902350a2fa8c567dfa20851c5238418d 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
 @@ -45,14 +45,14 @@ public class DispenseBehaviorItem implements IDispenseBehavior {
@@ -223,7 +223,7 @@ index b007f7c29bdfb86ac75920f288759ecf70a5c802..8f2f7abf361068dea009ef9687c5cbab
          // CraftBukkit start
          org.bukkit.block.Block block = world.getWorld().getBlockAt(isourceblock.getBlockPosition().getX(), isourceblock.getBlockPosition().getY(), isourceblock.getBlockPosition().getZ());
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 3034756a2f3032cb6fe44512e6d168b47bfd7342..61c91557a7ea66c43035914581542416bd5ad4ca 100644
+index 746f64700f7400287710548c62a2cfe5a28e4320..3a11ba5651c44651db6ced9e782d994c4fa9b9aa 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -13,6 +13,8 @@ import java.util.Random;
@@ -257,7 +257,7 @@ index 3034756a2f3032cb6fe44512e6d168b47bfd7342..61c91557a7ea66c43035914581542416
      List<Entity> entitySlice = null;
      // Paper end
 diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
-index 2671af33e518b3470f507ec439e57533c2165bb6..486b28e7d0e65b969d31f2525305a71bde4b700d 100644
+index 2472edfc9f82783527832bb1396c5b3c5398209c..a6d926e60cfef60b7020a56f50ba12c9220a6ae6 100644
 --- a/src/main/java/net/minecraft/server/EntityEnderman.java
 +++ b/src/main/java/net/minecraft/server/EntityEnderman.java
 @@ -334,7 +334,7 @@ public class EntityEnderman extends EntityMonster {
@@ -279,7 +279,7 @@ index 2671af33e518b3470f507ec439e57533c2165bb6..486b28e7d0e65b969d31f2525305a71b
              int i = MathHelper.floor(this.a.locX - 1.0D + random.nextDouble() * 2.0D);
              int j = MathHelper.floor(this.a.locY + random.nextDouble() * 2.0D);
 diff --git a/src/main/java/net/minecraft/server/EntityEvokerFangs.java b/src/main/java/net/minecraft/server/EntityEvokerFangs.java
-index 6feba35d515c9bfae218e0a3ef114b2f10c4084f..26837bd20c600c4a2ef6ff6c16fba5e31c26dd3c 100644
+index 1895112269254b345368562a8296dc1802f74010..c29de2838863fce3ed92aeb192237feb14f6ba37 100644
 --- a/src/main/java/net/minecraft/server/EntityEvokerFangs.java
 +++ b/src/main/java/net/minecraft/server/EntityEvokerFangs.java
 @@ -69,7 +69,7 @@ public class EntityEvokerFangs extends Entity {
@@ -292,10 +292,10 @@ index 6feba35d515c9bfae218e0a3ef114b2f10c4084f..26837bd20c600c4a2ef6ff6c16fba5e3
                          double d3 = (this.random.nextDouble() * 2.0D - 1.0D) * 0.3D;
                          double d4 = 0.3D + this.random.nextDouble() * 0.3D;
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index d8753dffa478a4050434dfc326f646b6e9573b29..1375742e98a3f2b381e3c969d79882e092409df7 100644
+index 82c3a84edd7a9408f99873ef8ea1693674786791..bac4bd40bafb1369bc5f88b8d2eb2d76f62b7260 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
-@@ -2546,7 +2546,6 @@ public abstract class EntityLiving extends Entity {
+@@ -2553,7 +2553,6 @@ public abstract class EntityLiving extends Entity {
          boolean flag = false;
          BlockPosition blockposition = new BlockPosition(this);
          World world = this.world;
@@ -304,7 +304,7 @@ index d8753dffa478a4050434dfc326f646b6e9573b29..1375742e98a3f2b381e3c969d79882e0
  
          if (world.isLoaded(blockposition)) {
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index 589da0e5a34565cf03bb4b8a5ded5b09ee74925b..4f3045003ec14244823a9ffb964755f2a98df49d 100644
+index a3a39935b4f177a35b7356dd4d922d47faccf30c..9d1258194066d64b29fc6b01160603029feda56c 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
 @@ -3,6 +3,7 @@ package net.minecraft.server;
@@ -336,11 +336,11 @@ index 589da0e5a34565cf03bb4b8a5ded5b09ee74925b..4f3045003ec14244823a9ffb964755f2
      private final double posX;
      private final double posY;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index de456592d3d6acfc2832591d621cabdd1888930e..306d49a73a7d214d5b82ee4eb90fca2f5c9789bf 100644
+index 014a09dbace61a57993881ccbb49662acfb97e79..eafffdfffd06f530bdce252170f88a4bf36e2c25 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -782,7 +782,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
-                 agameprofile[k] = this.v.v().get(j + k).getProfile();
+                 agameprofile[k] = ((EntityPlayer) this.v.v().get(j + k)).getProfile();
              }
  
 -            Collections.shuffle(Arrays.asList(agameprofile));
@@ -349,7 +349,7 @@ index de456592d3d6acfc2832591d621cabdd1888930e..306d49a73a7d214d5b82ee4eb90fca2f
          }
  
 diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
-index b52500355a456985b66a67cabdd7750240a42da9..c74f1e20383e53a013811abade2ddbe31570d08d 100644
+index 94d0b8a3dba5c69736eee336bcdd3f0325629d4d..87beea39db72a7380232a705d7e67f8948ea592e 100644
 --- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 +++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 @@ -1,6 +1,7 @@
@@ -385,7 +385,7 @@ index b52500355a456985b66a67cabdd7750240a42da9..c74f1e20383e53a013811abade2ddbe3
                      if (this.getMobName() == null) {
                          return;
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index ec4bafbc33dcd62fb4d9d476f2eee081092a302a..4e07b428991982cc2d66ac36fd44d3889e4350ba 100644
+index 4a629aaa1e7b5b06525661d6c9e6b9e1375917b7..48d281832664dde24522e83a53254176d3ccc6a3 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -23,11 +23,13 @@ import java.net.InetAddress;
@@ -403,7 +403,7 @@ index ec4bafbc33dcd62fb4d9d476f2eee081092a302a..4e07b428991982cc2d66ac36fd44d388
      private static final Logger e = LogManager.getLogger();
      public static final LazyInitVar<NioEventLoopGroup> a = new LazyInitVar() {
          protected NioEventLoopGroup a() {
-@@ -135,7 +137,7 @@ public class ServerConnection {
+@@ -136,7 +138,7 @@ public class ServerConnection {
              // This prevents players from 'gaming' the server, and strategically relogging to increase their position in the tick order
              if ( org.spigotmc.SpigotConfig.playerShuffle > 0 && MinecraftServer.currentTick % org.spigotmc.SpigotConfig.playerShuffle == 0 )
              {
@@ -413,7 +413,7 @@ index ec4bafbc33dcd62fb4d9d476f2eee081092a302a..4e07b428991982cc2d66ac36fd44d388
              // Spigot End
              Iterator iterator = this.h.iterator();
 diff --git a/src/main/java/net/minecraft/server/TileEntityDispenser.java b/src/main/java/net/minecraft/server/TileEntityDispenser.java
-index b366885888a3b1f17030e9d17e612b26e9ddc3f7..ce98bde259892adb320ff97b48a4e5c2b8971f1c 100644
+index fc0b231f16d2f449095fc48a74328525c898f459..1c821fd922168e5c05b27ff89e9e7e9adaf40055 100644
 --- a/src/main/java/net/minecraft/server/TileEntityDispenser.java
 +++ b/src/main/java/net/minecraft/server/TileEntityDispenser.java
 @@ -5,13 +5,14 @@ import java.util.Random;
@@ -433,7 +433,7 @@ index b366885888a3b1f17030e9d17e612b26e9ddc3f7..ce98bde259892adb320ff97b48a4e5c2
  
      // CraftBukkit start - add fields and methods
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 43e300409d167a13c67a941ef91c21b1335d8fe9..d95193b04025c52e8e178f35a869253e7274643e 100644
+index 476eb23f37695a78543b8ed3dcdcc5511a5d4a06..2156ca3b1b844310b407395784c06ac7053e507a 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -20,6 +20,7 @@ import javax.annotation.Nullable;
@@ -445,7 +445,7 @@ index 43e300409d167a13c67a941ef91c21b1335d8fe9..d95193b04025c52e8e178f35a869253e
  import org.bukkit.block.BlockState;
  import org.bukkit.craftbukkit.CraftServer;
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index 7ebb3714d711f8f0190cb2d4b5656a3295c3a74d..109b22da0b5a7d468850ccc943c5f8bcb910aff3 100644
+index afb141c62974e1877c774a7d1ab09e3398f7713e..6274566dd3101afef4f37073a16b05c90065e835 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -12,6 +12,7 @@ import java.util.Random;

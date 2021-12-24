@@ -18,7 +18,7 @@ index e172491020e7a734e2d43007e9feb816628e50be..e396bb9cecb8085b949ce025178969b0
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 19a950762304ff93ea7b43c8f57ceab7eab39d4a..3db8179012a140506a573f84d81ece823e0d91e2 100644
+index fa19df341d13c531fd3597362b126ce8f183cd97..d31438b05fbcf3f4a10943c89e94e2a78675fbde 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -34,6 +34,8 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -30,7 +30,7 @@ index 19a950762304ff93ea7b43c8f57ceab7eab39d4a..3db8179012a140506a573f84d81ece82
  public abstract class EntityLiving extends Entity {
  
      private static final Logger a = LogManager.getLogger();
-@@ -1974,6 +1976,20 @@ public abstract class EntityLiving extends Entity {
+@@ -1981,6 +1983,20 @@ public abstract class EntityLiving extends Entity {
  
                  ItemStack itemstack1 = this.getEquipment(enumitemslot);
  

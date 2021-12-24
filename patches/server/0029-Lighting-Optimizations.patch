@@ -8,7 +8,7 @@ Semi-Experimental as this gets rid of lambda creations and replaces it with only
 Additionally remove some sync'd functions.
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index acb925d323b29c8c4fd78517d0cf5ab60e2fd7a2..296682fbd97f836ca4ec76185588cc8e091a7fae 100644
+index 181cfd7b955dc804234e9da633fd8c75e64efe03..a22b7763ced2ff594b12b2b17dc2674a3fc9ec18 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 @@ -140,7 +140,7 @@ public class PaperWorldConfig {
@@ -37,7 +37,7 @@ index d4f104eedd1bbb8b96491f5e6e8ab05489cfd4c3..bde1d8e5f003bc9aef9131a5f22f624e
      public static boolean tamableAiLimitBypass = true;
      public static boolean spawnerAiLimitBypass = true;
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 38f95b12103134967781db6b05ed7eb37b456b28..385c37342f16778bdf6af337760d7943ac2ae041 100644
+index 7e662a49cd3be33bae6e5a09300a69ebc9d231e6..f36426f1615af411aa091c0eb536b60ed4cb91aa 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -2,16 +2,16 @@ package net.minecraft.server;
@@ -180,11 +180,11 @@ index 38f95b12103134967781db6b05ed7eb37b456b28..385c37342f16778bdf6af337760d7943
 +    }
 +    // Dionysus end
 +
-     public enum EnumTileEntityState {
+     public static enum EnumTileEntityState {
  
          IMMEDIATE, QUEUED, CHECK;
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 493ddcb3e3e3892e8fc54ae3c5e4ceab8875935e..013b8a6489e71e52f33ff8fc2924fc0013029b49 100644
+index ad5485908d3795e73f5fa13c0d553b7fde17c189..4ad9a824b671b2c83a594cb2ad9b98b36d423b46 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -1,31 +1,26 @@
@@ -279,44 +279,21 @@ index 493ddcb3e3e3892e8fc54ae3c5e4ceab8875935e..013b8a6489e71e52f33ff8fc2924fc00
      }
  
      // Paper start
-@@ -202,8 +174,8 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -202,9 +174,9 @@ public class ChunkProviderServer implements IChunkProvider {
                  CrashReport crashreport = CrashReport.a(throwable, "Exception generating new chunk");
                  CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Chunk to be generated");
  
--                crashreportsystemdetails.a("Location", String.format("%d,%d", new Object[] { Integer.valueOf(i), Integer.valueOf(j)}));
--                crashreportsystemdetails.a("Position hash", Long.valueOf(k));
+-                crashreportsystemdetails.a("Location", (Object) String.format("%d,%d", new Object[] { Integer.valueOf(i), Integer.valueOf(j)}));
+-                crashreportsystemdetails.a("Position hash", (Object) Long.valueOf(k));
+-                crashreportsystemdetails.a("Generator", (Object) this.chunkGenerator);
 +                crashreportsystemdetails.a("Location", String.format("%d,%d", i, j));
 +                crashreportsystemdetails.a("Position hash", k);
-                 crashreportsystemdetails.a("Generator", this.chunkGenerator);
++                crashreportsystemdetails.a("Generator", this.chunkGenerator);
                  throw new ReportedException(crashreport);
              }
-@@ -238,21 +210,20 @@ public class ChunkProviderServer implements IChunkProvider {
-         }
-     }
  
--    public void saveChunkNOP(Chunk chunk) {
--        try {
--            // this.chunkLoader.b(this.world, chunk); // Spigot
--        } catch (Exception exception) {
--            // Paper start
--            String msg = "Couldn't save entities";
--            ChunkProviderServer.a.error(msg, exception);
--            ServerInternalException.reportInternalException(exception);
--            // Paper end
--        }
--
--    }
-+//    public void saveChunkNOP(Chunk chunk) {
-+//        try {
-+//            // this.chunkLoader.b(this.world, chunk); // Spigot
-+//        } catch (Exception exception) {
-+//            // Paper start
-+//            String msg = "Couldn't save entities";
-+//            ChunkProviderServer.a.error(msg, exception);
-+//            ServerInternalException.reportInternalException(exception);
-+//            // Paper end
-+//        }
-+//    }
+@@ -252,7 +224,7 @@ public class ChunkProviderServer implements IChunkProvider {
+     }
  
      public void saveChunk(Chunk chunk, boolean unloaded) { // Spigot
 -        try (co.aikar.timings.Timing timed = world.timings.chunkSaveData.startTiming()) {
@@ -324,7 +301,7 @@ index 493ddcb3e3e3892e8fc54ae3c5e4ceab8875935e..013b8a6489e71e52f33ff8fc2924fc00
              chunk.setLastSaved(this.world.getTime());
              this.chunkLoader.saveChunk(this.world, chunk, unloaded); // Spigot
          } catch (IOException ioexception) {
-@@ -304,14 +275,10 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -304,14 +276,10 @@ public class ChunkProviderServer implements IChunkProvider {
          }
          final int autoSaveLimit = world.paperConfig.maxAutoSaveChunksPerTick;
          // Paper end
@@ -343,7 +320,7 @@ index 493ddcb3e3e3892e8fc54ae3c5e4ceab8875935e..013b8a6489e71e52f33ff8fc2924fc00
  
              if (chunk.a(flag)) {
                  this.saveChunk(chunk, false); // Spigot
-@@ -341,12 +308,12 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -341,12 +309,12 @@ public class ChunkProviderServer implements IChunkProvider {
                  int targetSize = Math.min(this.unloadQueue.size() - 100,  (int) (this.unloadQueue.size() * UNLOAD_QUEUE_RESIZE_FACTOR)); // Paper - Make more aggressive
                  // Spigot end
  
@@ -354,12 +331,12 @@ index 493ddcb3e3e3892e8fc54ae3c5e4ceab8875935e..013b8a6489e71e52f33ff8fc2924fc00
 -                    Long olong = (Long) iterator.next();
 +                    long chunkKey = iterator.next();
                      iterator.remove(); // Spigot
--                    Chunk chunk = this.chunks.get(olong);
+-                    Chunk chunk = (Chunk) this.chunks.get(olong);
 +                    Chunk chunk = this.chunks.get(chunkKey);
  
                      if (chunk != null && chunk.d) {
                          // CraftBukkit start - move unload logic to own method
-@@ -414,7 +381,7 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -414,7 +382,7 @@ public class ChunkProviderServer implements IChunkProvider {
          chunk.removeEntities();
          if (save) {
              this.saveChunk(chunk, true); // Spigot
@@ -369,7 +346,7 @@ index 493ddcb3e3e3892e8fc54ae3c5e4ceab8875935e..013b8a6489e71e52f33ff8fc2924fc00
          this.chunks.remove(chunk.chunkKey);
          return true;
 diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
-index 5468c3b723b75dc590c87b759d81a4ee066c1776..f2a0bbbc993b5a7d58acfbeaf46eb20e9f54fede 100644
+index 5ef7b89001329892328e2ccb274982d1d9e992df..948114ad5300748aeb54fd406b353ce66e5dee69 100644
 --- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 +++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 @@ -194,7 +194,7 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
@@ -521,7 +498,7 @@ index f1c013116fc05b7abe7184eae01b715c02c7a058..33df884c049726c9ebaad7d61ba905ee
  
      private static boolean isOutOfTime(long maxTickTime, long startTime) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 6239a47f7c8ecf7e88d3f116cec401c76fe9480b..41aa4caaf6c8029835cd5021ef3bc304d4a1e1d6 100644
+index aeeaccbba01e9fa13a98f580fa1025288c75fab9..df8940ff1c317ca321e0a03d06eafffd4b561c6c 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1,7 +1,6 @@
@@ -587,7 +564,7 @@ index 6239a47f7c8ecf7e88d3f116cec401c76fe9480b..41aa4caaf6c8029835cd5021ef3bc304
          co.aikar.timings.TimingsManager.FULL_SERVER_TICK.stopTiming(); // Paper
      }
 diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
-index 605c064c38d50e34d92eca4e6c8b13dc3df0571d..75a36bf997a5867024ca00fd56ea9e551d559dad 100644
+index 5c5bed0344baeeaff4e75807326a7255ebca8bf5..3b001ae0ae2f15486285a19b3b301c77eefb57e1 100644
 --- a/src/main/java/net/minecraft/server/SpawnerCreature.java
 +++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
 @@ -1,50 +1,49 @@
@@ -763,16 +740,16 @@ index 605c064c38d50e34d92eca4e6c8b13dc3df0571d..75a36bf997a5867024ca00fd56ea9e55
                                                  float f = (float) j3 + 0.5F;
                                                  float f1 = (float) l3 + 0.5F;
  
--                                                if (worldserver.getWorldBorder().isInBounds(blockposition_mutableblockposition) && worldserver.getChunkIfLoaded(blockposition_mutableblockposition) != null && !worldserver.isPlayerNearby(f, k3, f1, 24.0D) && blockposition.distanceSquared(f, k3, f1) >= 576.0D) { // Paper - Prevent mob spawning from loading/generating chunks
+-                                                if (worldserver.getWorldBorder().isInBounds(blockposition_mutableblockposition) && worldserver.getChunkIfLoaded(blockposition_mutableblockposition) != null && !worldserver.isPlayerNearby((double) f, (double) k3, (double) f1, 24.0D) && blockposition.distanceSquared((double) f, (double) k3, (double) f1) >= 576.0D) { // Paper - Prevent mob spawning from loading/generating chunks
 +                                                if (worldserver.getWorldBorder().isInBounds(blockposition_mutableblockposition) && worldserver.getChunkIfLoaded(blockposition_mutableblockposition) != null && !worldserver.isPlayerNearby(f, j2, f1, 24.0D) && blockposition.distanceSquared(f, j2, f1) >= 576.0D) { // Paper - Prevent mob spawning from loading/generating chunks
                                                      if (biomebase_biomemeta == null) {
-                                                         biomebase_biomemeta = worldserver.a(enumcreaturetype, blockposition_mutableblockposition);
+                                                         biomebase_biomemeta = worldserver.a(enumcreaturetype, (BlockPosition) blockposition_mutableblockposition);
                                                          if (biomebase_biomemeta == null) {
 @@ -215,14 +217,14 @@ public final class SpawnerCreature {
                                                          EntityInsentient entityinsentient;
  
                                                          try {
--                                                            entityinsentient = biomebase_biomemeta.b.getConstructor(new Class[] { World.class}).newInstance(new Object[] { worldserver});
+-                                                            entityinsentient = (EntityInsentient) biomebase_biomemeta.b.getConstructor(new Class[] { World.class}).newInstance(new Object[] { worldserver});
 +                                                            entityinsentient = biomebase_biomemeta.b.getConstructor(new Class[] { World.class}).newInstance(worldserver);
                                                          } catch (Exception exception) {
                                                              exception.printStackTrace();
@@ -780,7 +757,7 @@ index 605c064c38d50e34d92eca4e6c8b13dc3df0571d..75a36bf997a5867024ca00fd56ea9e55
                                                              return j1;
                                                          }
  
--                                                        entityinsentient.setPositionRotation(f, k3, f1, worldserver.random.nextFloat() * 360.0F, 0.0F);
+-                                                        entityinsentient.setPositionRotation((double) f, (double) k3, (double) f1, worldserver.random.nextFloat() * 360.0F, 0.0F);
 +                                                        entityinsentient.setPositionRotation(f, j2, f1, worldserver.random.nextFloat() * 360.0F, 0.0F);
                                                          if (entityinsentient.P() && entityinsentient.canSpawn()) {
                                                              groupdataentity = entityinsentient.prepare(worldserver.D(new BlockPosition(entityinsentient)), groupdataentity);
@@ -803,13 +780,13 @@ index 605c064c38d50e34d92eca4e6c8b13dc3df0571d..75a36bf997a5867024ca00fd56ea9e55
                              EntityInsentient entityinsentient;
  
                              try {
--                                entityinsentient = biomebase_biomemeta.b.getConstructor(new Class[] { World.class}).newInstance(new Object[] { world});
+-                                entityinsentient = (EntityInsentient) biomebase_biomemeta.b.getConstructor(new Class[] { World.class}).newInstance(new Object[] { world});
 +                                entityinsentient = biomebase_biomemeta.b.getConstructor(new Class[] { World.class}).newInstance(world);
                              } catch (Exception exception) {
                                  exception.printStackTrace();
                                  ServerInternalException.reportInternalException(exception); // Paper
 diff --git a/src/main/java/net/minecraft/server/StructureGenerator.java b/src/main/java/net/minecraft/server/StructureGenerator.java
-index e6337d12964cf3aeef8bd707e964344002391df4..064422e5e2a702855eb04cc52c55203f20ee9434 100644
+index f4dfba8f315c7f88fdda4ff1639314d7d38099a9..97f18572be414c1fa9fc5c5f4cfccd776472713c 100644
 --- a/src/main/java/net/minecraft/server/StructureGenerator.java
 +++ b/src/main/java/net/minecraft/server/StructureGenerator.java
 @@ -22,7 +22,7 @@ public abstract class StructureGenerator extends WorldGenBase {
@@ -831,10 +808,10 @@ index e6337d12964cf3aeef8bd707e964344002391df4..064422e5e2a702855eb04cc52c55203f
          this.a(world);
          int i = (chunkcoordintpair.x << 4) + 8;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 65e009be29de90e225787b8f6d002c762b21b048..7719a2d2a013d36cfad9505661f4e81f06181fa9 100644
+index f7f6fca0ccd8fd5f853d73d7060acafae6330a9f..d26e0396088ef1553bb05572344614b575a17174 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -408,7 +408,7 @@ public abstract class World implements IBlockAccess {
+@@ -409,7 +409,7 @@ public abstract class World implements IBlockAccess {
              } else {
                  if (iblockdata.c() != iblockdata1.c() || iblockdata.d() != iblockdata1.d()) {
                      this.methodProfiler.a("checkLight");
@@ -843,7 +820,7 @@ index 65e009be29de90e225787b8f6d002c762b21b048..7719a2d2a013d36cfad9505661f4e81f
                      this.methodProfiler.b();
                  }
  
-@@ -2395,6 +2395,7 @@ public abstract class World implements IBlockAccess {
+@@ -2403,6 +2403,7 @@ public abstract class World implements IBlockAccess {
          }
      }
  

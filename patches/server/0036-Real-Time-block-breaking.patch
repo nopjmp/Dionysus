@@ -22,7 +22,7 @@ index e396bb9cecb8085b949ce025178969b01991218e..0fe33eb470ad0be018d127194273b39c
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
-index f48cebb2e5d635fd2d23cbd73b4b46da80b8ae72..7dcbed2e3bde2da14744674982e83b3050df3c31 100644
+index 91ca480cbfbc22788d0321d27b3afc0544370bea..265a3aff11634ca1f7883537d3966cc9d5233400 100644
 --- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
 +++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
 @@ -16,6 +16,7 @@ public class PlayerInteractManager {

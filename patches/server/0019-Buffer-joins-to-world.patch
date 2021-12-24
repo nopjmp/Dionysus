@@ -10,7 +10,7 @@ the world per tick, this attempts to reduce the impact that join floods
 has on the server
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperConfig.java b/src/main/java/com/destroystokyo/paper/PaperConfig.java
-index 3f5b5a3cf5c09bed41a2670e7e46b3e335cb53e0..8b65762e0a4a80156f0e8349df0e489259dab0d1 100644
+index 3d6e09907b9d416fc011c5d434903baede20ab49..539ae6aeb5e92f55b981d9cf3f11bf2f1816852f 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperConfig.java
 @@ -264,6 +264,12 @@ public class PaperConfig {
@@ -27,7 +27,7 @@ index 3f5b5a3cf5c09bed41a2670e7e46b3e335cb53e0..8b65762e0a4a80156f0e8349df0e4892
      private static void removeInvalidStatistics() {
          if (version < 12) {
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index 82fa4dc9506b09946970f2a45b193e8bd0341174..5e67afc222e8d61663a5c81a5d0fb7db03231db5 100644
+index 668ab0d3bbc85d961a4748095455a2026a869107..01fa40071a47ef12967b58645041e1b13a3ea814 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -39,7 +39,7 @@ public class LoginListener implements PacketLoginInListener, ITickable {
@@ -40,10 +40,10 @@ index 82fa4dc9506b09946970f2a45b193e8bd0341174..5e67afc222e8d61663a5c81a5d0fb7db
      private GameProfile i; private void setGameProfile(GameProfile profile) { i = profile; } private GameProfile getGameProfile() { return i; } // Paper - OBFHELPER
      private final String j;
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index c98a30c3fa1ede60364b80218c6f6b492ebbc11e..6d9c49995c20d512a1a7a0c6ec6b3f95a54511c9 100644
+index 94d4e2de78ff9800a5bd453934e858147432f649..5c8e45b46b30429d636b07eb90b2d03a620aacd4 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
-@@ -410,10 +410,27 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -411,10 +411,27 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
      }
      // Paper end
  

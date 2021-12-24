@@ -10,7 +10,7 @@ This is not as robust as the newer chunk async changes, but this should get us 9
 https://github.com/PaperMC/Paper/blob/master/Spigot-Server-Patches/0452-Load-Chunks-for-Login-Asynchronously.patch
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 61c91557a7ea66c43035914581542416bd5ad4ca..ddbaacc2d20a63dba7d505b6feddf7d46926dc32 100644
+index 3a11ba5651c44651db6ced9e782d994c4fa9b9aa..a4eddca67a7c401da8351c2e994d14119e96d692 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -1316,7 +1316,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
@@ -23,10 +23,10 @@ index 61c91557a7ea66c43035914581542416bd5ad4ca..ddbaacc2d20a63dba7d505b6feddf7d4
          this.setYawPitch(f, f1);
      }
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 2f9fe3cad3b2be7972886c614e0eabf94416da4a..ac6e2bbd85dd2cfa2a026961ccd00b621aebfc92 100644
+index cb2c459ae02898a11732c8b96682f2015bd3b3a9..52d8e8ed1ff91032c4dd6bfb3bbc0eb13a648b70 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -32,6 +32,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -36,6 +36,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
      public String locale = null; // PAIL: private -> public // Paper - default to null
      public long lastSave = MinecraftServer.currentTick; // Paper
      public PlayerConnection playerConnection;
@@ -34,7 +34,7 @@ index 2f9fe3cad3b2be7972886c614e0eabf94416da4a..ac6e2bbd85dd2cfa2a026961ccd00b62
      public final MinecraftServer server;
      public final PlayerInteractManager playerInteractManager;
      public double d;
-@@ -93,6 +94,10 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -97,6 +98,10 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
      public boolean sentListPacket = false;
      // CraftBukkit end
  
@@ -46,7 +46,7 @@ index 2f9fe3cad3b2be7972886c614e0eabf94416da4a..ac6e2bbd85dd2cfa2a026961ccd00b62
          super(worldserver, gameprofile);
          playerinteractmanager.player = this;
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index 5e67afc222e8d61663a5c81a5d0fb7db03231db5..06353e7d312121c18a942f7fe6f31d11efcc8b01 100644
+index 01fa40071a47ef12967b58645041e1b13a3ea814..4bf1b174b2e3f2042f23da9b4c3bb047942c4db1 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -69,7 +69,7 @@ public class LoginListener implements PacketLoginInListener, ITickable {
@@ -68,7 +68,7 @@ index 5e67afc222e8d61663a5c81a5d0fb7db03231db5..06353e7d312121c18a942f7fe6f31d11
              if (entityplayer != null) {
                  this.g = LoginListener.EnumProtocolState.DELAY_ACCEPT;
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index ddeb68f2b3b0ac45639103f57ee07ce06f69498a..0c3b475c5412c1fd75bad81b2fda2bce76941d28 100644
+index 5b11ad200153d423704ade4c2ce6fa5cdde48ace..6550ac897c10427650577ece8e248f55dca77b8a 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -63,6 +63,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
@@ -78,8 +78,8 @@ index ddeb68f2b3b0ac45639103f57ee07ce06f69498a..0c3b475c5412c1fd75bad81b2fda2bce
 +    Runnable playerJoinReady; // Dionysus
      public EntityPlayer player;
      private int e;
-     private long f = getCurrentMillis(); private void setLastPing(long lastPing) { this.f = lastPing;}
-@@ -143,45 +144,53 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+     private long f = getCurrentMillis(); private void setLastPing(long lastPing) { this.f = lastPing;}; private long getLastPing() { return this.f;}; // Paper - OBFHELPER - set ping to delay initial
+@@ -137,45 +138,53 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
      // CraftBukkit end
  
      public void e() {
@@ -167,11 +167,11 @@ index ddeb68f2b3b0ac45639103f57ee07ce06f69498a..0c3b475c5412c1fd75bad81b2fda2bce
          this.minecraftServer.methodProfiler.a("keepAlive");
          // Paper Start - give clients a longer time to respond to pings as per pre 1.12.2 timings
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 0544c758f2afd76857953327c380d66d8ac798ce..df7b6d3ee9831b85f498e64a1117a41a384d02b3 100644
+index 80e9c9200c2afc3005c6a8bc5f5140eab71f4a40..0e9c0466ec0108a822d6e2f9e6b90363159e6f67 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -54,11 +54,12 @@ public abstract class PlayerList {
-     private static final SimpleDateFormat g = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
+     private static final SimpleDateFormat g = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
      private final MinecraftServer server;
      public final List<EntityPlayer> players = new java.util.concurrent.CopyOnWriteArrayList(); // CraftBukkit - ArrayList -> CopyOnWriteArrayList: Iterator safety
 -    private final Map<UUID, EntityPlayer> j = Maps.newHashMap();
@@ -273,7 +273,7 @@ index 0544c758f2afd76857953327c380d66d8ac798ce..df7b6d3ee9831b85f498e64a1117a41a
 +        if (!entityplayer.didPlayerJoinEvent) return; // Dionysus
          entityplayer.lastSave = MinecraftServer.currentTick; // Paper
          this.playerFileData.save(entityplayer);
-         ServerStatisticManager serverstatisticmanager = entityplayer.getStatisticManager(); // CraftBukkit
+         ServerStatisticManager serverstatisticmanager = (ServerStatisticManager) entityplayer.getStatisticManager(); // CraftBukkit
 @@ -427,7 +479,7 @@ public abstract class PlayerList {
  
          PlayerQuitEvent playerQuitEvent = new PlayerQuitEvent(cserver.getPlayer(entityplayer), "\u00A7e" + entityplayer.getName() + " left the game");

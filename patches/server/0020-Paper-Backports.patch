@@ -1,14 +1,14 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Tue, 9 Feb 2021 21:12:21 -0600
+Date: Fri, 24 Dec 2021 16:29:14 -0600
 Subject: [PATCH] Paper Backports
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 1375742e98a3f2b381e3c969d79882e092409df7..19a950762304ff93ea7b43c8f57ceab7eab39d4a 100644
+index bac4bd40bafb1369bc5f88b8d2eb2d76f62b7260..fa19df341d13c531fd3597362b126ce8f183cd97 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
-@@ -1557,6 +1557,7 @@ public abstract class EntityLiving extends Entity {
+@@ -1564,6 +1564,7 @@ public abstract class EntityLiving extends Entity {
          return this.getEquipment(EnumItemSlot.OFFHAND);
      }
  
@@ -17,7 +17,7 @@ index 1375742e98a3f2b381e3c969d79882e092409df7..19a950762304ff93ea7b43c8f57ceab7
          if (enumhand == EnumHand.MAIN_HAND) {
              return this.getEquipment(EnumItemSlot.MAINHAND);
 diff --git a/src/main/java/net/minecraft/server/EnumDirection.java b/src/main/java/net/minecraft/server/EnumDirection.java
-index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07dd8f4677 100644
+index 3f24307f1fe9cc0b1e871e0806eacce82ae87d87..cf3db56cfea38b8d5eab40286810579c91cc836d 100644
 --- a/src/main/java/net/minecraft/server/EnumDirection.java
 +++ b/src/main/java/net/minecraft/server/EnumDirection.java
 @@ -19,19 +19,27 @@ public enum EnumDirection implements INamable {
@@ -101,7 +101,7 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
              }
          }
  
-@@ -209,27 +217,23 @@ public enum EnumDirection implements INamable {
+@@ -209,7 +217,7 @@ public enum EnumDirection implements INamable {
              return aenumdirection[random.nextInt(aenumdirection.length)];
          }
  
@@ -110,12 +110,14 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
              return enumdirection != null && enumdirection.k().d() == this;
          }
  
+@@ -217,21 +225,16 @@ public enum EnumDirection implements INamable {
          public Iterator<EnumDirection> iterator() {
              return Iterators.forArray(this.a());
          }
 -
--        public boolean apply(@Nullable Object object) {
--            return this.a((EnumDirection) object);
+-        @Override
+-        public boolean apply(EnumDirection object) {
+-            return this.a(object);
 -        }
      }
  
@@ -132,7 +134,7 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
              this.c = i;
              this.d = s;
          }
-@@ -243,7 +247,7 @@ public enum EnumDirection implements INamable {
+@@ -245,7 +248,7 @@ public enum EnumDirection implements INamable {
          }
      }
  
@@ -141,7 +143,7 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
  
          X("x", EnumDirection.EnumDirectionLimit.HORIZONTAL), Y("y", EnumDirection.EnumDirectionLimit.VERTICAL), Z("z", EnumDirection.EnumDirectionLimit.HORIZONTAL);
  
-@@ -251,9 +255,9 @@ public enum EnumDirection implements INamable {
+@@ -253,9 +256,9 @@ public enum EnumDirection implements INamable {
          private final String e;
          private final EnumDirection.EnumDirectionLimit f;
  
@@ -153,7 +155,7 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
          }
  
          public String a() {
-@@ -272,10 +276,6 @@ public enum EnumDirection implements INamable {
+@@ -274,10 +277,6 @@ public enum EnumDirection implements INamable {
              return this.e;
          }
  
@@ -164,12 +166,13 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
          public EnumDirection.EnumDirectionLimit d() {
              return this.f;
          }
-@@ -284,18 +284,18 @@ public enum EnumDirection implements INamable {
+@@ -286,19 +285,18 @@ public enum EnumDirection implements INamable {
              return this.e;
          }
  
--        public boolean apply(@Nullable Object object) {
--            return this.a((EnumDirection) object);
+-        @Override
+-        public boolean apply(EnumDirection object) {
+-            return this.a(object);
 +        public boolean apply(@Nullable EnumDirection enumdirection) {
 +            return enumdirection != null && enumdirection.k() == this;
          }
@@ -190,7 +193,7 @@ index ef7b951b978d6b30170bb98aafd31782d1797bed..40845cad6808fd2c5db5e7298a886f07
  
          }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 306d49a73a7d214d5b82ee4eb90fca2f5c9789bf..e63ff4e8c07126de881eea03ba1fc8ab756a17f3 100644
+index eafffdfffd06f530bdce252170f88a4bf36e2c25..9e56d235eb59f3981b6ec74ea457e4cb2ce431ba 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -484,6 +484,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
@@ -208,7 +211,7 @@ index 306d49a73a7d214d5b82ee4eb90fca2f5c9789bf..e63ff4e8c07126de881eea03ba1fc8ab
 -        // Send time updates to everyone, it will get the right time from the world the player is in.
 -        if (this.ticks % 20 == 0) {
 -            for (int i = 0; i < this.getPlayerList().players.size(); ++i) {
--                EntityPlayer entityplayer = this.getPlayerList().players.get(i);
+-                EntityPlayer entityplayer = (EntityPlayer) this.getPlayerList().players.get(i);
 -                entityplayer.playerConnection.sendPacket(new PacketPlayOutUpdateTime(entityplayer.world.getTime(), entityplayer.getPlayerTime(), entityplayer.world.getGameRules().getBoolean("doDaylightCycle"))); // Add support for per player time
 +        // Paper start - optimize time updates
 +        for (final WorldServer world : this.worlds) {
@@ -232,7 +235,7 @@ index 306d49a73a7d214d5b82ee4eb90fca2f5c9789bf..e63ff4e8c07126de881eea03ba1fc8ab
  
          int i;
 diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
-index 858afc6b7ebb5dc61e8ed2c74177352f737ffb7d..e975bbdce6b2e7222a657e2ece2cd6a7837626f3 100644
+index 82c2537b30ad2f17bdcb1828561ecea09fde445f..035a1714d0caa28f90c95cd515e69591e41693c1 100644
 --- a/src/main/java/net/minecraft/server/NBTTagCompound.java
 +++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
 @@ -1,7 +1,5 @@
@@ -271,7 +274,7 @@ index 858afc6b7ebb5dc61e8ed2c74177352f737ffb7d..e975bbdce6b2e7222a657e2ece2cd6a7
  
      void write(DataOutput dataoutput) throws IOException {
          Iterator iterator = this.map.keySet().iterator();
-@@ -295,19 +302,19 @@ public class NBTTagCompound extends NBTBase {
+@@ -302,19 +309,19 @@ public class NBTTagCompound extends NBTBase {
  
      public String toString() {
          StringBuilder stringbuilder = new StringBuilder("{");
@@ -297,7 +300,7 @@ index 858afc6b7ebb5dc61e8ed2c74177352f737ffb7d..e975bbdce6b2e7222a657e2ece2cd6a7
              if (stringbuilder.length() != 1) {
                  stringbuilder.append(',');
              }
-@@ -347,16 +354,18 @@ public class NBTTagCompound extends NBTBase {
+@@ -354,16 +361,18 @@ public class NBTTagCompound extends NBTBase {
      }
  
      public NBTTagCompound g() {
@@ -310,7 +313,7 @@ index 858afc6b7ebb5dc61e8ed2c74177352f737ffb7d..e975bbdce6b2e7222a657e2ece2cd6a7
          while (iterator.hasNext()) {
 -            String s = (String) iterator.next();
 -
--            nbttagcompound.set(s, this.map.get(s).clone());
+-            nbttagcompound.set(s, ((NBTBase) this.map.get(s)).clone());
 +            Map.Entry<String, NBTBase> entry = iterator.next();
 +            ret.put(entry.getKey(), entry.getValue().clone());
          }
@@ -323,10 +326,10 @@ index 858afc6b7ebb5dc61e8ed2c74177352f737ffb7d..e975bbdce6b2e7222a657e2ece2cd6a7
  
      public boolean equals(Object object) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index d7ba50f2ccf764a40d78be2c626efbafc5a02187..ddeb68f2b3b0ac45639103f57ee07ce06f69498a 100644
+index 3ac88efae7bf03258caf811562f9e27269b20361..5b11ad200153d423704ade4c2ce6fa5cdde48ace 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -1062,10 +1062,13 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -1056,10 +1056,13 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
  
              if (cancelled) {
                  this.player.getBukkitEntity().updateInventory(); // SPIGOT-2524
@@ -344,10 +347,10 @@ index d7ba50f2ccf764a40d78be2c626efbafc5a02187..ddeb68f2b3b0ac45639103f57ee07ce0
      }
  
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index d95193b04025c52e8e178f35a869253e7274643e..a9abd48e8e8b2d759944008d4210618d648b4aac 100644
+index 2156ca3b1b844310b407395784c06ac7053e507a..5ce4270edaab6e658cb477042082dfe0a7d0dab0 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -2103,20 +2103,19 @@ public abstract class World implements IBlockAccess {
+@@ -2107,20 +2107,19 @@ public abstract class World implements IBlockAccess {
          }
      }
  
@@ -373,7 +376,7 @@ index d95193b04025c52e8e178f35a869253e7274643e..a9abd48e8e8b2d759944008d4210618d
                  tileentity = this.F(blockposition);
              }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 6bfd3749629a17a8947cfa685f5360e0e606b239..25dba20f9a51a84417a63cec304f6af0f53f92dc 100644
+index a1fbda2e61afac93a85d4f2e606ed313b0020525..fc969ddeee05779293a7dc0377b66db17ff01017 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -809,6 +809,35 @@ public final class CraftServer implements Server {

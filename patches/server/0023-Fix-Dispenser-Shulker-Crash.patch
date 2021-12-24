@@ -6,7 +6,7 @@ Subject: [PATCH] Fix Dispenser Shulker Crash
 This will now check to make sure the shulker box was actually placed before interacting with it.
 
 diff --git a/src/main/java/net/minecraft/server/DispenserRegistry.java b/src/main/java/net/minecraft/server/DispenserRegistry.java
-index 167b830ec0d10ca37c0a4b25d49e36a4d461645e..5786dce4f22b8eaa9ad0d5914b8b979b97ac9bb8 100644
+index fb1d640cc3e133c7623d051893fd85324b2c4de4..c3d2d7947b33b2331cfd61a325277eebe1240770 100644
 --- a/src/main/java/net/minecraft/server/DispenserRegistry.java
 +++ b/src/main/java/net/minecraft/server/DispenserRegistry.java
 @@ -757,7 +757,12 @@ public class DispenserRegistry {

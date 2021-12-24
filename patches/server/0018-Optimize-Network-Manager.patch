@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Mon, 8 Feb 2021 22:00:43 -0600
+Date: Fri, 24 Dec 2021 16:22:09 -0600
 Subject: [PATCH] Optimize Network Manager
 
 Backport from SpottedLeaf/Tuinity and PaperMC changes
@@ -49,6 +49,19 @@ up on this optimisation before he came along.
 
 Locally this patch drops the entity tracker tick by a full 1.5x.
 
+diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
+index be43d9292af30f81705c41c6144bc76d08b6eef0..668ab0d3bbc85d961a4748095455a2026a869107 100644
+--- a/src/main/java/net/minecraft/server/LoginListener.java
++++ b/src/main/java/net/minecraft/server/LoginListener.java
+@@ -165,7 +165,7 @@ public class LoginListener implements PacketLoginInListener, ITickable {
+                     public void operationComplete(ChannelFuture future) throws Exception { // CraftBukkit - fix decompile error
+                         this.a((ChannelFuture) future);
+                     }
+-                }, new GenericFutureListener[0]);
++                });
+             }
+ 
+             this.networkManager.sendPacket(new PacketLoginOutSuccess(this.i));
 diff --git a/src/main/java/net/minecraft/server/MCUtil.java b/src/main/java/net/minecraft/server/MCUtil.java
 index 4539b56012ee2ffcfcce86212f609341e76a9887..a3b6522709cd75ed05a38c4fc4a4cc48579e5c7c 100644
 --- a/src/main/java/net/minecraft/server/MCUtil.java
@@ -65,13 +78,15 @@ index 4539b56012ee2ffcfcce86212f609341e76a9887..a3b6522709cd75ed05a38c4fc4a4cc48
      public static TileEntityHopper getHopper(World world, BlockPosition pos) {
          Chunk chunk = world.getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 6e09dac73b8672e76205d1436ae52191dc2c96a6..c98a30c3fa1ede60364b80218c6f6b492ebbc11e 100644
+index 63f5785aede6799d5229751f5c09126ebad93e6f..94d4e2de78ff9800a5bd453934e858147432f649 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
-@@ -79,8 +79,45 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -78,9 +78,46 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+     // Paper start - NetworkClient implementation
      public int protocolVersion;
      public java.net.InetSocketAddress virtualHost;
-     private static final boolean enableExplicitFlush = Boolean.getBoolean("paper.explicit-flush");
+-    private static boolean enableExplicitFlush = Boolean.getBoolean("paper.explicit-flush");
++    private static final boolean enableExplicitFlush = Boolean.getBoolean("paper.explicit-flush");
 +    // Optimize network
 +    boolean isPending = true;
 +    boolean queueImmunity = false;
@@ -122,7 +137,7 @@ index 6e09dac73b8672e76205d1436ae52191dc2c96a6..c98a30c3fa1ede60364b80218c6f6b49
          this.channel.attr(NetworkManager.c).set(enumprotocol);
          this.channel.config().setAutoRead(true);
          NetworkManager.g.debug("Enabled auto read");
-@@ -149,41 +187,95 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -150,41 +188,95 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
          NetworkManager.g.debug("Set listener of {} to {}", this, packetlistener);
          this.m = packetlistener;
      }
@@ -152,7 +167,7 @@ index 6e09dac73b8672e76205d1436ae52191dc2c96a6..c98a30c3fa1ede60364b80218c6f6b49
 +        }
  
 -            try {
--                this.i.add(new NetworkManager.QueuedPacket(packet));
+-                this.i.add(new NetworkManager.QueuedPacket(packet, new GenericFutureListener[0]));
 -            } finally {
 -                this.j.writeLock().unlock();
 +        private static void buildExtraPackets0(java.util.List<Packet> extraPackets, java.util.List<Packet> into) {
@@ -210,7 +225,7 @@ index 6e09dac73b8672e76205d1436ae52191dc2c96a6..c98a30c3fa1ede60364b80218c6f6b49
 +            packets.add(new NetworkManager.QueuedPacket(packet, null)); // delay the future listener until the end of the extra packets
  
 -            try {
--                this.i.add(new NetworkManager.QueuedPacket(packet, ArrayUtils.add(agenericfuturelistener, 0, genericfuturelistener)));
+-                this.i.add(new NetworkManager.QueuedPacket(packet, (GenericFutureListener[]) ArrayUtils.add(agenericfuturelistener, 0, genericfuturelistener)));
 -            } finally {
 -                this.j.writeLock().unlock();
 +            for (int i = 0, len = extraPackets.size(); i < len;) {
@@ -238,9 +253,9 @@ index 6e09dac73b8672e76205d1436ae52191dc2c96a6..c98a30c3fa1ede60364b80218c6f6b49
 +        boolean effectiveFlush = flushConditional == null ? this.canFlush : flushConditional.booleanValue();
 +        final boolean flush = effectiveFlush || packet instanceof PacketPlayOutKeepAlive || packet instanceof PacketPlayOutKickDisconnect; // no delay for certain packets
          final EnumProtocol enumprotocol = EnumProtocol.a(packet);
-         final EnumProtocol enumprotocol1 = this.channel.attr(NetworkManager.c).get();
+         final EnumProtocol enumprotocol1 = (EnumProtocol) this.channel.attr(NetworkManager.c).get();
  
-@@ -192,63 +284,131 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -193,63 +285,131 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
              this.channel.config().setAutoRead(false);
          }
  
@@ -399,7 +414,7 @@ index 6e09dac73b8672e76205d1436ae52191dc2c96a6..c98a30c3fa1ede60364b80218c6f6b49
  
      public void a() {
          this.m();
-@@ -266,9 +426,21 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -267,9 +427,21 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
          return this.l;
      }
  
@@ -421,7 +436,7 @@ index 6e09dac73b8672e76205d1436ae52191dc2c96a6..c98a30c3fa1ede60364b80218c6f6b49
          // Spigot End
          if (this.channel.isOpen()) {
              this.channel.close(); // We can't wait as this may be called from an event loop.
-@@ -335,7 +507,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -336,7 +508,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
      public void handleDisconnection() {
          if (this.channel != null && !this.channel.isOpen()) {
              if (this.p) {
@@ -430,16 +445,16 @@ index 6e09dac73b8672e76205d1436ae52191dc2c96a6..c98a30c3fa1ede60364b80218c6f6b49
              } else {
                  this.p = true;
                  if (this.j() != null) {
-@@ -343,7 +515,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -344,7 +516,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
                  } else if (this.i() != null) {
-                     this.i().a(new ChatMessage("multiplayer.disconnect.generic"));
+                     this.i().a(new ChatMessage("multiplayer.disconnect.generic", new Object[0]));
                  }
 -                this.i.clear(); // Free up packet queue.
 +                clearPacketQueue(); // Paper
              }
  
          }
-@@ -355,10 +527,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -356,10 +528,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
  
      static class QueuedPacket {
  
@@ -484,8 +499,21 @@ index 668d470894e72bf867d9b3ecab2c53931f0636b3..c433cd1eba14f81d33d49a609a9b47bc
      default java.util.List<Packet> getExtraPackets() { return null; }
      default boolean packetTooLarge(NetworkManager manager) {
          return false;
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 0460166d4f2ffbd4df91e9392f2402f9aa47949c..3ac88efae7bf03258caf811562f9e27269b20361 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -266,7 +266,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+             public void operationComplete(Future future) throws Exception { // CraftBukkit - decompile error
+                 PlayerConnection.this.networkManager.close(chatcomponenttext);
+             }
+-        }, new GenericFutureListener[0]);
++        });
+         this.a(chatcomponenttext); // CraftBukkit - fire quit instantly
+         this.networkManager.stopReading();
+         // CraftBukkit - Don't wait
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 4e07b428991982cc2d66ac36fd44d3889e4350ba..ac9f51145b24aae15fba083e786b32dc13331339 100644
+index 48d281832664dde24522e83a53254176d3ccc6a3..db9c96c733da547afb7a786fc8fd36e22178d3a2 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -15,6 +15,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -509,7 +537,7 @@ index 4e07b428991982cc2d66ac36fd44d3889e4350ba..ac9f51145b24aae15fba083e786b32dc
      private final List<ChannelFuture> g = Collections.synchronizedList(Lists.newArrayList());
      private final List<NetworkManager> h = Collections.synchronizedList(Lists.newArrayList());
      // Paper start - prevent blocking on adding a new network manager while the server is ticking
--    private final List<NetworkManager> pending = Collections.synchronizedList(Lists.newArrayList());
+-    private final List<NetworkManager> pending = Collections.synchronizedList(Lists.<NetworkManager>newArrayList());
 +    private final Queue<NetworkManager> pending = new ConcurrentLinkedQueue<>();
 +    private static final boolean disableFlushConsolidation = Boolean.getBoolean("Paper.disableFlushConsolidate"); // Paper
      private void addPending() {
@@ -523,12 +551,21 @@ index 4e07b428991982cc2d66ac36fd44d3889e4350ba..ac9f51145b24aae15fba083e786b32dc
          }
      }
      // Paper end
-@@ -100,7 +105,7 @@ public class ServerConnection {
-                         channel.config().setOption(ChannelOption.TCP_NODELAY, Boolean.valueOf(true));
+@@ -101,7 +106,7 @@ public class ServerConnection {
                      } catch (ChannelException channelexception) {
+                         ;
                      }
 -
 +                    if (!disableFlushConsolidation) channel.pipeline().addFirst(new FlushConsolidationHandler()); // Paper
                      channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("legacy_query", new LegacyPingHandler(ServerConnection.this)).addLast("splitter", new PacketSplitter()).addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND)).addLast("prepender", new PacketPrepender()).addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
                      NetworkManager networkmanager = new NetworkManager(EnumProtocolDirection.SERVERBOUND);
  
+@@ -174,7 +179,7 @@ public class ServerConnection {
+                                 public void operationComplete(Future future) throws Exception {
+                                     networkmanager.close(chatcomponenttext);
+                                 }
+-                            }, new GenericFutureListener[0]);
++                            });
+                             networkmanager.stopReading();
+                         }
+                     } else {

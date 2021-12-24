@@ -8,19 +8,19 @@ Currently just just changes the logging levels for PlayerConnection, but anythin
 I can provide examples if needed.
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 0c3b475c5412c1fd75bad81b2fda2bce76941d28..abcd062371372f07b00a732ca4cf479491d961e3 100644
+index 6550ac897c10427650577ece8e248f55dca77b8a..78fcb022c8f4448b7ee8167510fd0937814cab53 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -363,7 +363,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -357,7 +357,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
  
-                 if (d10 - d9 > Math.max(100.0D, Math.pow(org.spigotmc.SpigotConfig.movedTooQuicklyMultiplier * (float) i * speed, 2)) && (!this.minecraftServer.R() || !this.minecraftServer.Q().equals(entity.getName()))) { // Spigot
+                 if (d10 - d9 > Math.max(100.0D, Math.pow((double) (org.spigotmc.SpigotConfig.movedTooQuicklyMultiplier * (float) i * speed), 2)) && (!this.minecraftServer.R() || !this.minecraftServer.Q().equals(entity.getName()))) { // Spigot
                  // CraftBukkit end
 -                    PlayerConnection.LOGGER.warn("{} (vehicle of {}) moved too quickly! {},{},{}", entity.getName(), this.player.getName(), Double.valueOf(d6), Double.valueOf(d7), Double.valueOf(d8));
 +                    PlayerConnection.LOGGER.trace("{} (vehicle of {}) moved too quickly! {},{},{}", entity.getName(), this.player.getName(), Double.valueOf(d6), Double.valueOf(d7), Double.valueOf(d8));
                      this.networkManager.sendPacket(new PacketPlayOutVehicleMove(entity));
                      return;
                  }
-@@ -388,7 +388,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -382,7 +382,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
  
                  if (d10 > org.spigotmc.SpigotConfig.movedWronglyThreshold) { // Spigot
                      flag1 = true;
@@ -29,16 +29,16 @@ index 0c3b475c5412c1fd75bad81b2fda2bce76941d28..abcd062371372f07b00a732ca4cf4794
                  }
                  Location curPos = this.getPlayer().getLocation(); // Spigot
  
-@@ -611,7 +611,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -605,7 +605,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
  
-                                 if (d11 - d10 > Math.max(f2, Math.pow(org.spigotmc.SpigotConfig.movedTooQuicklyMultiplier * (float) i * speed, 2)) && (!this.minecraftServer.R() || !this.minecraftServer.Q().equals(this.player.getName()))) { // Spigot
+                                 if (d11 - d10 > Math.max(f2, Math.pow((double) (org.spigotmc.SpigotConfig.movedTooQuicklyMultiplier * (float) i * speed), 2)) && (!this.minecraftServer.R() || !this.minecraftServer.Q().equals(this.player.getName()))) { // Spigot
                                  // CraftBukkit end
 -                                    PlayerConnection.LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName(), Double.valueOf(d7), Double.valueOf(d8), Double.valueOf(d9));
 +                                    PlayerConnection.LOGGER.trace("{} moved too quickly! {},{},{}", this.player.getName(), Double.valueOf(d7), Double.valueOf(d8), Double.valueOf(d9));
                                      this.a(this.player.locX, this.player.locY, this.player.locZ, this.player.yaw, this.player.pitch);
                                      return;
                                  }
-@@ -669,7 +669,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -663,7 +663,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
  
                              if (!this.player.L() && d11 > org.spigotmc.SpigotConfig.movedWronglyThreshold && !this.player.isSleeping() && !this.player.playerInteractManager.isCreative() && this.player.playerInteractManager.getGameMode() != EnumGamemode.SPECTATOR) { // Spigot
                                  flag1 = true;
@@ -47,7 +47,7 @@ index 0c3b475c5412c1fd75bad81b2fda2bce76941d28..abcd062371372f07b00a732ca4cf4794
                              }
  
                              this.player.setLocation(d4, d5, d6, f, f1);
-@@ -1313,7 +1313,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -1307,7 +1307,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
                      this.minecraftServer.server.playerCommandState = false;
                  }
              } else if (s.isEmpty()) {

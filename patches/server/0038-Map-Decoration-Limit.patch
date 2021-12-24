@@ -67,7 +67,7 @@ index e0832d7f3a5e8fc992eafc824642b518c1e2810f..043bccf726c5a4cc5455e7eeb6522423
 +
  }
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index ddbaacc2d20a63dba7d505b6feddf7d46926dc32..515c361ac987fd689fe09379e34ebc24f3438da6 100644
+index a4eddca67a7c401da8351c2e994d14119e96d692..56b08a0a417c2d47728b62d78ec0db3906c87b47 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -48,13 +48,13 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
@@ -98,7 +98,7 @@ index ddbaacc2d20a63dba7d505b6feddf7d46926dc32..515c361ac987fd689fe09379e34ebc24
          return tag.hasKey("Bukkit.updateLevel") && tag.getInt("Bukkit.updateLevel") >= level;
      }
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index d26c1798b64333b3e1c04e72ea1823ed453bae1e..e023574268c9ebfdafe86461e3550923dda014f7 100644
+index 42d7dff874ecac0d5760dc4f9b6c13e6f078f408..30a2097975868ff80232cd0c32d7d55b0c374aa1 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -188,9 +188,13 @@ public class LoginListener implements PacketLoginInListener, ITickable {
@@ -116,7 +116,7 @@ index d26c1798b64333b3e1c04e72ea1823ed453bae1e..e023574268c9ebfdafe86461e3550923
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 41aa4caaf6c8029835cd5021ef3bc304d4a1e1d6..cc8b3fef7421e5b2f58a22687990ff129bd527cd 100644
+index df8940ff1c317ca321e0a03d06eafffd4b561c6c..4c6de8a38d7d90ad9cfe0192c2d08d07f349e52a 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -761,8 +761,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
@@ -202,7 +202,7 @@ index e37627fff51f4161231213ad08f7b411bd0874a5..c797f103bf68dfe5e281ca4344a47926
              for (int a = 0, len = Integer.bitCount(chunkSectionBitSet); a < len; ++a) {
                  // IntegerUtil.getTrailingBit (-n & n)
 diff --git a/src/main/java/net/minecraft/server/WorldMap.java b/src/main/java/net/minecraft/server/WorldMap.java
-index 13c06e94ed5e9afd23afd4336dc5280e353beb0d..a3f61121dca1fbc28a2f073a974d2130212ed925 100644
+index 59173605ee8406b021576329657a8f1477fe10ad..9d34b65f21e9b8a240e290433cefba14071035b8 100644
 --- a/src/main/java/net/minecraft/server/WorldMap.java
 +++ b/src/main/java/net/minecraft/server/WorldMap.java
 @@ -10,12 +10,16 @@ import javax.annotation.Nullable;
@@ -262,4 +262,4 @@ index 13c06e94ed5e9afd23afd4336dc5280e353beb0d..a3f61121dca1fbc28a2f073a974d2130
 +
      @Nullable
      public Packet<?> a(ItemStack itemstack, World world, EntityHuman entityhuman) {
-         WorldMap.WorldMapHumanTracker worldmap_worldmaphumantracker = this.k.get(entityhuman);
+         WorldMap.WorldMapHumanTracker worldmap_worldmaphumantracker = (WorldMap.WorldMapHumanTracker) this.k.get(entityhuman);

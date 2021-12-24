@@ -23,7 +23,7 @@ index 0e542ad19d2e3d8c2762091d22f32f62056ddd1c..48464f4d1b3da414d3f9b9d86c0e53c0
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java b/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
-index d1ed4cf0723fa8c067d148a2355a5b9030b07d58..6b73bd46671377cbd34228f390644239086ab72c 100644
+index 8b5aeb1b02eeb24b29fede44b625587826052f90..76858edadf56a014bb84228689931f66fcaeee26 100644
 --- a/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
 +++ b/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
 @@ -1,5 +1,7 @@
@@ -44,7 +44,7 @@ index d1ed4cf0723fa8c067d148a2355a5b9030b07d58..6b73bd46671377cbd34228f390644239
          try {
              a(nbttagcompound, (DataOutput) dataoutputstream);
 diff --git a/src/main/java/net/minecraft/server/PacketCompressor.java b/src/main/java/net/minecraft/server/PacketCompressor.java
-index db7dc175239193ade658f7f0fce86463fbf0432c..a80d293b8a37ff86a243d6167a30639f7105749c 100644
+index dc87fe47fa7f91643630f9e257e4facb1c0e592a..a80d293b8a37ff86a243d6167a30639f7105749c 100644
 --- a/src/main/java/net/minecraft/server/PacketCompressor.java
 +++ b/src/main/java/net/minecraft/server/PacketCompressor.java
 @@ -1,5 +1,6 @@
@@ -80,13 +80,12 @@ index db7dc175239193ade658f7f0fce86463fbf0432c..a80d293b8a37ff86a243d6167a30639f
              packetdataserializer.d(abyte.length);
              this.b.setInput(abyte, 0, i);
              this.b.finish();
-@@ -46,7 +48,8 @@ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
-         this.c = i;
+@@ -47,7 +49,7 @@ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
      }
  
--    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
--        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
-+    @Override
+     @Override
+-    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, object, bytebuf);
 +    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf incoming, ByteBuf outgoing) throws Exception {
 +        this.a(channelhandlercontext, incoming, outgoing);
      }

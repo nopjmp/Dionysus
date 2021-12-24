@@ -25,7 +25,7 @@ index e3ca26e90e956cca655f3449e3985079cc842f46..81f24b09bfc127226918aea6215a7902
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index 06353e7d312121c18a942f7fe6f31d11efcc8b01..d26c1798b64333b3e1c04e72ea1823ed453bae1e 100644
+index 4bf1b174b2e3f2042f23da9b4c3bb047942c4db1..42d7dff874ecac0d5760dc4f9b6c13e6f078f408 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -4,6 +4,7 @@ import com.destroystokyo.paper.profile.CraftPlayerProfile;
@@ -50,7 +50,7 @@ index 06353e7d312121c18a942f7fe6f31d11efcc8b01..d26c1798b64333b3e1c04e72ea1823ed
  
      public void a(PacketLoginInStart packetlogininstart) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index abcd062371372f07b00a732ca4cf479491d961e3..99a803bc45a18420fb3e30e35ad1eb94e260ce6f 100644
+index 78fcb022c8f4448b7ee8167510fd0937814cab53..9eefbbbc78acd0494ba7ab30908e6d40ca679cda 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
@@ -61,9 +61,9 @@ index abcd062371372f07b00a732ca4cf479491d961e3..99a803bc45a18420fb3e30e35ad1eb94
  import io.netty.util.concurrent.Future;
  import io.netty.util.concurrent.GenericFutureListener;
  import java.io.IOException;
-@@ -363,7 +364,11 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -357,7 +358,11 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
  
-                 if (d10 - d9 > Math.max(100.0D, Math.pow(org.spigotmc.SpigotConfig.movedTooQuicklyMultiplier * (float) i * speed, 2)) && (!this.minecraftServer.R() || !this.minecraftServer.Q().equals(entity.getName()))) { // Spigot
+                 if (d10 - d9 > Math.max(100.0D, Math.pow((double) (org.spigotmc.SpigotConfig.movedTooQuicklyMultiplier * (float) i * speed), 2)) && (!this.minecraftServer.R() || !this.minecraftServer.Q().equals(entity.getName()))) { // Spigot
                  // CraftBukkit end
 -                    PlayerConnection.LOGGER.trace("{} (vehicle of {}) moved too quickly! {},{},{}", entity.getName(), this.player.getName(), Double.valueOf(d6), Double.valueOf(d7), Double.valueOf(d8));
 +                    if (DionysusConfig.redactPlayerData) {
@@ -74,9 +74,9 @@ index abcd062371372f07b00a732ca4cf479491d961e3..99a803bc45a18420fb3e30e35ad1eb94
                      this.networkManager.sendPacket(new PacketPlayOutVehicleMove(entity));
                      return;
                  }
-@@ -611,7 +616,11 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -605,7 +610,11 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
  
-                                 if (d11 - d10 > Math.max(f2, Math.pow(org.spigotmc.SpigotConfig.movedTooQuicklyMultiplier * (float) i * speed, 2)) && (!this.minecraftServer.R() || !this.minecraftServer.Q().equals(this.player.getName()))) { // Spigot
+                                 if (d11 - d10 > Math.max(f2, Math.pow((double) (org.spigotmc.SpigotConfig.movedTooQuicklyMultiplier * (float) i * speed), 2)) && (!this.minecraftServer.R() || !this.minecraftServer.Q().equals(this.player.getName()))) { // Spigot
                                  // CraftBukkit end
 -                                    PlayerConnection.LOGGER.trace("{} moved too quickly! {},{},{}", this.player.getName(), Double.valueOf(d7), Double.valueOf(d8), Double.valueOf(d9));
 +                                    if (DionysusConfig.redactPlayerData) {
@@ -88,7 +88,7 @@ index abcd062371372f07b00a732ca4cf479491d961e3..99a803bc45a18420fb3e30e35ad1eb94
                                      return;
                                  }
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index fd972ff6ab0f1162ca5cafb257a3221a5ccb4062..cd61edadf9776bea3d26ea9319389315a1b05b10 100644
+index d15079f9bb3c77a3268d9d19f1445060ff7342e7..7b4adac6f21ea331c4c0c16b518fb9daa6500875 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
@@ -114,7 +114,7 @@ index fd972ff6ab0f1162ca5cafb257a3221a5ccb4062..cd61edadf9776bea3d26ea9319389315
  
      public void sendScoreboard(ScoreboardServer scoreboardserver, EntityPlayer entityplayer) {
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 6420eb7e94cf68953a0ab0696cee5af3bccdd068..f26ecd3186120f550c9310c218663728bcd866ae 100644
+index efa0c8ec29e659ac8c9691939f0b4482e500e516..e68112d39b6fc38bfdbe6e503a7c9d1bd1bdfb31 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -125,7 +125,7 @@ index 6420eb7e94cf68953a0ab0696cee5af3bccdd068..f26ecd3186120f550c9310c218663728
  import io.netty.bootstrap.ServerBootstrap;
  import io.netty.channel.Channel;
  import io.netty.channel.ChannelException;
-@@ -176,7 +177,11 @@ public class ServerConnection {
+@@ -177,7 +178,11 @@ public class ServerConnection {
                                  throw new ReportedException(crashreport);
                              }
  

@@ -18,7 +18,7 @@ index 52457e3d8402d6d050818ba3cc036bfdc54a89ee..294d03335b6d655a448bf321eedff646
              for (int y = startY; y <= endY; y++) {
                  for (int z = startZ; z <= endZ; z++) {
 diff --git a/src/main/java/net/minecraft/server/BlockPosition.java b/src/main/java/net/minecraft/server/BlockPosition.java
-index 149d09361fd6bb01505cd2efea7e50463b9a0376..6bb23bc30dd8729212dd2fe6dbf9e31295a7670d 100644
+index 4849fcbc835040b5b6e46e3008080c2003b68d41..e80adc4f254a28cf9524eaf5a1c8be5132ae280b 100644
 --- a/src/main/java/net/minecraft/server/BlockPosition.java
 +++ b/src/main/java/net/minecraft/server/BlockPosition.java
 @@ -290,11 +290,12 @@ public class BlockPosition extends BaseBlockPosition {
@@ -44,7 +44,7 @@ index 149d09361fd6bb01505cd2efea7e50463b9a0376..6bb23bc30dd8729212dd2fe6dbf9e312
              return this.c(MathHelper.floor(d0), MathHelper.floor(d1), MathHelper.floor(d2));
          }
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 6a81ad9e4b745813b23a806aa18a05b151961277..38f95b12103134967781db6b05ed7eb37b456b28 100644
+index 035fa533da442ddf0c0c3943fe0ebfc0e2218cce..7e662a49cd3be33bae6e5a09300a69ebc9d231e6 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -950,8 +950,6 @@ public class Chunk {
@@ -77,7 +77,7 @@ index afdc4a779a61c1ccbf6b42cf3214bfef9e819a71..caa7779ad348b25a779000519aa49db9
          return false; // CraftBukkit - MC-80966
      }
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index 8f881eeb6b7395f54f887e94020a15e495c080d8..589da0e5a34565cf03bb4b8a5ded5b09ee74925b 100644
+index e148901e5349ecd2ba99d359906cff38176d7be6..a3a39935b4f177a35b7356dd4d922d47faccf30c 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
 @@ -2,24 +2,24 @@ package net.minecraft.server;
@@ -404,7 +404,7 @@ index 8f881eeb6b7395f54f887e94020a15e495c080d8..589da0e5a34565cf03bb4b8a5ded5b09
 +    // Dionysus end
 +
      public void a(boolean flag) {
-         this.world.a(null, this.posX, this.posY, this.posZ, SoundEffects.bV, SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F);
+         this.world.a((EntityHuman) null, this.posX, this.posY, this.posZ, SoundEffects.bV, SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F);
          if (this.size >= 2.0F && this.b) {
 -            this.world.addParticle(EnumParticle.EXPLOSION_HUGE, this.posX, this.posY, this.posZ, 1.0D, 0.0D, 0.0D, new int[0]);
 +            this.world.addParticle(EnumParticle.EXPLOSION_HUGE, this.posX, this.posY, this.posZ, 1.0D, 0.0D, 0.0D);

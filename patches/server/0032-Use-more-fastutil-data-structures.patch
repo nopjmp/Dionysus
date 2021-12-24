@@ -23,7 +23,7 @@ index a93167b12194198276493cca184d5179baaa38ee..c60b54b50d4be7d7c701903f3369353f
          <dependency>
              <groupId>net.minecrell</groupId>
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 013b8a6489e71e52f33ff8fc2924fc0013029b49..00db28579af80c9b250048d0ce6f9f522afa4ce7 100644
+index 4ad9a824b671b2c83a594cb2ad9b98b36d423b46..ca89369cec5423786e0446858301e4e6f3fe5626 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -3,6 +3,7 @@ package net.minecraft.server;
@@ -34,7 +34,7 @@ index 013b8a6489e71e52f33ff8fc2924fc0013029b49..00db28579af80c9b250048d0ce6f9f52
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
-@@ -308,10 +309,10 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -309,10 +310,10 @@ public class ChunkProviderServer implements IChunkProvider {
                  int targetSize = Math.min(this.unloadQueue.size() - 100,  (int) (this.unloadQueue.size() * UNLOAD_QUEUE_RESIZE_FACTOR)); // Paper - Make more aggressive
                  // Spigot end
  
@@ -98,7 +98,7 @@ index c583ab7d9a481a7df05acf70dc0d7cc341473bb1..13cf0a5e9237c28e8b869df0e0d863ba
                  }
              } catch (Throwable t) {
 diff --git a/src/main/java/net/minecraft/server/MethodProfiler.java b/src/main/java/net/minecraft/server/MethodProfiler.java
-index 6e01bad470c5d00557f74a7e7af19ffc2d8c7604..750e06d641aaa2864276d6ccb9507ce85adc7167 100644
+index 480e2ca972bc9dedc6d77c7f2a2621e01c51f21c..e0276b11cdfda75a3bd1ec75cfecbbe0bdd45cd7 100644
 --- a/src/main/java/net/minecraft/server/MethodProfiler.java
 +++ b/src/main/java/net/minecraft/server/MethodProfiler.java
 @@ -1,13 +1,18 @@
@@ -141,14 +141,14 @@ index 6e01bad470c5d00557f74a7e7af19ffc2d8c7604..750e06d641aaa2864276d6ccb9507ce8
          if (!ENABLED) return;  // CraftBukkit
          if (this.a) {
              long i = System.nanoTime();
--            long j = this.d.remove(this.d.size() - 1).longValue();
+-            long j = ((Long) this.d.remove(this.d.size() - 1)).longValue();
 +            long j = this.d.removeLong(this.d.size() - 1);
  
              this.c.remove(this.c.size() - 1);
              long k = i - j;
  
              if (this.f.containsKey(this.e)) {
--                this.f.put(this.e, Long.valueOf(this.f.get(this.e).longValue() + k));
+-                this.f.put(this.e, Long.valueOf(((Long) this.f.get(this.e)).longValue() + k));
 +                this.f.put(this.e, this.f.get(this.e) + k);
              } else {
 -                this.f.put(this.e, Long.valueOf(k));
@@ -156,17 +156,17 @@ index 6e01bad470c5d00557f74a7e7af19ffc2d8c7604..750e06d641aaa2864276d6ccb9507ce8
              }
  
              if (k > 100000000L) {
--                MethodProfiler.b.warn("Something's taking too long! '{}' took aprox {} ms", this.e, Double.valueOf((double) k / 1000000.0D));
+-                MethodProfiler.b.warn("Something\'s taking too long! \'{}\' took aprox {} ms", this.e, Double.valueOf((double) k / 1000000.0D));
 +                MethodProfiler.b.warn("Something's taking too long! '{}' took aprox {} ms", this.e, (double) k / 1000000.0D);
              }
  
-             this.e = this.c.isEmpty() ? "" : this.c.get(this.c.size() - 1);
+             this.e = this.c.isEmpty() ? "" : (String) this.c.get(this.c.size() - 1);
 @@ -77,22 +82,19 @@ public class MethodProfiler {
          if (!ENABLED || !this.a) {  // CraftBukkit
              return Collections.emptyList();
          } else {
--            long i = this.f.containsKey("root") ? this.f.get("root").longValue() : 0L;
--            long j = this.f.containsKey(s) ? this.f.get(s).longValue() : -1L;
+-            long i = this.f.containsKey("root") ? ((Long) this.f.get("root")).longValue() : 0L;
+-            long j = this.f.containsKey(s) ? ((Long) this.f.get(s)).longValue() : -1L;
 -            ArrayList arraylist = Lists.newArrayList();
 +            long i = this.f.getOrDefault("root", 0L);
 +            long j = this.f.getOrDefault(s, -1L);
@@ -184,7 +184,7 @@ index 6e01bad470c5d00557f74a7e7af19ffc2d8c7604..750e06d641aaa2864276d6ccb9507ce8
  
 +            for (String s1 : this.f.keySet()) {
                  if (s1.length() > s.length() && s1.startsWith(s) && s1.indexOf(".", s.length() + 1) < 0) {
--                    k += this.f.get(s1).longValue();
+-                    k += ((Long) this.f.get(s1)).longValue();
 +                    k += this.f.getLong(s1);
                  }
              }
@@ -202,7 +202,7 @@ index 6e01bad470c5d00557f74a7e7af19ffc2d8c7604..750e06d641aaa2864276d6ccb9507ce8
 +            for (Object2LongMap.Entry<String> entry : this.f.object2LongEntrySet()) {
 +                String s2 = entry.getKey();
                  if (s2.length() > s.length() && s2.startsWith(s) && s2.indexOf(".", s.length() + 1) < 0) {
--                    long l = this.f.get(s2).longValue();
+-                    long l = ((Long) this.f.get(s2)).longValue();
 +                    long l = this.f.getLong(s2);
                      double d0 = (double) l * 100.0D / (double) k;
                      double d1 = (double) l * 100.0D / (double) i;
@@ -216,20 +216,22 @@ index 6e01bad470c5d00557f74a7e7af19ffc2d8c7604..750e06d641aaa2864276d6ccb9507ce8
  
 -            while (iterator1.hasNext()) {
 -                s2 = (String) iterator1.next();
--                this.f.put(s2, Long.valueOf(this.f.get(s2).longValue() * 999L / 1000L));
+-                this.f.put(s2, Long.valueOf(((Long) this.f.get(s2)).longValue() * 999L / 1000L));
 +                entry.setValue(entry.getLongValue() * 999L / 1000L);
              }
  
              if ((float) k > f) {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index df7b6d3ee9831b85f498e64a1117a41a384d02b3..fd972ff6ab0f1162ca5cafb257a3221a5ccb4062 100644
+index 0e9c0466ec0108a822d6e2f9e6b90363159e6f67..d15079f9bb3c77a3268d9d19f1445060ff7342e7 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -74,7 +74,19 @@ public abstract class PlayerList {
+@@ -73,8 +73,20 @@ public abstract class PlayerList {
+     private int v;
  
      // CraftBukkit start
-     private final CraftServer cserver;
+-    private CraftServer cserver;
 -    private final Map<String,EntityPlayer> playersByName = new org.spigotmc.CaseInsensitiveMap<EntityPlayer>();
++    private final CraftServer cserver;
 +    private final Map<String,EntityPlayer> playersByName = new it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap<String, EntityPlayer>(
 +        new it.unimi.dsi.fastutil.Hash.Strategy<String>() {
 +            @Override
@@ -247,7 +249,7 @@ index df7b6d3ee9831b85f498e64a1117a41a384d02b3..fd972ff6ab0f1162ca5cafb257a3221a
  
      public PlayerList(MinecraftServer minecraftserver) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
-index e80e4ea85b945b499d0c6ba351ed18909faf2704..0e0d850c10326b9fe312bcc08d15aa02d34608a6 100644
+index 2ab4a1cf4123242665e0605cfd998c4d6a6148ee..9d063df7041f75a43663ad13ce39227e42127294 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
 @@ -308,19 +308,22 @@ class CraftMetaItem implements ItemMeta, Repairable {
@@ -282,10 +284,9 @@ index e80e4ea85b945b499d0c6ba351ed18909faf2704..0e0d850c10326b9fe312bcc08d15aa02
              nbttaglist = new NBTTagList();
  
 diff --git a/src/main/java/org/spigotmc/CaseInsensitiveHashingStrategy.java b/src/main/java/org/spigotmc/CaseInsensitiveHashingStrategy.java
-deleted file mode 100644
-index 4070162bcb8cc18ae5ce7ba710e9ad607a2070fd..0000000000000000000000000000000000000000
+index aafdd3682eb95177361795f62943ccfe212a2fae..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 100644
 --- a/src/main/java/org/spigotmc/CaseInsensitiveHashingStrategy.java
-+++ /dev/null
++++ b/src/main/java/org/spigotmc/CaseInsensitiveHashingStrategy.java
 @@ -1,18 +0,0 @@
 -package org.spigotmc;
 -
@@ -302,7 +303,7 @@ index 4070162bcb8cc18ae5ce7ba710e9ad607a2070fd..00000000000000000000000000000000
 -
 -    @Override
 -    public boolean equals(Object o1, Object o2) {
--        return o1.equals(o2) || (o1 instanceof String && o2 instanceof String && ((String) o1).equalsIgnoreCase(((String) o2)));
+-        return o1.equals(o2) || (o1 instanceof String && o2 instanceof String && ((String) o1).toLowerCase().equals(((String) o2).toLowerCase()));
 -    }
 -}
 diff --git a/src/main/java/org/spigotmc/CaseInsensitiveMap.java b/src/main/java/org/spigotmc/CaseInsensitiveMap.java
@@ -327,7 +328,7 @@ index 1934fd50ad103970c20ad52ac32c3a6a3353b17e..00000000000000000000000000000000
 -    }
 -}
 diff --git a/src/main/java/org/spigotmc/SpigotConfig.java b/src/main/java/org/spigotmc/SpigotConfig.java
-index 7778ebfab65ba9728ef2d8c55b7a0ec63b6f797a..1a7d4452c94c22d0f25085fabbe63cc624cf8693 100644
+index 887c7d02c19bd83b2f99aff9072973573fcf36d5..0ca9151d72fe1805aa4dc2784760753b47cb3b91 100644
 --- a/src/main/java/org/spigotmc/SpigotConfig.java
 +++ b/src/main/java/org/spigotmc/SpigotConfig.java
 @@ -1,6 +1,7 @@

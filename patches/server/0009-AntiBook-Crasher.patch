@@ -1,12 +1,12 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Fri, 5 Feb 2021 00:13:43 -0600
+Date: Fri, 24 Dec 2021 16:26:26 -0600
 Subject: [PATCH] AntiBook Crasher
 
 This prevents someone from interacting with a book that is too large
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index ffc048f13004d940e1804bc65a74310b5122b39e..d7ba50f2ccf764a40d78be2c626efbafc5a02187 100644
+index 59d5263295ec57981fb8a9cbab34a00bce904f70..0460166d4f2ffbd4df91e9392f2402f9aa47949c 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -7,17 +7,13 @@ import com.google.common.util.concurrent.Futures;
@@ -29,7 +29,7 @@ index ffc048f13004d940e1804bc65a74310b5122b39e..d7ba50f2ccf764a40d78be2c626efbaf
  import java.util.concurrent.ExecutionException;
  import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  import org.bukkit.Location;
-@@ -1796,6 +1792,13 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -1790,6 +1786,13 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
          this.player.resetIdleTimer();
          if (this.player.activeContainer.windowId == packetplayinwindowclick.a() && this.player.activeContainer.c(this.player) && this.player.activeContainer.canUse(this.player)) { // CraftBukkit
              boolean cancelled = this.player.isSpectator(); // CraftBukkit - see below if
@@ -43,7 +43,7 @@ index ffc048f13004d940e1804bc65a74310b5122b39e..d7ba50f2ccf764a40d78be2c626efbaf
              if (false/*this.player.isSpectator()*/) { // CraftBukkit
                  NonNullList nonnulllist = NonNullList.a();
  
-@@ -2358,7 +2361,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -2352,7 +2355,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
      }
  
      // Paper start
@@ -52,7 +52,7 @@ index ffc048f13004d940e1804bc65a74310b5122b39e..d7ba50f2ccf764a40d78be2c626efbaf
          NBTTagList pageList = testStack.getTag().getList("pages", 8);
          long byteTotal = 0;
          int maxBookPageSize = com.destroystokyo.paper.PaperConfig.maxBookPageSize;
-@@ -2387,8 +2390,10 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -2381,8 +2384,10 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
          }
  
          if (byteTotal > byteAllowed) {
@@ -65,7 +65,16 @@ index ffc048f13004d940e1804bc65a74310b5122b39e..d7ba50f2ccf764a40d78be2c626efbaf
              return false;
          }
  
-@@ -2465,7 +2470,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -2423,7 +2428,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                 }
+ 
+                 if (itemstack.getItem() == Items.WRITABLE_BOOK && itemstack.getItem() == itemstack1.getItem()) {
+-                    if (!validateBook(itemstack)) return; // Paper
++                    if (!validateBook(itemstack, true)) return; // Paper
+                     itemstack1.a("pages", (NBTBase) itemstack.getTag().getList("pages", 8));
+                     CraftEventFactory.handleEditBookEvent(player, itemstack1); // CraftBukkit
+                 }
+@@ -2459,7 +2464,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
                      }
  
                      if (itemstack.getItem() == Items.WRITABLE_BOOK && itemstack1.getItem() == Items.WRITABLE_BOOK) {
@@ -73,4 +82,4 @@ index ffc048f13004d940e1804bc65a74310b5122b39e..d7ba50f2ccf764a40d78be2c626efbaf
 +                        if (!validateBook(itemstack, true)) return; // Paper
                          ItemStack itemstack2 = new ItemStack(Items.WRITTEN_BOOK);
  
-                         itemstack2.a("author", new NBTTagString(this.player.getName()));
+                         itemstack2.a("author", (NBTBase) (new NBTTagString(this.player.getName())));

@@ -7,7 +7,7 @@ Subject: [PATCH] Optimize the advancement data player iteration to be O(N)
 From Paper https://github.com/PaperMC/Paper/commit/97cedaa5891f31028ed493d160773ce4d32220d9
 
 diff --git a/src/main/java/net/minecraft/server/AdvancementDataPlayer.java b/src/main/java/net/minecraft/server/AdvancementDataPlayer.java
-index 811b4c02d6df4f0af7e8550655a612d3d341bb7b..96dacb9936b17d3ccd8277483f6b0b0b60b712c2 100644
+index 8913e2744eef5d27c954dabe13956673ff3c3e93..80063e376960b73e4eacd12a64d4be8eb790d04e 100644
 --- a/src/main/java/net/minecraft/server/AdvancementDataPlayer.java
 +++ b/src/main/java/net/minecraft/server/AdvancementDataPlayer.java
 @@ -356,6 +356,16 @@ public class AdvancementDataPlayer {

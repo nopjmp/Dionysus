@@ -18,10 +18,10 @@ index 67f8ad8eda987217291dccdbc61419ffed89725a..c5472b50109c2efb46c896d097860e48
          boolean flag1 = false;
          int l1 = 0;
 diff --git a/src/main/java/net/minecraft/server/EntityEnderSignal.java b/src/main/java/net/minecraft/server/EntityEnderSignal.java
-index 6a5e20ab11923ef92af941afd69467224f473e64..5d7b85759db9cc439968dadaf46520fb1c6a706f 100644
+index c8c75445eab5c48e93cdbd737af2892a22d9aca0..2f2f054c6a4daa4c2f12fbdf15cb1212770af8a0 100644
 --- a/src/main/java/net/minecraft/server/EntityEnderSignal.java
 +++ b/src/main/java/net/minecraft/server/EntityEnderSignal.java
-@@ -85,8 +85,8 @@ public class EntityEnderSignal extends Entity {
+@@ -86,8 +86,8 @@ public class EntityEnderSignal extends Entity {
                  this.motY *= 0.8D;
              }
  
@@ -33,12 +33,12 @@ index 6a5e20ab11923ef92af941afd69467224f473e64..5d7b85759db9cc439968dadaf46520fb
                  this.motY += (1.0D - this.motY) * 0.014999999664723873D;
              } else {
 diff --git a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
-index beefd53d0e0e8b742af6386251427872f10ccf05..761f34c7b62468f0b2f51df3151e53f27dfd2931 100644
+index 1f4025486e09067a232dad6c89272889e97a5ffc..8d917b9e5a804151c8c5371783e8ef6f4fdf7222 100644
 --- a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
 +++ b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
 @@ -487,8 +487,8 @@ public abstract class EntityMinecartAbstract extends Entity implements INamableT
          if (entity instanceof EntityLiving) {
-             d6 = ((EntityLiving) entity).bg;
+             d6 = (double) ((EntityLiving) entity).bg;
              if (d6 > 0.0D) {
 -                d7 = -Math.sin((double) (entity.yaw * 0.017453292F));
 -                d8 = Math.cos((double) (entity.yaw * 0.017453292F));
@@ -48,7 +48,7 @@ index beefd53d0e0e8b742af6386251427872f10ccf05..761f34c7b62468f0b2f51df3151e53f2
                  if (d9 < 0.01D) {
                      this.motX += d7 * 0.1D;
 diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
-index 5eabbd2063b09fd1822a22d1e326b72f581d8ca9..b1320ec746b51f12aeaa5adb6191f4bf42ca2d61 100644
+index 50811852a3319895fc08419eb577c54fe9d0bbb8..9871b444c62d0d614338a6febbc967be84bcbb0c 100644
 --- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 +++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 @@ -25,9 +25,9 @@ public class EntityTNTPrimed extends Entity {
@@ -64,7 +64,7 @@ index 5eabbd2063b09fd1822a22d1e326b72f581d8ca9..b1320ec746b51f12aeaa5adb6191f4bf
          this.lastX = d0;
          this.lastY = d1;
 diff --git a/src/main/java/net/minecraft/server/WorldGenStronghold.java b/src/main/java/net/minecraft/server/WorldGenStronghold.java
-index d6f8396c327ffbf5865001549d2325410459c1fd..f47046889d3073cbd55cc0807b8b4e9b66a12ffd 100644
+index a3b958e0109ea54e478d543324151e9972d86541..595ecb9052b8ab62c52f8dbcad6f565660119342 100644
 --- a/src/main/java/net/minecraft/server/WorldGenStronghold.java
 +++ b/src/main/java/net/minecraft/server/WorldGenStronghold.java
 @@ -130,8 +130,8 @@ public class WorldGenStronghold extends StructureGenerator {
@@ -79,7 +79,7 @@ index d6f8396c327ffbf5865001549d2325410459c1fd..f47046889d3073cbd55cc0807b8b4e9b
  
                  if (blockposition != null) {
 diff --git a/src/main/java/net/minecraft/server/WorldProvider.java b/src/main/java/net/minecraft/server/WorldProvider.java
-index a0ef408148383405cbcdb9f3c6372ef5bcebc984..1ffd02e8ed41cf3cde91fdb0bb3a0c151f0c5851 100644
+index 35d8d1a6e77ce070b4b1c85e8fdb0edca768dcf7..64ce23c6e221d64798c16be2023acc8e97a9c6e7 100644
 --- a/src/main/java/net/minecraft/server/WorldProvider.java
 +++ b/src/main/java/net/minecraft/server/WorldProvider.java
 @@ -76,7 +76,7 @@ public abstract class WorldProvider {

@@ -23,7 +23,7 @@ index 0fe33eb470ad0be018d127194273b39cb42be0ff..e0832d7f3a5e8fc992eafc824642b518
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/RegionFile.java b/src/main/java/net/minecraft/server/RegionFile.java
-index c185e2ef5d34e48bd41c69e7523294574e7b69d8..c10dc446d391160336ee926d73c53c8b9ac0706b 100644
+index 542a35d13014f8540f1bf525f021188b8955fc56..5fecde675808a5c179ff2b055c3faa127b9f962e 100644
 --- a/src/main/java/net/minecraft/server/RegionFile.java
 +++ b/src/main/java/net/minecraft/server/RegionFile.java
 @@ -20,6 +20,8 @@ import java.util.zip.GZIPInputStream;

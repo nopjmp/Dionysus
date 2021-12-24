@@ -6,7 +6,7 @@ Subject: [PATCH] Revert "Anti-Xray"
 This reverts commit 80ae68b01ac170397e9d46e16ee7316b239529c8.
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index 0554ad244224e8f97e865310587ee59a341478cc..6611d0b9e598f5a235ea753641ae7cf1e3436951 100644
+index d481318ced62ce0ac73319d1dd42748098b239a8..20352389e74c57f7c5ef5ebf2830d4c1a2e49e37 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 @@ -1,10 +1,7 @@
@@ -1018,7 +1018,7 @@ index 8ea2beb5973c8eeb4a6f6b6327fe71c6699ae320..00000000000000000000000000000000
 -    }
 -}
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 0d02da57b4a3a825e6ab95106c1b5ed4b7cda35d..6a81ad9e4b745813b23a806aa18a05b151961277 100644
+index ff6a148c653e03cda5e7056503e5e33af695df9e..035fa533da442ddf0c0c3943fe0ebfc0e2218cce 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -158,7 +158,7 @@ public class Chunk {
@@ -1049,7 +1049,7 @@ index 0d02da57b4a3a825e6ab95106c1b5ed4b7cda35d..6a81ad9e4b745813b23a806aa18a05b1
              this.initLighting();
          }
 diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
-index c04f8e64862799552a3baded35b0e101a25296a0..5468c3b723b75dc590c87b759d81a4ee066c1776 100644
+index e6906effb4bb63ec1b856ccb190434e0cb0a7510..5ef7b89001329892328e2ccb274982d1d9e992df 100644
 --- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 +++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 @@ -446,7 +446,7 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
@@ -1237,7 +1237,7 @@ index 67784b4a67360fbbb7575797d81899b27db73158..2cb462b8e31c9d11147af1db8776054b
      }
  
 diff --git a/src/main/java/net/minecraft/server/EntityFallingBlock.java b/src/main/java/net/minecraft/server/EntityFallingBlock.java
-index 77a1d33ff822e314750f746c1b88cf92fa765367..499cc91ae9a6c769f295934142b8b428bb9419f0 100644
+index eeaa625d2fcaa4207f556b9961571875385664bc..d0b67d8fd63dfc78a3919fb7fdf35796421d8558 100644
 --- a/src/main/java/net/minecraft/server/EntityFallingBlock.java
 +++ b/src/main/java/net/minecraft/server/EntityFallingBlock.java
 @@ -74,7 +74,6 @@ public class EntityFallingBlock extends Entity {
@@ -1257,7 +1257,7 @@ index 77a1d33ff822e314750f746c1b88cf92fa765367..499cc91ae9a6c769f295934142b8b428
                                  if (block instanceof BlockFalling) {
                                      ((BlockFalling) block).a(this.world, blockposition, this.block, iblockdata);
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index af60b96a465b3f6dbacfa7352977c4949f336ca5..8f881eeb6b7395f54f887e94020a15e495c080d8 100644
+index 61fbdeb6ac55849552fa23f4fb5384e9dc375ebd..e148901e5349ecd2ba99d359906cff38176d7be6 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
 @@ -228,7 +228,6 @@ public class Explosion {
@@ -1267,9 +1267,9 @@ index af60b96a465b3f6dbacfa7352977c4949f336ca5..8f881eeb6b7395f54f887e94020a15e4
 -                this.world.chunkPacketBlockController.updateNearbyBlocks(this.world, blockposition); // Paper - Anti-Xray
  
                  if (flag) {
-                     double d0 = (float) blockposition.getX() + this.world.random.nextFloat();
+                     double d0 = (double) ((float) blockposition.getX() + this.world.random.nextFloat());
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 69d69361f60f8a8857fddf4b43a1e08e647a7623..6e09dac73b8672e76205d1436ae52191dc2c96a6 100644
+index 95c7eba962a701d35f309cd7150b96f3877e4234..63f5785aede6799d5229751f5c09126ebad93e6f 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -62,7 +62,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
@@ -1281,7 +1281,7 @@ index 69d69361f60f8a8857fddf4b43a1e08e647a7623..6e09dac73b8672e76205d1436ae52191
      private final ReentrantReadWriteLock j = new ReentrantReadWriteLock();
      public Channel channel;
      // Spigot Start // PAIL
-@@ -151,8 +151,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -152,8 +152,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
      }
  
      public void sendPacket(Packet<?> packet) {
@@ -1292,7 +1292,7 @@ index 69d69361f60f8a8857fddf4b43a1e08e647a7623..6e09dac73b8672e76205d1436ae52191
              this.a(packet, (GenericFutureListener[]) null);
          } else {
              this.j.writeLock().lock();
-@@ -167,8 +167,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -168,8 +168,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
      }
  
      public void sendPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) {
@@ -1303,7 +1303,7 @@ index 69d69361f60f8a8857fddf4b43a1e08e647a7623..6e09dac73b8672e76205d1436ae52191
              this.a(packet, (GenericFutureListener[]) ArrayUtils.add(agenericfuturelistener, 0, genericfuturelistener));
          } else {
              this.j.writeLock().lock();
-@@ -182,7 +182,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -183,7 +183,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
  
      }
  
@@ -1311,8 +1311,8 @@ index 69d69361f60f8a8857fddf4b43a1e08e647a7623..6e09dac73b8672e76205d1436ae52191
 +    private void dispatchPacket(final Packet<?> packet, @Nullable final GenericFutureListener<? extends Future<? super Void>>[] genericFutureListeners) { this.a(packet, genericFutureListeners); } // Paper - OBFHELPER
      private void a(final Packet<?> packet, @Nullable final GenericFutureListener<? extends Future<? super Void>>[] agenericfuturelistener) {
          final EnumProtocol enumprotocol = EnumProtocol.a(packet);
-         final EnumProtocol enumprotocol1 = this.channel.attr(NetworkManager.c).get();
-@@ -233,38 +233,22 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+         final EnumProtocol enumprotocol1 = (EnumProtocol) this.channel.attr(NetworkManager.c).get();
+@@ -234,38 +234,22 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
  
      }
  
@@ -1357,7 +1357,7 @@ index 69d69361f60f8a8857fddf4b43a1e08e647a7623..6e09dac73b8672e76205d1436ae52191
  
      public void a() {
          this.m();
-@@ -371,8 +355,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+@@ -372,8 +356,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
  
      static class QueuedPacket {
  
@@ -1369,7 +1369,7 @@ index 69d69361f60f8a8857fddf4b43a1e08e647a7623..6e09dac73b8672e76205d1436ae52191
          public QueuedPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) {
              this.a = packet;
 diff --git a/src/main/java/net/minecraft/server/PacketDataSerializer.java b/src/main/java/net/minecraft/server/PacketDataSerializer.java
-index c280c8425a85368b2c7eec7ee17cfe8dc1561b07..adcd12204413d1b0dfc27045eef2dec3fde5aeb5 100644
+index d71734df819c76039e76d6790db181b210133224..c1273e988e6a46c20eca54530f928404c03ad947 100644
 --- a/src/main/java/net/minecraft/server/PacketDataSerializer.java
 +++ b/src/main/java/net/minecraft/server/PacketDataSerializer.java
 @@ -33,7 +33,6 @@ public class PacketDataSerializer extends ByteBuf {
@@ -1486,7 +1486,7 @@ index 108d4c500977ed34431b57fbf35feb36a43660ba..e37627fff51f4161231213ad08f7b411
                  if (flag) {
                      packetdataserializer.writeBytes(chunksection.getSkyLightArray().asBytes());
 diff --git a/src/main/java/net/minecraft/server/PlayerChunk.java b/src/main/java/net/minecraft/server/PlayerChunk.java
-index c4102d1bdd60069a3d6d0b4ad748e1be3eac3bed..27b1c2b86e5d0886c11846d3f211b13083ba1ef4 100644
+index baf72404ec5a26e74667d20070b0a6a58865424a..71906caa0b229217eac7404ccba0453e96624d0f 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunk.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunk.java
 @@ -136,8 +136,6 @@ public class PlayerChunk {
@@ -1514,9 +1514,9 @@ index c4102d1bdd60069a3d6d0b4ad748e1be3eac3bed..27b1c2b86e5d0886c11846d3f211b130
 -                    //this.chunk.world.chunkPacketBlockController.onChunkPacketCreate(this.chunk, this.h, true); // Paper - Anti-Xray - Load nearby chunks if necessary
                      this.a((Packet) (new PacketPlayOutMapChunk(this.chunk, this.h)));
                  } else {
-                     this.a(new PacketPlayOutMultiBlockChange(this.dirtyCount, this.dirtyBlocks, this.chunk));
+                     this.a((Packet) (new PacketPlayOutMultiBlockChange(this.dirtyCount, this.dirtyBlocks, this.chunk)));
 diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
-index 1c2599f3f151957364337f97937cd2a317d56da7..f48cebb2e5d635fd2d23cbd73b4b46da80b8ae72 100644
+index 3d86798248d2256f394d1f4f848ed5a2f2f0695c..91ca480cbfbc22788d0321d27b3afc0544370bea 100644
 --- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
 +++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
 @@ -202,8 +202,6 @@ public class PlayerInteractManager {
@@ -1529,7 +1529,7 @@ index 1c2599f3f151957364337f97937cd2a317d56da7..f48cebb2e5d635fd2d23cbd73b4b46da
  
      public void a(BlockPosition blockposition) {
 diff --git a/src/main/java/net/minecraft/server/RegistryBlockID.java b/src/main/java/net/minecraft/server/RegistryBlockID.java
-index f7416f7ff5b57d1f0610af0427a8811baa8feefd..97c7d0347f8700a34c9846928f9621fc4acf29bb 100644
+index 76f6f35bb995b4f961ff087ec2cae490bae96349..03894df54cdeafc98e7b5abed24b04536c1fee48 100644
 --- a/src/main/java/net/minecraft/server/RegistryBlockID.java
 +++ b/src/main/java/net/minecraft/server/RegistryBlockID.java
 @@ -47,7 +47,6 @@ public class RegistryBlockID<T> implements Registry<T> {
@@ -1541,7 +1541,7 @@ index f7416f7ff5b57d1f0610af0427a8811baa8feefd..97c7d0347f8700a34c9846928f9621fc
          return this.a.size();
      }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 922f27b7a5c988613ed5065c3f02c8e52b0127e0..43e300409d167a13c67a941ef91c21b1335d8fe9 100644
+index 451cf0c7c07dbb6edb3e194a6103ef513e9bee1a..476eb23f37695a78543b8ed3dcdcc5511a5d4a06 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -35,8 +35,6 @@ import org.bukkit.generator.ChunkGenerator;
@@ -1569,7 +1569,7 @@ index 922f27b7a5c988613ed5065c3f02c8e52b0127e0..43e300409d167a13c67a941ef91c21b1
          this.generator = gen;
          this.world = new CraftWorld((WorldServer) this, gen, env);
          this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit
-@@ -550,8 +546,6 @@ public abstract class World implements IBlockAccess {
+@@ -551,8 +547,6 @@ public abstract class World implements IBlockAccess {
          if (flag) {
              this.c(blockposition, block);
          }
@@ -1579,7 +1579,7 @@ index 922f27b7a5c988613ed5065c3f02c8e52b0127e0..43e300409d167a13c67a941ef91c21b1
  
      public void a(BlockPosition blockposition, Block block, EnumDirection enumdirection) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
-index b328ef4d62fe5d366b9fed7dc8f2d758a9edb0fb..27f97c74316ab9feeae137f95a9a50468500042f 100644
+index 2da6edc63e7c27548eb4eb0fbb33262e72515b4d..9942f0c7500ceb88b5ca21f334070f613af96b40 100644
 --- a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
 +++ b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
 @@ -73,7 +73,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {

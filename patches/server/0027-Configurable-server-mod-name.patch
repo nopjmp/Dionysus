@@ -20,7 +20,7 @@ index 48464f4d1b3da414d3f9b9d86c0e53c08e774a80..d4f104eedd1bbb8b96491f5e6e8ab054
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e63ff4e8c07126de881eea03ba1fc8ab756a17f3..6239a47f7c8ecf7e88d3f116cec401c76fe9480b 100644
+index 9e56d235eb59f3981b6ec74ea457e4cb2ce431ba..aeeaccbba01e9fa13a98f580fa1025288c75fab9 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -9,6 +9,7 @@ import com.mojang.authlib.GameProfile;
