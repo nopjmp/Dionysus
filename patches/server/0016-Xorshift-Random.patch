@@ -6,7 +6,7 @@ Subject: [PATCH] Xorshift Random
 Use xorshift random where we can.
 
 diff --git a/pom.xml b/pom.xml
-index 99a5edb9c6929c3de32da5c2ada412a86c3726a0..3d1a3c11b631d51a5b18626f917b4cc7cb0fefe3 100644
+index e26c9cb00363c7232628abfade0ec967fc309494..066817d5be3ca37635a8b4806d95b839c3b06eaf 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -115,6 +115,18 @@
