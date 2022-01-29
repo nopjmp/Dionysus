@@ -68,7 +68,7 @@ index 01fa40071a47ef12967b58645041e1b13a3ea814..4bf1b174b2e3f2042f23da9b4c3bb047
              if (entityplayer != null) {
                  this.g = LoginListener.EnumProtocolState.DELAY_ACCEPT;
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 5b11ad200153d423704ade4c2ce6fa5cdde48ace..6550ac897c10427650577ece8e248f55dca77b8a 100644
+index 95718fceea6bd080bc03619d9c1c5123faccbfaa..ed04602163ba61e94a15d6538e4bc68105cc0c37 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -63,6 +63,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {

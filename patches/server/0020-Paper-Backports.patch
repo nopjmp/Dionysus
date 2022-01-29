@@ -326,7 +326,7 @@ index 82c2537b30ad2f17bdcb1828561ecea09fde445f..035a1714d0caa28f90c95cd515e69591
  
      public boolean equals(Object object) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 3ac88efae7bf03258caf811562f9e27269b20361..5b11ad200153d423704ade4c2ce6fa5cdde48ace 100644
+index 86a89926e7ecc69372608b5707cf87cae04e73d2..95718fceea6bd080bc03619d9c1c5123faccbfaa 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1056,10 +1056,13 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {

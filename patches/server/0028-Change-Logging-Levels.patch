@@ -8,7 +8,7 @@ Currently just just changes the logging levels for PlayerConnection, but anythin
 I can provide examples if needed.
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 6550ac897c10427650577ece8e248f55dca77b8a..78fcb022c8f4448b7ee8167510fd0937814cab53 100644
+index ed04602163ba61e94a15d6538e4bc68105cc0c37..feee12cc3fb9c40c8e086f48019d49beb47aeebc 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -357,7 +357,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {

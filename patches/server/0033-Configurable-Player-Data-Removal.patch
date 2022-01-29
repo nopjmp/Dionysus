@@ -50,7 +50,7 @@ index 4bf1b174b2e3f2042f23da9b4c3bb047942c4db1..42d7dff874ecac0d5760dc4f9b6c13e6
  
      public void a(PacketLoginInStart packetlogininstart) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 78fcb022c8f4448b7ee8167510fd0937814cab53..9eefbbbc78acd0494ba7ab30908e6d40ca679cda 100644
+index feee12cc3fb9c40c8e086f48019d49beb47aeebc..25fda12b3ecca985182a1e4113401afb48688d74 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -4,6 +4,7 @@ import com.google.common.collect.Lists;

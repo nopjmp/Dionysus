@@ -1,12 +1,12 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: nopjmp <kthompson@hey.com>
-Date: Fri, 24 Dec 2021 16:26:26 -0600
+Date: Fri, 28 Jan 2022 23:35:09 -0600
 Subject: [PATCH] AntiBook Crasher
 
 This prevents someone from interacting with a book that is too large
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 59d5263295ec57981fb8a9cbab34a00bce904f70..0460166d4f2ffbd4df91e9392f2402f9aa47949c 100644
+index 59d5263295ec57981fb8a9cbab34a00bce904f70..efe2f6d7409fd54648d45560f3b93fdad0b41219 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -7,17 +7,13 @@ import com.google.common.util.concurrent.Futures;
@@ -36,7 +36,7 @@ index 59d5263295ec57981fb8a9cbab34a00bce904f70..0460166d4f2ffbd4df91e9392f2402f9
 +            // Dionysus Start - AntiBook Crasher
 +            if (!cancelled) {
 +                ItemStack stack = packetplayinwindowclick.e();
-+                if (stack.getItem() == Items.WRITABLE_BOOK && Objects.requireNonNull(stack.getTag()).hasKey("pages"))
++                if (stack != null && stack.getItem() == Items.WRITABLE_BOOK && stack.getTag() != null && stack.getTag().hasKey("pages"))
 +                    cancelled = !validateBook(stack, false);
 +            }
 +            // Dionysus End

@@ -500,7 +500,7 @@ index 668d470894e72bf867d9b3ecab2c53931f0636b3..c433cd1eba14f81d33d49a609a9b47bc
      default boolean packetTooLarge(NetworkManager manager) {
          return false;
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 0460166d4f2ffbd4df91e9392f2402f9aa47949c..3ac88efae7bf03258caf811562f9e27269b20361 100644
+index efe2f6d7409fd54648d45560f3b93fdad0b41219..86a89926e7ecc69372608b5707cf87cae04e73d2 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -266,7 +266,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
