@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.12] - 2022-01-28
+
+### Fixed
+* CVE-2021-44832 - Apache Log4j2 updated to 2.17.1 (only affects JDBC Appender users)
+* AntiBook Crash prevention caused issue with cloning books
+
 ## [0.1.11] - 2021-12-20
 
 ### Fixed
