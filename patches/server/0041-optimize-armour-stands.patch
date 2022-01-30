@@ -1,0 +1,42 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RemainingToast <remainingtoast@gmail.com>
+Date: Wed, 12 Jan 2022 21:30:45 +1000
+Subject: [PATCH] optimize armour stands
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 043bccf726c5a4cc5455e7eeb65224237addb021..f078bbd9c9dd1447129c8d95314a514d8969471d 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -274,5 +274,11 @@ public class DionysusConfig {
+         tileEntitySplitLimit = getInt("tile-entity.split-limit", tileEntitySplitLimit);
+     }
+ 
++    public static boolean optimizeArmourStands = true;
++    private static void optimizeArmourStands() {
++        optimizeArmourStands = getBoolean("optimize-armourstands", optimizeArmourStands);
++    }
++
++
+ 
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityArmorStand.java b/src/main/java/net/minecraft/server/EntityArmorStand.java
+index 907499248b6db60f3cc9b30291656ed13cd10e07..87a5e37dacb874cdcca0934d6f8fd2bc43fda6cc 100644
+--- a/src/main/java/net/minecraft/server/EntityArmorStand.java
++++ b/src/main/java/net/minecraft/server/EntityArmorStand.java
+@@ -6,6 +6,7 @@ import java.util.List;
+ import javax.annotation.Nullable;
+ 
+ // CraftBukkit start
++import dev.pomf.dionysus.DionysusConfig;
+ import org.bukkit.inventory.EquipmentSlot;
+ import org.bukkit.craftbukkit.CraftEquipmentSlot;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+@@ -784,6 +785,7 @@ public class EntityArmorStand extends EntityLiving {
+     // Paper start
+     @Override
+     public void move(EnumMoveType moveType, double x, double y, double z) {
++        if (DionysusConfig.optimizeArmourStands) return; // Dionysus
+         if (this.canMove) {
+             super.move(moveType, x, y, z);
+         }
