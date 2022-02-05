@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.13] - 2022-02-05
+
+### Added
+* Add optimize armour stands from RemainingToast
+
 ## [0.1.12] - 2022-01-28
 
 ### Fixed
