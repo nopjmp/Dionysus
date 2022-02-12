@@ -1,8 +1,9 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: RemainingToast <59129680+RemainingToast@users.noreply.github.com>
-Date: Wed, 15 Dec 2021 19:39:21 +1000
+From: nopjmp <kthompson@hey.com>
+Date: Sat, 12 Feb 2022 14:52:55 -0600
 Subject: [PATCH] Don't process nbt thats too big
 
+Co-authored-by: RemainingToast <59129680+RemainingToast@users.noreply.github.com>
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 index e172491020e7a734e2d43007e9feb816628e50be..e396bb9cecb8085b949ce025178969b01991218e 100644
@@ -18,7 +19,7 @@ index e172491020e7a734e2d43007e9feb816628e50be..e396bb9cecb8085b949ce025178969b0
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index fa19df341d13c531fd3597362b126ce8f183cd97..d31438b05fbcf3f4a10943c89e94e2a78675fbde 100644
+index fa19df341d13c531fd3597362b126ce8f183cd97..09748606f71e0dd6d7b743048070c7b02a0876a0 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -34,6 +34,8 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -36,13 +37,13 @@ index fa19df341d13c531fd3597362b126ce8f183cd97..d31438b05fbcf3f4a10943c89e94e2a7
  
 +                // Dionysus start - Don't process large NBTs
 +                NBTTagCompound tag1 = itemstack1.getTag();
-+                if (tag1 != null && tag1.toString().length() > DionysusConfig.maxProcessedNBTSize) {
++                if (tag1 != null && !tag1.isEmpty() && tag1.guessSize() > DionysusConfig.maxProcessedNBTSize) {
 +                    itemstack1.setCount(0);
 +                    itemstack1.setTag(new NBTTagCompound());
 +                }
 +
 +                NBTTagCompound tag = itemstack.getTag();
-+                if (tag != null && tag.toString().length() > DionysusConfig.maxProcessedNBTSize) {
++                if (tag != null && !tag.isEmpty() && tag.guessSize() > DionysusConfig.maxProcessedNBTSize) {
 +                    itemstack.setCount(0);
 +                    itemstack.setTag(new NBTTagCompound());
 +                }
@@ -51,3 +52,66 @@ index fa19df341d13c531fd3597362b126ce8f183cd97..d31438b05fbcf3f4a10943c89e94e2a7
                  if (!ItemStack.matches(itemstack1, itemstack)) {
                      // Paper start - PlayerArmorChangeEvent
                      if (this instanceof EntityPlayer && enumitemslot.getType() == EnumItemSlot.Function.ARMOR) {
+diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
+index 035a1714d0caa28f90c95cd515e69591e41693c1..a94248c18027aa38f496599e529157b321744796 100644
+--- a/src/main/java/net/minecraft/server/NBTTagCompound.java
++++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
+@@ -306,6 +306,58 @@ public class NBTTagCompound extends NBTBase {
+     public void remove(String s) {
+         this.map.remove(s);
+     }
++    
++    // Dionysus start - Don't process large NBTs
++    private int cachedSize = 0;
++    private int cachedHashCode = 0;
++    private boolean cached = false;
++    private int itemSize(NBTBase nbt) {
++        if (nbt instanceof NBTNumber) {
++            return 16;
++        } else if (nbt instanceof NBTTagIntArray) {
++            return 16 * ((NBTTagIntArray)nbt).d().length;
++        } else if (nbt instanceof NBTTagLongArray) { // there is no length property... so just convert it to a string for now.
++            return nbt.c_().length();
++        } else if (nbt instanceof NBTTagByteArray) {
++            return 2 * ((NBTTagByteArray)nbt).c().length;
++        } else if (nbt instanceof NBTTagString) {
++            return nbt.c_().length();
++        }
++        return 1;
++    }
++
++    public int guessSize() { // technically it's a string length
++        if (this.isEmpty()) {
++            return 0;
++        }
++
++        if (cached && this.map.hashCode() == cachedHashCode) {
++            return cachedSize;
++        }
++
++        int accumulator = 0;
++        for (Map.Entry<String, NBTBase> entry : this.map.entrySet()) {
++            accumulator += entry.getKey().length();
++            if (entry.getValue() instanceof NBTTagList) {
++                NBTTagList nbttaglist = (NBTTagList) entry.getValue();
++                if (!nbttaglist.isEmpty()) {
++                    for (NBTBase nbt : nbttaglist.list) {
++                        accumulator += this.itemSize(nbt);
++                    }
++                }
++            } else if (entry.getValue() instanceof NBTTagCompound) {
++                accumulator += ((NBTTagCompound)entry.getValue()).guessSize();
++            } else {
++                accumulator += this.itemSize(entry.getValue());
++            }
++        }
++
++        cached = true;
++        cachedHashCode = this.map.hashCode();
++        cachedSize = accumulator;
++        return accumulator;
++    }
++    // Dionysus end
+ 
+     public String toString() {
+         StringBuilder stringbuilder = new StringBuilder("{");
