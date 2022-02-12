@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.14] - 2022-02-12
+
+### Fixed
+* Performance problem with the NBT size check
+
 ## [0.1.13] - 2022-02-05
 
 ### Added
