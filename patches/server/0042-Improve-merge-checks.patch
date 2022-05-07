@@ -1,0 +1,60 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 7 May 2022 20:09:43 +0200
+Subject: [PATCH] Improve merge checks
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index f078bbd9c9dd1447129c8d95314a514d8969471d..8e0597a01e7f6b7926ac0632a6e6449d69d38a86 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -279,6 +279,9 @@ public class DionysusConfig {
+         optimizeArmourStands = getBoolean("optimize-armourstands", optimizeArmourStands);
+     }
+ 
+-
++    public static boolean improveMergeChecks = true;
++    private static void improveMergeChecks() {
++        improveMergeChecks = getBoolean("improve-merge-checks", improveMergeChecks);
++    }
+ 
+ }
+diff --git a/src/main/java/net/minecraft/server/PlayerInventory.java b/src/main/java/net/minecraft/server/PlayerInventory.java
+index 84f59b7501b111a3af551f3bcdf2d80fc35f89b1..d590aedf7f9659b57dd1ca8ad7f7a2db815f3b58 100644
+--- a/src/main/java/net/minecraft/server/PlayerInventory.java
++++ b/src/main/java/net/minecraft/server/PlayerInventory.java
+@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
+ // CraftBukkit start
+ import java.util.ArrayList;
+ import java.util.List;
++
++import dev.pomf.dionysus.DionysusConfig;
+ import org.bukkit.Location;
+ 
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+@@ -86,6 +88,12 @@ public class PlayerInventory implements IInventory {
+     }
+ 
+     private boolean a(ItemStack itemstack, ItemStack itemstack1) {
++        // Dionysus start
++        if (DionysusConfig.improveMergeChecks) {
++            return !itemstack.isEmpty() && itemstack.isStackable() && itemstack.getCount() < itemstack.getMaxStackSize() && itemstack.getCount() < this.getMaxStackSize() && this.b(itemstack, itemstack1);
++        }
++        // Dionysus end
++
+         return !itemstack.isEmpty() && this.b(itemstack, itemstack1) && itemstack.isStackable() && itemstack.getCount() < itemstack.getMaxStackSize() && itemstack.getCount() < this.getMaxStackSize();
+     }
+ 
+@@ -265,6 +273,12 @@ public class PlayerInventory implements IInventory {
+     }
+ 
+     public int firstPartial(ItemStack itemstack) {
++        // Dionysus start
++        if (DionysusConfig.improveMergeChecks && !itemstack.isStackable()) {
++            return -1;
++        }
++        // Dionysus end
++
+         if (this.a(this.getItem(this.itemInHandIndex), itemstack)) {
+             return this.itemInHandIndex;
+         } else if (this.a(this.getItem(40), itemstack)) {
