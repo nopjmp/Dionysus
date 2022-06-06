@@ -5,23 +5,42 @@ Subject: [PATCH] Fix book meta speed for enchantments
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
-index decdccdc76a09c1da62aef6d4d4542b92242788b..b093e81eb9e1db5dec08cfa12b7b5da141e817d2 100644
+index decdccdc76a09c1da62aef6d4d4542b92242788b..be90db97e1dc47638b67fc2c6bea88949d46f0ef 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
+@@ -212,12 +212,12 @@ public final class CraftItemStack extends ItemStack {
+ 
+     @Override
+     public boolean containsEnchantment(Enchantment ench) {
+-        return hasItemMeta() && getItemMeta().hasEnchant(ench); // Paper - use meta
++        return hasItemMeta() && getItemMeta(false).hasEnchant(ench); // Paper - use meta
+     }
+ 
+     @Override
+     public int getEnchantmentLevel(Enchantment ench) {
+-        return hasItemMeta() ? getItemMeta().getEnchantLevel(ench) : 0; // Pape - replace entire method with meta
++        return hasItemMeta() ? getItemMeta(false).getEnchantLevel(ench) : 0; // Pape - replace entire method with meta
+     }
+ 
+     @Override
 @@ -236,7 +236,7 @@ public final class CraftItemStack extends ItemStack {
  
      @Override
      public Map<Enchantment, Integer> getEnchantments() {
 -        return hasItemMeta() ? getItemMeta().getEnchants() : ImmutableMap.<Enchantment, Integer>of(); // Paper - use Item Meta
-+        return hasItemMeta() ? getItemMeta(handle, false).getEnchants() : ImmutableMap.<Enchantment, Integer>of(); // Paper - use Item Meta // Dionysus - Increase Book Meta Performance
++        return hasItemMeta() ? getItemMeta(false).getEnchants() : ImmutableMap.<Enchantment, Integer>of(); // Paper - use Item Meta // Dionysus - Increase Book Meta Performance
      }
  
      static Map<Enchantment, Integer> getEnchantments(net.minecraft.server.ItemStack item) {
-@@ -276,15 +276,21 @@ public final class CraftItemStack extends ItemStack {
+@@ -276,15 +276,25 @@ public final class CraftItemStack extends ItemStack {
          return getItemMeta(handle);
      }
  
 +    // Dionysus start - Increase Book Meta Performance
++    public ItemMeta getItemMeta(boolean resolveFurther) {
++        return getItemMeta(handle, resolveFurther);
++    }
++
      public static ItemMeta getItemMeta(net.minecraft.server.ItemStack item) {
 +        return getItemMeta(item, true);
 +    }
@@ -42,14 +61,14 @@ index decdccdc76a09c1da62aef6d4d4542b92242788b..b093e81eb9e1db5dec08cfa12b7b5da1
                  return new CraftMetaSkull(item.getTag());
              case LEATHER_HELMET:
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
-index bffbe9013bbe5d60295f4b8d9f84b21eb1942f4a..67d43cb19f07353dae5b97f5c0d0f3495f560def 100644
+index bffbe9013bbe5d60295f4b8d9f84b21eb1942f4a..549093c182faf45032442d1d62b87d1c7dcb896c 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
 @@ -23,7 +23,13 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
          super(meta);
      }
  
-+    // // Dionysus start - Increase Book Meta Performance
++    // Dionysus start - Increase Book Meta Performance
      CraftMetaBookSigned(NBTTagCompound tag) {
 +        this(tag, true);
 +    }
