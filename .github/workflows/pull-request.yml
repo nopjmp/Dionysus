@@ -10,7 +10,8 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Get PR info
-        run: echo ::set-env name=PR::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+        run: |
+          echo "PR=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> $GITHUB_ENV
 
       - name: Set up JDK 8
         uses: actions/setup-java@v1
