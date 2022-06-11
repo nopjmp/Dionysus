@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 11 Jun 2022 07:41:54 +0200
+Subject: [PATCH] Improve performance of book meta pages
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
+index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..ee64406440ef5b0d81b64dfb12c49ca269a7943c 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
+@@ -44,7 +44,23 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+ 
+     protected String title;
+     protected String author;
+-    public List<IChatBaseComponent> pages = new ArrayList<IChatBaseComponent>();
++    // Dionysus start - Increase Book Page Performance
++    protected final List<String> pagePreStore = new ArrayList<>();
++    public List<IChatBaseComponent> pages = new com.google.common.collect.ForwardingList<IChatBaseComponent>() {
++        private List<IChatBaseComponent> delegate;
++        @Override
++        protected synchronized List<IChatBaseComponent> delegate() {
++            if (delegate == null) {
++                List<IChatBaseComponent> list = new ArrayList<>();
++                for (String page : pagePreStore) {
++                    list.add(ChatSerializer.a(page));
++                }
++                delegate = list;
++            }
++            return delegate;
++        }
++    };
++    // Dionysus end
+     protected Integer generation;
+ 
+     CraftMetaBook(CraftMetaItem meta) {
+@@ -90,7 +106,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+                 String page = pages.getString(i);
+                 if (resolved) {
+                     try {
+-                        this.pages.add(ChatSerializer.a(page));
++                        this.pagePreStore.add(page); // Dionysus - Increase Book Page Performance
+                         continue;
+                     } catch (Exception e) {
+                         // Ignore and treat as an old book
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
+index 549093c182faf45032442d1d62b87d1c7dcb896c..c8c6a2b2e2408eabfc0b34ec72e2e49b0d8bba72 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
+@@ -44,7 +44,7 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
+                 String page = pages.getString(i);
+                 if (resolved) {
+                     try {
+-                        this.pages.add(ChatSerializer.a(page));
++                        this.pagePreStore.add(page); // Dionysus - Increase Book Page Performance
+                         continue;
+                     } catch (Exception e) {
+                         // Ignore and treat as an old book
