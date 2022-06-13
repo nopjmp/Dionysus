@@ -5,7 +5,7 @@ Subject: [PATCH] Improve performance of book meta pages
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
-index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..250eb093e19ee6befcd32ffe31bfe0f305f698b6 100644
+index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..52b22d2cf3786e8f01591a5ecbcc65acef469e45 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
 @@ -30,6 +30,11 @@ import net.md_5.bungee.chat.ComponentSerializer;
@@ -26,7 +26,7 @@ index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..250eb093e19ee6befcd32ffe31bfe0f3
      protected String author;
 -    public List<IChatBaseComponent> pages = new ArrayList<IChatBaseComponent>();
 +    // Dionysus start - Increase Book Page Performance
-+    enum PageType {RESOLVED, UNRESOLVED}
++    protected enum PageType {RESOLVED, UNRESOLVED}
 +    protected final List<Pair<PageType, String>> pagePreStore = new ArrayList<>();
 +    public List<IChatBaseComponent> pages = new ForwardingList<IChatBaseComponent>() {
 +        private List<IChatBaseComponent> delegate;
@@ -74,15 +74,26 @@ index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..250eb093e19ee6befcd32ffe31bfe0f3
      }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
-index 549093c182faf45032442d1d62b87d1c7dcb896c..c8c6a2b2e2408eabfc0b34ec72e2e49b0d8bba72 100644
+index 549093c182faf45032442d1d62b87d1c7dcb896c..65a2957beb032fdd9d2c35ef958b1fe649becc79 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
-@@ -44,7 +44,7 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
+@@ -16,6 +16,10 @@ import net.minecraft.server.IChatBaseComponent.ChatSerializer;
+ import net.minecraft.server.IChatBaseComponent;
+ import net.minecraft.server.NBTTagString;
+ 
++// Dionysus start
++import org.apache.commons.lang3.tuple.Pair;
++// Dionysus end
++
+ @DelegateDeserialization(SerializableMeta.class)
+ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
+ 
+@@ -44,7 +48,7 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
                  String page = pages.getString(i);
                  if (resolved) {
                      try {
 -                        this.pages.add(ChatSerializer.a(page));
-+                        this.pagePreStore.add(page); // Dionysus - Increase Book Page Performance
++                        this.pagePreStore.add(Pair.of(PageType.RESOLVED, page)); // Dionysus - Increase Book Page Performance
                          continue;
                      } catch (Exception e) {
                          // Ignore and treat as an old book
