@@ -5,43 +5,74 @@ Subject: [PATCH] Improve performance of book meta pages
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
-index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..ee64406440ef5b0d81b64dfb12c49ca269a7943c 100644
+index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..71b88d00e71fec3c92c6b8f2430461b0ff9ba8d6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
-@@ -44,7 +44,23 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+@@ -30,6 +30,11 @@ import net.md_5.bungee.chat.ComponentSerializer;
+ import net.minecraft.server.ChatBaseComponent;
+ // Spigot end
+ 
++// Dionysus start
++import com.google.common.collect.ForwardingList;
++import org.apache.commons.lang3.tuple.Pair;
++// Dionysus end
++
+ @DelegateDeserialization(SerializableMeta.class)
+ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+     static final ItemMetaKey BOOK_TITLE = new ItemMetaKey("title");
+@@ -44,7 +49,33 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
  
      protected String title;
      protected String author;
 -    public List<IChatBaseComponent> pages = new ArrayList<IChatBaseComponent>();
 +    // Dionysus start - Increase Book Page Performance
-+    protected final List<String> pagePreStore = new ArrayList<>();
-+    public List<IChatBaseComponent> pages = new com.google.common.collect.ForwardingList<IChatBaseComponent>() {
++    enum PageType {RESOLVED, UNRESOLVED}
++    protected final List<Pair<PageType, String>> pagePreStore = new ArrayList<>();
++    public List<IChatBaseComponent> pages = new ForwardingList<IChatBaseComponent>() {
 +        private List<IChatBaseComponent> delegate;
 +        @Override
 +        protected synchronized List<IChatBaseComponent> delegate() {
 +            if (delegate == null) {
 +                List<IChatBaseComponent> list = new ArrayList<>();
-+                for (String page : pagePreStore) {
-+                    list.add(ChatSerializer.a(page));
++                for (Pair<PageType, String> page : pagePreStore) {
++                    if (page.getLeft() == PageType.RESOLVED) {
++                        list.add(ChatSerializer.a(page.getRight()));
++                    } else if (page.getLeft() == PageType.UNRESOLVED) {
++                        list.add(CraftChatMessage.fromString(page.getRight(), true)[0]);
++                    }
 +                }
 +                delegate = list;
 +            }
 +            return delegate;
++        }
++
++        @Override
++        public int size() {
++            return pagePreStore.size();
 +        }
 +    };
 +    // Dionysus end
      protected Integer generation;
  
      CraftMetaBook(CraftMetaItem meta) {
-@@ -90,7 +106,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+@@ -90,7 +121,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
                  String page = pages.getString(i);
                  if (resolved) {
                      try {
 -                        this.pages.add(ChatSerializer.a(page));
-+                        this.pagePreStore.add(page); // Dionysus - Increase Book Page Performance
++                        this.pagePreStore.add(Pair.of(PageType.RESOLVED, page)); // Dionysus - Increase Book Page Performance
                          continue;
                      } catch (Exception e) {
                          // Ignore and treat as an old book
+@@ -255,7 +286,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+                 page = page.substring(0, MAX_PAGE_LENGTH);
+             }
+ 
+-            this.pages.add(CraftChatMessage.fromString(page, true)[0]);
++            pagePreStore.add(Pair.of(PageType.UNRESOLVED, page)); // Dionysus start - Increase Book Page Performance
+         }
+     }
+ 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
 index 549093c182faf45032442d1d62b87d1c7dcb896c..c8c6a2b2e2408eabfc0b34ec72e2e49b0d8bba72 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
