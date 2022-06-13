@@ -5,7 +5,7 @@ Subject: [PATCH] Improve performance of book meta pages
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
-index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..71b88d00e71fec3c92c6b8f2430461b0ff9ba8d6 100644
+index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..250eb093e19ee6befcd32ffe31bfe0f305f698b6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
 @@ -30,6 +30,11 @@ import net.md_5.bungee.chat.ComponentSerializer;
@@ -69,7 +69,7 @@ index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..71b88d00e71fec3c92c6b8f2430461b0
              }
  
 -            this.pages.add(CraftChatMessage.fromString(page, true)[0]);
-+            pagePreStore.add(Pair.of(PageType.UNRESOLVED, page)); // Dionysus start - Increase Book Page Performance
++            this.pagePreStore.add(Pair.of(PageType.UNRESOLVED, page)); // Dionysus - Increase Book Page Performance
          }
      }
  
