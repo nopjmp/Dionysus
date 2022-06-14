@@ -1,0 +1,58 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Fri, 10 Jun 2022 19:12:12 +0200
+Subject: [PATCH] Add option to disable chunk loading past the world border
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 8e0597a01e7f6b7926ac0632a6e6449d69d38a86..1e2bb1c5095a1d99419c324286494df26f38453d 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -284,4 +284,9 @@ public class DionysusConfig {
+         improveMergeChecks = getBoolean("improve-merge-checks", improveMergeChecks);
+     }
+ 
++    public static boolean noChunksPastWorldBorder = true;
++    private static void noChunksPastWorldBorder() {
++        noChunksPastWorldBorder = getBoolean("no-chunks-past-world-border", noChunksPastWorldBorder);
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/server/PlayerChunk.java b/src/main/java/net/minecraft/server/PlayerChunk.java
+index 71906caa0b229217eac7404ccba0453e96624d0f..b40c136fae6e3e5b8bd706cfaeea2e5aedad2b05 100644
+--- a/src/main/java/net/minecraft/server/PlayerChunk.java
++++ b/src/main/java/net/minecraft/server/PlayerChunk.java
+@@ -64,6 +64,7 @@ public class PlayerChunk {
+         if (this.c.contains(entityplayer)) {
+             PlayerChunk.a.debug("Failed to add player. {} already is in chunk {}, {}", entityplayer, Integer.valueOf(this.location.x), Integer.valueOf(this.location.z));
+         } else {
++            if (!dev.pomf.dionysus.DionysusConfig.noChunksPastWorldBorder || playerChunkMap.getWorld().getWorldBorder().isChunkInBounds(location.x, location.z)) { // Dionysus
+             if (this.c.isEmpty()) {
+                 this.i = this.playerChunkMap.getWorld().getTime();
+             }
+@@ -77,7 +78,7 @@ public class PlayerChunk {
+                 this.sendChunk(entityplayer);
+             }
+             // CraftBukkit end
+-
++            }
+         }
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/WorldBorder.java b/src/main/java/net/minecraft/server/WorldBorder.java
+index 1bb172bbf7d2f69bcdc36265f55e9d4f359a41ec..f404894d56c89a5a085e48e2b4199edae9a86ddd 100644
+--- a/src/main/java/net/minecraft/server/WorldBorder.java
++++ b/src/main/java/net/minecraft/server/WorldBorder.java
+@@ -36,10 +36,12 @@ public class WorldBorder {
+     // Paper start
+     private final BlockPosition.MutableBlockPosition mutPos = new BlockPosition.MutableBlockPosition();
+     public boolean isBlockInBounds(int chunkX, int chunkZ) {
++        BlockPosition.MutableBlockPosition mutPos = new BlockPosition.MutableBlockPosition(); // Dionysus - avoid collisions with other threads
+         mutPos.setValues(chunkX, 64, chunkZ);
+         return isInBounds(mutPos);
+     }
+     public boolean isChunkInBounds(int chunkX, int chunkZ) {
++        BlockPosition.MutableBlockPosition mutPos = new BlockPosition.MutableBlockPosition(); // Dionysus - avoid collisions with other threads
+         mutPos.setValues(((chunkX << 4) + 15), 64, (chunkZ << 4) + 15);
+         return isInBounds(mutPos);
+     }

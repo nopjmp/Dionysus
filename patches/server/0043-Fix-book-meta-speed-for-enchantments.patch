@@ -1,0 +1,89 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Mon, 6 Jun 2022 18:24:13 +0200
+Subject: [PATCH] Fix book meta speed for enchantments
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
+index decdccdc76a09c1da62aef6d4d4542b92242788b..be90db97e1dc47638b67fc2c6bea88949d46f0ef 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
+@@ -212,12 +212,12 @@ public final class CraftItemStack extends ItemStack {
+ 
+     @Override
+     public boolean containsEnchantment(Enchantment ench) {
+-        return hasItemMeta() && getItemMeta().hasEnchant(ench); // Paper - use meta
++        return hasItemMeta() && getItemMeta(false).hasEnchant(ench); // Paper - use meta
+     }
+ 
+     @Override
+     public int getEnchantmentLevel(Enchantment ench) {
+-        return hasItemMeta() ? getItemMeta().getEnchantLevel(ench) : 0; // Pape - replace entire method with meta
++        return hasItemMeta() ? getItemMeta(false).getEnchantLevel(ench) : 0; // Pape - replace entire method with meta
+     }
+ 
+     @Override
+@@ -236,7 +236,7 @@ public final class CraftItemStack extends ItemStack {
+ 
+     @Override
+     public Map<Enchantment, Integer> getEnchantments() {
+-        return hasItemMeta() ? getItemMeta().getEnchants() : ImmutableMap.<Enchantment, Integer>of(); // Paper - use Item Meta
++        return hasItemMeta() ? getItemMeta(false).getEnchants() : ImmutableMap.<Enchantment, Integer>of(); // Paper - use Item Meta // Dionysus - Increase Book Meta Performance
+     }
+ 
+     static Map<Enchantment, Integer> getEnchantments(net.minecraft.server.ItemStack item) {
+@@ -276,15 +276,25 @@ public final class CraftItemStack extends ItemStack {
+         return getItemMeta(handle);
+     }
+ 
++    // Dionysus start - Increase Book Meta Performance
++    public ItemMeta getItemMeta(boolean resolveFurther) {
++        return getItemMeta(handle, resolveFurther);
++    }
++
+     public static ItemMeta getItemMeta(net.minecraft.server.ItemStack item) {
++        return getItemMeta(item, true);
++    }
++    // Dionysus end
++
++    public static ItemMeta getItemMeta(net.minecraft.server.ItemStack item, boolean resolveFurther) { // Dionysus - Increase Book Meta Performance
+         if (!hasItemMeta(item)) {
+             return CraftItemFactory.instance().getItemMeta(getType(item));
+         }
+         switch (getType(item)) {
+             case WRITTEN_BOOK:
+-                return new CraftMetaBookSigned(item.getTag());
++                return new CraftMetaBookSigned(item.getTag(), resolveFurther); // Dionysus - Increase Book Meta Performance
+             case BOOK_AND_QUILL:
+-                return new CraftMetaBook(item.getTag());
++                return new CraftMetaBook(item.getTag(), resolveFurther); // Dionysus - Increase Book Meta Performance
+             case SKULL_ITEM:
+                 return new CraftMetaSkull(item.getTag());
+             case LEATHER_HELMET:
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
+index bffbe9013bbe5d60295f4b8d9f84b21eb1942f4a..549093c182faf45032442d1d62b87d1c7dcb896c 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBookSigned.java
+@@ -23,7 +23,13 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
+         super(meta);
+     }
+ 
++    // Dionysus start - Increase Book Meta Performance
+     CraftMetaBookSigned(NBTTagCompound tag) {
++        this(tag, true);
++    }
++    // Dionysus end
++
++    CraftMetaBookSigned(NBTTagCompound tag, boolean handlePages) { // Dionysus - Increase Book Meta Performance
+         super(tag, false);
+ 
+         boolean resolved = true;
+@@ -31,7 +37,7 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
+             resolved = tag.getBoolean(RESOLVED.NBT);
+         }
+ 
+-        if (tag.hasKey(BOOK_PAGES.NBT)) {
++        if (tag.hasKey(BOOK_PAGES.NBT) && handlePages) { // Dionysus - Increase Book Meta Performance
+             NBTTagList pages = tag.getList(BOOK_PAGES.NBT, CraftMagicNumbers.NBT.TAG_STRING);
+ 
+             for (int i = 0; i < Math.min(pages.size(), MAX_PAGES); i++) {
