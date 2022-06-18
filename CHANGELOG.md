@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.15] - 2022-06-18
+
+### Changes
+* Improve merge checks
+* Fix book meta speed for enchantments
+* Fix build
+* Add option to disable chunk loading past the world border
+* Disable JNDI lookups in the default log config
+* Improve performance of book meta pages
+
+By only converting the pages when we need them, we save a lot of computing power for 99% of cases where pages are not needed and people just access the methods of ItemMeta.
+
+* Improve performance of patch in more cases
+* Fix small typos
+* Fix error
+
 ## [0.1.14] - 2022-02-12
 
 ### Fixed
