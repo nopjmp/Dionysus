@@ -1,0 +1,302 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Wed, 15 Jun 2022 22:52:15 +0200
+Subject: [PATCH] Bump dependencies
+
+
+diff --git a/pom.xml b/pom.xml
+index f86a4cf893bfdb1a12c156361ca166a9abd7e8db..2084c876ba6076dc46e5fdf06366cab1c4e525a1 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -19,7 +19,7 @@
+         <maven.compiler.source>1.8</maven.compiler.source>
+         <maven.compiler.target>1.8</maven.compiler.target>
+ 
+-        <log4j2.version>2.17.1</log4j2.version>
++        <log4j2.version>2.17.2</log4j2.version>
+     </properties>
+ 
+     <parent>
+@@ -34,7 +34,7 @@
+         <dependency>
+             <groupId>io.netty</groupId>
+             <artifactId>netty-all</artifactId>
+-            <version>4.1.72.Final</version>
++            <version>4.1.77.Final</version>
+             <scope>compile</scope>
+         </dependency>
+         <dependency>
+@@ -58,7 +58,7 @@
+         <dependency>
+             <groupId>org.xerial</groupId>
+             <artifactId>sqlite-jdbc</artifactId>
+-            <version>3.34.0</version>
++            <version>3.36.0.3</version>
+             <scope>runtime</scope>
+         </dependency>
+         <dependency>
+@@ -71,7 +71,7 @@
+         <dependency>
+             <groupId>net.minecrell</groupId>
+             <artifactId>terminalconsoleappender</artifactId>
+-            <version>1.2.0</version>
++            <version>1.3.0</version>
+         </dependency>
+ 
+         <!--
+@@ -112,26 +112,32 @@
+         <dependency>
+             <groupId>it.unimi.dsi</groupId>
+             <artifactId>dsiutils</artifactId>
+-            <version>2.6.17</version>
++            <version>2.7.0</version>
+         </dependency>
+ 
+         <dependency>
+             <groupId>it.unimi.dsi</groupId>
+             <artifactId>fastutil</artifactId>
+-            <version>8.5.6</version>
++            <version>8.5.8</version>
+         </dependency>
+ 
+         <!-- testing -->
+         <dependency>
+             <groupId>junit</groupId>
+             <artifactId>junit</artifactId>
+-            <version>4.12</version>
++            <version>4.13.2</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>org.hamcrest</groupId>
++            <artifactId>hamcrest</artifactId>
++            <version>2.2</version>
+             <scope>test</scope>
+         </dependency>
+         <dependency>
+             <groupId>org.hamcrest</groupId>
+             <artifactId>hamcrest-library</artifactId>
+-            <version>1.3</version>
++            <version>2.2</version>
+             <scope>test</scope>
+         </dependency>
+ 
+@@ -139,7 +145,7 @@
+         <dependency>
+             <groupId>com.velocitypowered</groupId>
+             <artifactId>velocity-native</artifactId>
+-            <version>1.1.0-SNAPSHOT</version>
++            <version>1.1.9-SNAPSHOT</version>
+             <scope>compile</scope>
+         </dependency>
+     </dependencies>
+diff --git a/src/test/java/org/bukkit/ArtTest.java b/src/test/java/org/bukkit/ArtTest.java
+index 7f40288922c7a0ba13184cb54b0d1e133e1f1947..fc6b2f61ed980dae345b6ae383cf689e1e019297 100644
+--- a/src/test/java/org/bukkit/ArtTest.java
++++ b/src/test/java/org/bukkit/ArtTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import java.util.Collections;
+ import java.util.EnumMap;
+diff --git a/src/test/java/org/bukkit/DyeColorsTest.java b/src/test/java/org/bukkit/DyeColorsTest.java
+index 020714da68783608673862b1792cc661dfb890ce..b762b1b549165728f82e496063d8cc9f41798fa6 100644
+--- a/src/test/java/org/bukkit/DyeColorsTest.java
++++ b/src/test/java/org/bukkit/DyeColorsTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import java.util.ArrayList;
+ import java.util.List;
+diff --git a/src/test/java/org/bukkit/MaterialTest.java b/src/test/java/org/bukkit/MaterialTest.java
+index a9b4e525e1b0b00ba90469dd89118f7e88893d4a..c409f6e0e1948c97cff16a1b6f6c91629907b753 100644
+--- a/src/test/java/org/bukkit/MaterialTest.java
++++ b/src/test/java/org/bukkit/MaterialTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import java.util.Collections;
+ import java.util.Map;
+diff --git a/src/test/java/org/bukkit/PerMaterialTest.java b/src/test/java/org/bukkit/PerMaterialTest.java
+index ed5242a99c4d1abe79e6e367bef4a1d4bcf1dd60..1859afc7303a777dfd0eced37cb93f77b4f517b2 100644
+--- a/src/test/java/org/bukkit/PerMaterialTest.java
++++ b/src/test/java/org/bukkit/PerMaterialTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import java.util.List;
+ 
+diff --git a/src/test/java/org/bukkit/SoundTest.java b/src/test/java/org/bukkit/SoundTest.java
+index 942cb4ea3199aa8a9bbc99cac5a47dcebba2c8a0..676ea55e2e943012d05170ad24019230d065ddd7 100644
+--- a/src/test/java/org/bukkit/SoundTest.java
++++ b/src/test/java/org/bukkit/SoundTest.java
+@@ -4,7 +4,7 @@ import net.minecraft.server.MinecraftKey;
+ import net.minecraft.server.SoundEffect;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import org.bukkit.craftbukkit.CraftSound;
+ import org.junit.Test;
+diff --git a/src/test/java/org/bukkit/StatisticsAndAchievementsTest.java b/src/test/java/org/bukkit/StatisticsAndAchievementsTest.java
+index e05e7330f27ef706d36af5121c57defd75faf81d..15b22a3b17cce686e53c4570a863db6f75468e84 100644
+--- a/src/test/java/org/bukkit/StatisticsAndAchievementsTest.java
++++ b/src/test/java/org/bukkit/StatisticsAndAchievementsTest.java
+@@ -1,7 +1,8 @@
+ package org.bukkit;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
++import static org.hamcrest.number.OrderingComparison.*;
+ 
+ import java.util.List;
+ 
+diff --git a/src/test/java/org/bukkit/WorldTypeTest.java b/src/test/java/org/bukkit/WorldTypeTest.java
+index 4d35a1064bfa1a2f1cfe8cc52a9ef1dd5903e64f..e290d276755aa9a9b08ab60f068926a74db53889 100644
+--- a/src/test/java/org/bukkit/WorldTypeTest.java
++++ b/src/test/java/org/bukkit/WorldTypeTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import net.minecraft.server.WorldType;
+ import org.junit.Test;
+diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/CompositeSerialization.java b/src/test/java/org/bukkit/craftbukkit/inventory/CompositeSerialization.java
+index 1349a7f18ddd7bfc5f57e780b1595e2008f24710..52c8c619c88090bd882365e1c5f1630a8f847287 100644
+--- a/src/test/java/org/bukkit/craftbukkit/inventory/CompositeSerialization.java
++++ b/src/test/java/org/bukkit/craftbukkit/inventory/CompositeSerialization.java
+@@ -1,7 +1,8 @@
+ package org.bukkit.craftbukkit.inventory;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
++import static org.hamcrest.collection.IsCollectionWithSize.*;
+ 
+ import java.util.ArrayList;
+ import java.util.List;
+diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/FactoryItemMaterialTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/FactoryItemMaterialTest.java
+index 1e5c3ef2d0024c9baf8f3b55c6e6be3dddf68811..a1f5b9eec3ad1a231e270ed963ab5da22108b29e 100644
+--- a/src/test/java/org/bukkit/craftbukkit/inventory/FactoryItemMaterialTest.java
++++ b/src/test/java/org/bukkit/craftbukkit/inventory/FactoryItemMaterialTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit.craftbukkit.inventory;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import java.util.ArrayList;
+ import java.util.List;
+diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/ItemFactoryTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/ItemFactoryTest.java
+index 3190cadfcccc5ce2425514f2bb013d0a83d72d9b..fd85f5e4e389c536b9b45382a62e28fcc460f0c5 100644
+--- a/src/test/java/org/bukkit/craftbukkit/inventory/ItemFactoryTest.java
++++ b/src/test/java/org/bukkit/craftbukkit/inventory/ItemFactoryTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit.craftbukkit.inventory;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import java.lang.reflect.Field;
+ import java.lang.reflect.Modifier;
+diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaCloneTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaCloneTest.java
+index 834fb297b4d8f66613da4c1fcf66289e07de7f0b..709ab3bc32b7bba98d630b85612b5d8b82598fb3 100644
+--- a/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaCloneTest.java
++++ b/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaCloneTest.java
+@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
+ import org.bukkit.Material;
+ import org.junit.Test;
+ 
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ import static org.junit.Assert.*;
+ 
+ public class ItemMetaCloneTest {
+diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaImplementationOverrideTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaImplementationOverrideTest.java
+index f1b4ec0da83b64279748c5ff6bfd1a3f5673785f..e5d225f7010712ce5e80b47bdf78411139fd0e43 100644
+--- a/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaImplementationOverrideTest.java
++++ b/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaImplementationOverrideTest.java
+@@ -1,6 +1,6 @@
+ package org.bukkit.craftbukkit.inventory;
+ 
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ import static org.junit.Assert.*;
+ 
+ import java.lang.reflect.Method;
+diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaTest.java
+index a29731f1d1f15bbf4420f0771ea605696ed27485..27092e30be2aee5e5028397bc1a1a50994c6b7f9 100644
+--- a/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaTest.java
++++ b/src/test/java/org/bukkit/craftbukkit/inventory/ItemMetaTest.java
+@@ -1,7 +1,8 @@
+ package org.bukkit.craftbukkit.inventory;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
++import static org.hamcrest.collection.IsCollectionWithSize.*;
+ 
+ import java.util.Arrays;
+ import java.util.List;
+diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java
+index 6140edeec404bc97f28664f59fb589c5961599ea..a1288a00fd1a09687c64a18568e1579775536b37 100644
+--- a/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java
++++ b/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java
+@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.inventory;
+ 
+ import static org.bukkit.support.Matchers.sameHash;
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import java.io.ByteArrayInputStream;
+ import java.io.ByteArrayOutputStream;
+diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/NMSCraftItemStackTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/NMSCraftItemStackTest.java
+index 1f5a6a32f143765a6593ed96908454495d7a98a4..f58fd965387bd6b463619d5f63bd5709043e7dfa 100644
+--- a/src/test/java/org/bukkit/craftbukkit/inventory/NMSCraftItemStackTest.java
++++ b/src/test/java/org/bukkit/craftbukkit/inventory/NMSCraftItemStackTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit.craftbukkit.inventory;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import net.minecraft.server.Enchantments;
+ 
+diff --git a/src/test/java/org/bukkit/potion/PotionTest.java b/src/test/java/org/bukkit/potion/PotionTest.java
+index e46429a59b0b00f31d57ae21956387f9d2785fdb..ece0209cc595a7760a4e7faf6f69b16064d23a15 100644
+--- a/src/test/java/org/bukkit/potion/PotionTest.java
++++ b/src/test/java/org/bukkit/potion/PotionTest.java
+@@ -1,7 +1,7 @@
+ package org.bukkit.potion;
+ 
+ import static org.junit.Assert.*;
+-import static org.hamcrest.Matchers.*;
++import static org.hamcrest.CoreMatchers.*;
+ 
+ import java.util.EnumMap;
+ import java.util.List;
