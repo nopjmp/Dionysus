@@ -41,7 +41,6 @@ jobs:
       - name: Build Dionysus
         run: |
           ./dionysus build
-          cd ..
           ./scripts/paperclip.sh
 
       - uses: actions/upload-artifact@v2
