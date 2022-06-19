@@ -1,0 +1,175 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 18 Jun 2022 08:30:33 +0200
+Subject: [PATCH] Add more utils
+
+
+diff --git a/pom.xml b/pom.xml
+index 87c97cfbc07b66af5186eba0f4fefff7f42edbaf..47304ee8cfe0b8bd4f9bbbddf3354c0fbb5d1be4 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -149,6 +149,12 @@
+             <version>3.1.2-SNAPSHOT</version>
+             <scope>compile</scope>
+         </dependency>
++        <dependency>
++            <groupId>org.jetbrains</groupId>
++            <artifactId>annotations</artifactId>
++            <version>23.0.0</version>
++            <scope>compile</scope>
++        </dependency>
+     </dependencies>
+ 
+     <repositories>
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusLogger.java b/src/main/java/dev/pomf/dionysus/DionysusLogger.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..f290fe1fbcd4c08b93b249f0d20c375f466d3925
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/DionysusLogger.java
+@@ -0,0 +1,16 @@
++package dev.pomf.dionysus;
++
++import java.util.logging.Level;
++import java.util.logging.Logger;
++import org.bukkit.Bukkit;
++
++public class DionysusLogger extends Logger {
++    public static final DionysusLogger LOGGER = new DionysusLogger();
++
++    private DionysusLogger() {
++        super("Dionysus", null);
++
++        setParent(Bukkit.getLogger());
++        setLevel(Level.ALL);
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/dev/pomf/dionysus/util/AsyncExecutor.java b/src/main/java/dev/pomf/dionysus/util/AsyncExecutor.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..0db51be974549b50a51e6b6be320d70b05e44ee8
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/util/AsyncExecutor.java
+@@ -0,0 +1,51 @@
++package dev.pomf.dionysus.util;
++
++import com.google.common.collect.Queues;
++import dev.pomf.dionysus.DionysusLogger;
++import java.util.Queue;
++import java.util.concurrent.locks.LockSupport;
++import java.util.function.BooleanSupplier;
++import java.util.logging.Level;
++
++public class AsyncExecutor implements Runnable {
++
++    private Queue<Runnable> jobs = Queues.newConcurrentLinkedQueue();
++    private final Thread thread;
++    private final BooleanSupplier shouldRun;
++    private volatile boolean killswitch = false;
++
++    public AsyncExecutor(String threadName, BooleanSupplier shouldRun) {
++        this.thread = new Thread(this, threadName);
++        this.shouldRun = shouldRun;
++    }
++
++    public void start() {
++        thread.start();
++    }
++
++    public void kill() {
++        killswitch = true;
++    }
++
++    public void submit(Runnable runnable) {
++        jobs.offer(runnable);
++    }
++
++    @Override
++    public void run() {
++        while (!killswitch) {
++            if (shouldRun.getAsBoolean()) {
++                try {
++                    Runnable runnable;
++                    while ((runnable = jobs.poll()) != null) {
++                        runnable.run();
++                    }
++                } catch (Exception e) {
++                    DionysusLogger.LOGGER.log(Level.SEVERE, e, () -> "Failed to execute async job for thread " + thread.getName());
++                }
++            }
++            LockSupport.parkNanos("executing tasks", 1000L);
++        }
++    }
++
++}
+diff --git a/src/main/java/dev/pomf/dionysus/util/IterableWrapper.java b/src/main/java/dev/pomf/dionysus/util/IterableWrapper.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..d2075b1f1687d2f4bd19d4b66d6588be29cb6c6e
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/util/IterableWrapper.java
+@@ -0,0 +1,20 @@
++package dev.pomf.dionysus.util;
++
++import java.util.Iterator;
++import org.jetbrains.annotations.NotNull;
++
++public class IterableWrapper<T> implements Iterable<T> {
++
++    private final Iterator<T> iterator;
++
++    public IterableWrapper(Iterator<T> iterator) {
++        this.iterator = iterator;
++    }
++
++    @NotNull
++    @Override
++    public Iterator<T> iterator() {
++        return iterator;
++    }
++
++}
+diff --git a/src/main/java/dev/pomf/dionysus/util/Long2ObjectOpenHashMapWrapper.java b/src/main/java/dev/pomf/dionysus/util/Long2ObjectOpenHashMapWrapper.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..7c46a0c46242980ca91b76dc460ce0ef0aefcefd
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/util/Long2ObjectOpenHashMapWrapper.java
+@@ -0,0 +1,40 @@
++package dev.pomf.dionysus.util;
++
++import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
++import java.util.Map;
++import org.jetbrains.annotations.Nullable;
++
++public class Long2ObjectOpenHashMapWrapper<V> extends Long2ObjectOpenHashMap<V> {
++
++    private final Map<Long, V> backingMap;
++
++    public Long2ObjectOpenHashMapWrapper(Map<Long, V> map) {
++        backingMap = map;
++    }
++
++    @Override
++    public V put(Long key, V value) {
++        return backingMap.put(key, value);
++    }
++
++    @Override
++    public V get(Object key) {
++        return backingMap.get(key);
++    }
++
++    @Override
++    public V remove(Object key) {
++        return backingMap.remove(key);
++    }
++
++    @Nullable
++    @Override
++    public V putIfAbsent(Long key, V value) {
++        return backingMap.putIfAbsent(key, value);
++    }
++
++    @Override
++    public int size() {
++        return backingMap.size();
++    }
++}

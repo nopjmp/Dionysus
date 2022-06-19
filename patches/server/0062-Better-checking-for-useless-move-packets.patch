@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sun, 19 Jun 2022 14:41:36 +0200
+Subject: [PATCH] Better checking for useless move packets
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index efc4c79ab717effe2995e155dd29827ff68b8e5e..52ddc347a645c8293bee39348303ad05dc5f7793 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -163,6 +163,7 @@ public class EntityTrackerEntry {
+                 // CraftBukkit end
+ 
+                     if (l1 >= -32768L && l1 < 32768L && i2 >= -32768L && i2 < 32768L && j2 >= -32768L && j2 < 32768L && this.v <= 400 && !this.x && this.y == this.tracker.onGround) {
++                        if (flag1 || flag2 || this.tracker instanceof EntityArrow) { // Dionysus
+                         if ((!flag1 || !flag2) && !(this.tracker instanceof EntityArrow)) {
+                             if (flag1) {
+                                 object = new PacketPlayOutEntity.PacketPlayOutRelEntityMove(this.tracker.getId(), l1, i2, j2, this.tracker.onGround);
+@@ -172,6 +173,7 @@ public class EntityTrackerEntry {
+                         } else {
+                             object = new PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook(this.tracker.getId(), l1, i2, j2, (byte) j1, (byte) k1, this.tracker.onGround);
+                         }
++                        } // Dionysus
+                     } else {
+                         this.y = this.tracker.onGround;
+                         this.v = 0;

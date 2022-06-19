@@ -1,0 +1,70 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 18 Jun 2022 11:12:06 +0200
+Subject: [PATCH] Simpler ShapelessRecipes comparison for Vanilla
+
+
+diff --git a/src/main/java/net/minecraft/server/ShapelessRecipes.java b/src/main/java/net/minecraft/server/ShapelessRecipes.java
+index 9c69f92f29e0bd19518810b3d451172a69d95580..91aaf578c42a5fced3d5081df7e687ca8905a352 100644
+--- a/src/main/java/net/minecraft/server/ShapelessRecipes.java
++++ b/src/main/java/net/minecraft/server/ShapelessRecipes.java
+@@ -18,6 +18,7 @@ public class ShapelessRecipes implements IRecipe {
+     private final String c;
+     // CraftBukkit start
+     public MinecraftKey key;
++    private final boolean isBukkit; // Dionysus
+ 
+     @Override
+     public void setKey(MinecraftKey key) {
+@@ -25,7 +26,11 @@ public class ShapelessRecipes implements IRecipe {
+     }
+     // CraftBukkit end
+ 
++    // Dionysus start
+     public ShapelessRecipes(String s, ItemStack itemstack, NonNullList<RecipeItemStack> nonnulllist) {
++        this(s, itemstack, nonnulllist, false);
++    }
++    public ShapelessRecipes(String s, ItemStack itemstack, NonNullList<RecipeItemStack> nonnulllist, boolean isBukkit) { this.isBukkit = isBukkit; // Dionysus end
+         this.c = s;
+         this.result = itemstack;
+         this.ingredients = nonnulllist;
+@@ -69,6 +74,27 @@ public class ShapelessRecipes implements IRecipe {
+     }
+ 
+     public boolean a(InventoryCrafting inventorycrafting, World world) {
++        // Pufferfish start
++        if (!this.isBukkit) {
++            java.util.List<RecipeItemStack> ingredients = com.google.common.collect.Lists.newArrayList(this.ingredients.toArray(new RecipeItemStack[0]));
++
++            inventory: for (int index = 0; index < inventorycrafting.getSize(); index++) {
++                ItemStack itemStack = inventorycrafting.getItem(index);
++
++                if (!itemStack.isEmpty()) {
++                    for (int i = 0; i < ingredients.size(); i++) {
++                        if (ingredients.get(i).test(itemStack)) {
++                            ingredients.remove(i);
++                            continue inventory;
++                        }
++                    }
++                    return false;
++                }
++            }
++
++            return ingredients.isEmpty();
++        }
++        // Pufferfish end
+         ArrayList arraylist = Lists.newArrayList(this.ingredients);
+ 
+         for (int i = 0; i < inventorycrafting.i(); ++i) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftShapelessRecipe.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftShapelessRecipe.java
+index 211898c514752e42c4773214c27bae962ba7415b..c55537e7b9d3891731ce4e409a47522d520ad9ca 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftShapelessRecipe.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftShapelessRecipe.java
+@@ -43,6 +43,6 @@ public class CraftShapelessRecipe extends ShapelessRecipe implements CraftRecipe
+             data.set(i, RecipeItemStack.a(new net.minecraft.server.ItemStack[]{CraftItemStack.asNMSCopy(ingred.get(i))}));
+         }
+ 
+-        CraftingManager.a(CraftNamespacedKey.toMinecraft(this.getKey()), new ShapelessRecipes("", CraftItemStack.asNMSCopy(this.getResult()), data));
++        CraftingManager.a(CraftNamespacedKey.toMinecraft(this.getKey()), new ShapelessRecipes("", CraftItemStack.asNMSCopy(this.getResult()), data, true));
+     }
+ }

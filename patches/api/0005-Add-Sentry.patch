@@ -1,0 +1,241 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Fri, 17 Jun 2022 21:27:18 +0200
+Subject: [PATCH] Add Sentry
+
+
+diff --git a/pom.xml b/pom.xml
+index e32fd4014b3174678b775f76a643ab4e7338a3a8..6d711f3f5e2c658dfc0daec78edf720a22aa7c45 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -147,6 +147,12 @@
+             <artifactId>asm-commons</artifactId>
+             <version>6.1.1</version>
+         </dependency>
++        <!-- Dionysus -->
++        <dependency>
++            <groupId>io.sentry</groupId>
++            <artifactId>sentry</artifactId>
++            <version>6.0.0</version>
++        </dependency>
+     </dependencies>
+ 
+     <build>
+diff --git a/src/main/java/dev/pomf/dionysus/sentry/SentryContext.java b/src/main/java/dev/pomf/dionysus/sentry/SentryContext.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..eedb2aeac7ad50170cbb2900f084cd1e382f01de
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/sentry/SentryContext.java
+@@ -0,0 +1,162 @@
++package dev.pomf.dionysus.sentry;
++
++import com.google.gson.Gson;
++import java.lang.reflect.Field;
++import java.lang.reflect.Modifier;
++import java.util.Map;
++import java.util.TreeMap;
++import org.apache.logging.log4j.ThreadContext;
++import org.bukkit.command.Command;
++import org.bukkit.command.CommandSender;
++import org.bukkit.entity.Player;
++import org.bukkit.event.Event;
++import org.bukkit.event.player.PlayerEvent;
++import org.bukkit.plugin.Plugin;
++import org.bukkit.plugin.RegisteredListener;
++
++import javax.annotation.Nullable;
++
++public class SentryContext {
++
++    private static final Gson GSON = new Gson();
++
++    public static void setPluginContext(@Nullable Plugin plugin) {
++        if (plugin != null) {
++            ThreadContext.put("dionysussentry_pluginname", plugin.getName());
++            ThreadContext.put("dionysussentry_pluginversion", plugin.getDescription().getVersion());
++        }
++    }
++
++    public static void removePluginContext() {
++        ThreadContext.remove("dionysussentry_pluginname");
++        ThreadContext.remove("dionysussentry_pluginversion");
++    }
++
++    public static void setSenderContext(@Nullable CommandSender sender) {
++        if (sender != null) {
++            ThreadContext.put("dionysussentry_playername", sender.getName());
++            if (sender instanceof Player) {
++                ThreadContext.put("dionysussentry_playerid", ((Player) sender).getUniqueId().toString());
++            }
++        }
++    }
++
++    public static void removeSenderContext() {
++        ThreadContext.remove("dionysussentry_playername");
++        ThreadContext.remove("dionysussentry_playerid");
++    }
++
++    public static void setEventContext(Event event, RegisteredListener registration) {
++        setPluginContext(registration.getPlugin());
++
++        try {
++            // Find the player that was involved with this event
++            Player player = null;
++            if (event instanceof PlayerEvent) {
++                player = ((PlayerEvent) event).getPlayer();
++            } else {
++                Class<? extends Event> eventClass = event.getClass();
++
++                Field playerField = null;
++
++                for (Field field : eventClass.getDeclaredFields()) {
++                    if (field.getType().equals(Player.class)) {
++                        playerField = field;
++                        break;
++                    }
++                }
++
++                if (playerField != null) {
++                    playerField.setAccessible(true);
++                    player = (Player) playerField.get(event);
++                }
++            }
++
++            if (player != null) {
++                setSenderContext(player);
++            }
++        } catch (Exception e) {} // We can't really safely log exceptions.
++
++        ThreadContext.put("dionysussentry_eventdata", GSON.toJson(serializeFields(event)));
++    }
++
++    public static void removeEventContext() {
++        removePluginContext();
++        removeSenderContext();
++        ThreadContext.remove("dionysussentry_eventdata");
++    }
++
++    private static Map<String, String> serializeFields(Object object) {
++        Map<String, String> fields = new TreeMap<>();
++        fields.put("_class", object.getClass().getName());
++        for (Field declaredField : object.getClass().getDeclaredFields()) {
++            try {
++                if (Modifier.isStatic(declaredField.getModifiers())) {
++                    continue;
++                }
++
++                String fieldName = declaredField.getName();
++                if (fieldName.equals("handlers")) {
++                    continue;
++                }
++                declaredField.setAccessible(true);
++                Object value = declaredField.get(object);
++                if (value != null) {
++                    fields.put(fieldName, value.toString());
++                } else {
++                    fields.put(fieldName, "<null>");
++                }
++            } catch (Exception e) {} // We can't really safely log exceptions.
++        }
++        return fields;
++    }
++
++    public static class State {
++
++        private Plugin plugin;
++        private Command command;
++        private String commandLine;
++        private Event event;
++        private RegisteredListener registeredListener;
++
++        public Plugin getPlugin() {
++            return plugin;
++        }
++
++        public void setPlugin(Plugin plugin) {
++            this.plugin = plugin;
++        }
++
++        public Command getCommand() {
++            return command;
++        }
++
++        public void setCommand(Command command) {
++            this.command = command;
++        }
++
++        public String getCommandLine() {
++            return commandLine;
++        }
++
++        public void setCommandLine(String commandLine) {
++            this.commandLine = commandLine;
++        }
++
++        public Event getEvent() {
++            return event;
++        }
++
++        public void setEvent(Event event) {
++            this.event = event;
++        }
++
++        public RegisteredListener getRegisteredListener() {
++            return registeredListener;
++        }
++
++        public void setRegisteredListener(RegisteredListener registeredListener) {
++            this.registeredListener = registeredListener;
++        }
++    }
++}
+diff --git a/src/main/java/org/bukkit/plugin/SimplePluginManager.java b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
+index a7dd902fb689e3d7c5563a091e8947e7f4ab486b..dbc1710b8cff8f977f625315f390e1360df4a71f 100644
+--- a/src/main/java/org/bukkit/plugin/SimplePluginManager.java
++++ b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
+@@ -473,7 +473,9 @@ public final class SimplePluginManager implements PluginManager {
+ 
+     // Paper start
+     private void handlePluginException(String msg, Throwable ex, Plugin plugin) {
++        dev.pomf.dionysus.sentry.SentryContext.setPluginContext(plugin); // Dionysus
+         server.getLogger().log(Level.SEVERE, msg, ex);
++        dev.pomf.dionysus.sentry.SentryContext.removePluginContext(); // Dionysus
+         callEvent(new ServerExceptionEvent(new ServerPluginEnableDisableException(msg, ex, plugin)));
+     }
+     // Paper end
+@@ -525,9 +527,11 @@ public final class SimplePluginManager implements PluginManager {
+                             ));
+                 }
+             } catch (Throwable ex) {
++                dev.pomf.dionysus.sentry.SentryContext.setEventContext(event, registration); // Dionysus
+                 // Paper start - error reporting
+                 String msg = "Could not pass event " + event.getEventName() + " to " + registration.getPlugin().getDescription().getFullName();
+                 server.getLogger().log(Level.SEVERE, msg, ex);
++                dev.pomf.dionysus.sentry.SentryContext.removeEventContext(); // Dionysus
+                 if (!(event instanceof ServerExceptionEvent)) { // We don't want to cause an endless event loop
+                     callEvent(new ServerExceptionEvent(new ServerEventException(msg, ex, registration.getPlugin(), registration.getListener(), event)));
+                 }
+diff --git a/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java b/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
+index 8b5cea64b5c3d66e761b655b81c7abc076ce8c73..ef901c1d442b0c00247a2949702f88cb6ad90197 100644
+--- a/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
++++ b/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
+@@ -315,7 +315,9 @@ public final class JavaPluginLoader implements PluginLoader {
+             try {
+                 jPlugin.setEnabled(true);
+             } catch (Throwable ex) {
++                dev.pomf.dionysus.sentry.SentryContext.setPluginContext(plugin); // Dionysus
+                 server.getLogger().log(Level.SEVERE, "Error occurred while enabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
++                dev.pomf.dionysus.sentry.SentryContext.removePluginContext(); // Dionysus
+                 // Paper start - Disable plugins that fail to load
+                 server.getPluginManager().disablePlugin(jPlugin, true); // Paper - close Classloader on disable - She's dead jim
+                 return;
+@@ -349,7 +351,9 @@ public final class JavaPluginLoader implements PluginLoader {
+             try {
+                 jPlugin.setEnabled(false);
+             } catch (Throwable ex) {
++                dev.pomf.dionysus.sentry.SentryContext.setPluginContext(plugin); // Dionysus
+                 server.getLogger().log(Level.SEVERE, "Error occurred while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
++                dev.pomf.dionysus.sentry.SentryContext.removePluginContext(); // Dionysus
+             }
+ 
+             if (cloader instanceof PluginClassLoader) {

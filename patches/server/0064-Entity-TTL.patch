@@ -1,0 +1,97 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sun, 19 Jun 2022 16:04:42 +0200
+Subject: [PATCH] Entity TTL
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index da1cd4fb1b4b9449e1e43df7d1bff46cc4b35817..bee4209e7663791494626a0f408bfa213c971140 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -6,6 +6,7 @@ import net.minecraft.server.MinecraftServer;
+ import org.bukkit.Bukkit;
+ import org.bukkit.command.SimpleCommandMap;
+ import org.bukkit.configuration.file.YamlConfiguration;
++import org.bukkit.entity.EntityType;
+ import org.jetbrains.annotations.Nullable;
+ import org.simpleyaml.configuration.comments.CommentType;
+ import org.simpleyaml.configuration.file.YamlFile;
+@@ -16,7 +17,10 @@ import java.io.IOException;
+ import java.lang.reflect.Method;
+ import java.lang.reflect.Modifier;
+ import java.net.URI;
++import java.util.EnumMap;
+ import java.util.List;
++import java.util.Locale;
++import java.util.Map;
+ 
+ public class DionysusConfig {
+ 
+@@ -354,4 +358,23 @@ public class DionysusConfig {
+ 
+     }
+ 
++    public static Map<EntityType, Integer> projectileTimeouts = new EnumMap<>(EntityType.class);
++    private static void projectileTimeouts() {
++        // Set some defaults
++        getInt("entity_timeouts.SNOWBALL", -1);
++        setComment("entity_timeouts",
++                "These values define a entity's maximum lifespan. If an",
++                "entity is in this list and it has survived for longer than",
++                "that number of ticks, then it will be removed. Setting a value to",
++                "-1 disables this feature.");
++
++        for (EntityType entityType : EntityType.values()) {
++            int value = config.getInt("entity_timeouts." + entityType.name(), -1);
++
++            if (value >= 0) {
++                projectileTimeouts.put(entityType, value);
++            }
++        }
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 56b08a0a417c2d47728b62d78ec0db3906c87b47..5a5d082bb5953a38004ec5c1e963b8c24e96ea07 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -24,6 +24,7 @@ import org.bukkit.Location;
+ import org.bukkit.Server;
+ import org.bukkit.TravelAgent;
+ import org.bukkit.block.BlockFace;
++import org.bukkit.entity.EntityType;
+ import org.bukkit.entity.Hanging;
+ import org.bukkit.entity.LivingEntity;
+ import org.bukkit.entity.Vehicle;
+@@ -204,6 +205,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+         return this.yaw;
+     }
+     // CraftBukkit end
++    public int ttl; // Dionysus
+ 
+     public Entity(World world) {
+         this.id = Entity.entityCount++;
+@@ -240,6 +242,10 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+         this.datawatcher.register(Entity.aD, Boolean.valueOf(false));
+         this.datawatcher.register(Entity.aE, Boolean.valueOf(false));
+         this.i();
++
++        // Dionysus start
++        ttl = dev.pomf.dionysus.DionysusConfig.projectileTimeouts.getOrDefault(EntityType.fromId(getId()), -1);
++        // Dionysus end
+     }
+ 
+     public int getId() {
+@@ -411,6 +417,12 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     // CraftBukkit end
+ 
+     public void Y() {
++        // Dionysus start - entity TTL
++        if (!(this instanceof EntityPlayer) && ttl >= 0 && this.ticksLived >= ttl) {
++            die();
++            return;
++        }
++        // Dionysus end - entity TTL
+         this.world.methodProfiler.a("entityBaseTick");
+         if (this.isPassenger() && this.bJ().dead) {
+             this.stopRiding();

@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sun, 19 Jun 2022 15:33:37 +0200
+Subject: [PATCH] Fix Paper#6045, block goal shouldn't load chunks
+
+
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java b/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java
+index e3781f3a8b8de6885445fac7f46d640a1b912b9e..a360b60b9f5e74648740f0defafa912419378668 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java
+@@ -76,7 +76,7 @@ public abstract class PathfinderGoalGotoTarget extends PathfinderGoal {
+                 for (int l = 0; l <= k; l = l > 0 ? -l : 1 - l) {
+                     for (int i1 = l < k && l > -k ? k : 0; i1 <= k; i1 = i1 > 0 ? -i1 : 1 - i1) {
+                         BlockPosition blockposition1 = blockposition.a(l, j - 1, i1);
+-
++                        if (this.c.world.getChunkIfLoaded(blockposition1) != null) continue; // Dionysus - if this block isn't loaded, continue
+                         if (this.c.f(blockposition1) && this.a(this.c.world, blockposition1)) {
+                             setTarget(blockposition1); // Paper
+                             return true;

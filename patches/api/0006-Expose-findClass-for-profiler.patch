@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Fri, 17 Jun 2022 21:29:29 +0200
+Subject: [PATCH] Expose findClass for profiler
+
+
+diff --git a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
+index bd936d9f2eb5ee665d4605bc23f646582fb045ae..0d43330b3a4cd4e2fee851630d3129d2d8af897b 100644
+--- a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
++++ b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
+@@ -99,6 +99,7 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
+         }
+     }
+ 
++    public boolean _dionysus_hasClass(String name) { return this.classes.containsKey(name); } // Dionysus
+     @Override
+     protected Class<?> findClass(String name) throws ClassNotFoundException {
+         return findClass(name, true);

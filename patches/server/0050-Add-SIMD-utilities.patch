@@ -1,0 +1,56 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 18 Jun 2022 08:33:44 +0200
+Subject: [PATCH] Add SIMD utilities
+
+
+diff --git a/pom.xml b/pom.xml
+index 47304ee8cfe0b8bd4f9bbbddf3354c0fbb5d1be4..a28f386fb6546d9faa6ed754b62a211dfc1e0919 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -307,6 +307,9 @@
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-compiler-plugin</artifactId>
+                 <version>3.7.0</version>
++                <configuration>
++                    <compilerArgs>--add-modules=jdk.incubator.vector</compilerArgs>
++                </configuration>
+             </plugin>
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 1e2bb1c5095a1d99419c324286494df26f38453d..8ff1d3c79ba7472d2d609bc0cfabea674234f9ca 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -2,6 +2,7 @@ package dev.pomf.dionysus;
+ 
+ import com.google.common.base.Throwables;
+ import com.google.common.collect.ImmutableMap;
++import dev.pomf.dionysus.simd.SIMDDetection;
+ import net.minecraft.server.MinecraftServer;
+ import org.bukkit.Bukkit;
+ import org.bukkit.command.Command;
+@@ -58,6 +59,23 @@ public class DionysusConfig {
+         version = getInt("config-version", 1);
+         set("config-version", 1);
+         readConfig(DionysusConfig.class, null);
++
++        // Attempt to detect vectorization
++        try {
++            SIMDDetection.isEnabled = SIMDDetection.canEnable(DionysusLogger.LOGGER);
++            SIMDDetection.versionLimited = SIMDDetection.getJavaVersion() != 17 && SIMDDetection.getJavaVersion() != 18;
++        } catch (NoClassDefFoundError | Exception ignored) {}
++
++        if (SIMDDetection.isEnabled) {
++            DionysusLogger.LOGGER.info("SIMD operations detected as functional. Will replace some operations with faster versions.");
++        } else if (SIMDDetection.versionLimited) {
++            DionysusLogger.LOGGER.warning("Will not enable SIMD! These optimizations are only safely supported on Java 17 and Java 18.");
++        } else {
++            DionysusLogger.LOGGER.warning("SIMD operations are available for your server, but are not configured!");
++            DionysusLogger.LOGGER.warning("To enable additional optimizations, add \"--add-modules=jdk.incubator.vector\" to your startup flags, BEFORE the \"-jar\".");
++            DionysusLogger.LOGGER.warning("If you have already added this flag, then SIMD operations are not supported on your JVM or CPU.");
++            DionysusLogger.LOGGER.warning("Debug: Java: " + System.getProperty("java.version") + ", test run: " + SIMDDetection.testRun);
++        }
+     }
+ 
+     protected static void logError(String s) {

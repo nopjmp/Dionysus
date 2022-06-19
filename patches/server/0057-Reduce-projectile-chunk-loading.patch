@@ -1,0 +1,63 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 18 Jun 2022 13:15:24 +0200
+Subject: [PATCH] Reduce projectile chunk loading
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 197ddb5bec0a83195b619eca81ab684459d77394..69c869af85a28c87e1dc9c4db896271172107449 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -318,4 +318,13 @@ public class DionysusConfig {
+                 "configuration option if the vanilla deviation is undesirable.");
+     }
+ 
++    public static int maxProjectileLoadsPerTick;
++    public static int maxProjectileLoadsPerProjectile;
++    private static void projectileLoading() {
++        maxProjectileLoadsPerTick = getInt("projectile.max-loads-per-tick", 10, "Controls how many chunks are allowed", "to be sync loaded by projectiles in a tick.");
++        maxProjectileLoadsPerProjectile = getInt("projectile.max-loads-per-projectile", 10, "Controls how many chunks a projectile", "can load in its lifetime before it gets", "automatically removed.");
++
++        setComment("projectile", "Optimizes projectile settings");
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityProjectile.java b/src/main/java/net/minecraft/server/EntityProjectile.java
+index 8e6428a0cfc5d0d13197d2ce8b90c0962eb2b414..7323a0bb6b99e2bb057ccdfd70bfc0857d590be7 100644
+--- a/src/main/java/net/minecraft/server/EntityProjectile.java
++++ b/src/main/java/net/minecraft/server/EntityProjectile.java
+@@ -295,4 +295,34 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
+ 
+         return this.shooter;
+     }
++
++    // Dionysus start
++    private static int loadedThisTick = 0;
++    private static int loadedTick;
++
++    private int loadedLifetime = 0;
++    @Override
++    public void setPosition(double x, double y, double z) {
++        int currentTick = net.minecraft.server.MinecraftServer.currentTick;
++        if (loadedTick != currentTick) {
++            loadedTick = currentTick;
++            loadedThisTick = 0;
++        }
++        int previousX = MathHelper.floor(this.getX()) >> 4, previousZ = MathHelper.floor(this.getZ()) >> 4;
++        int newX = MathHelper.floor(x) >> 4, newZ = MathHelper.floor(z) >> 4;
++        if (previousX != newX || previousZ != newZ) {
++            boolean isLoaded = ((net.minecraft.server.ChunkProviderServer) this.world.getChunkProvider()).isLoaded(newX, newZ);
++            if (!isLoaded) {
++                if (EntityProjectile.loadedThisTick > dev.pomf.dionysus.DionysusConfig.maxProjectileLoadsPerTick) {
++                    if (++this.loadedLifetime > dev.pomf.dionysus.DionysusConfig.maxProjectileLoadsPerProjectile) {
++                        this.die();
++                    }
++                    return;
++                }
++                EntityProjectile.loadedThisTick++;
++            }
++        }
++        super.setPosition(x, y, z);
++    }
++    // Dionysus end
+ }
