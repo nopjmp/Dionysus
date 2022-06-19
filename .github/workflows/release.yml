@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up JDK 17
+      - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '8'
           distribution: 'temurin'
 
       - uses: actions/cache@v2
@@ -29,6 +29,16 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git submodule update --init --recursive
+          ./dionysus patch
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Dionysus
+        run: |
           ./dionysus jar
 
       - uses: actions/upload-artifact@v2
