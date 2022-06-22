@@ -1,0 +1,201 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Tue, 21 Jun 2022 13:57:18 +0200
+Subject: [PATCH] Add opt-in ZSTD support
+
+
+diff --git a/pom.xml b/pom.xml
+index fec3caf0fa6133a7d0b6ddcf44bbbb5191a543dd..400777d29f82b5cac0053bdc2b25ec92cacddd5d 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -179,6 +179,11 @@
+             <version>6.1.6</version>
+             <scope>compile</scope>
+         </dependency>
++        <dependency>
++            <groupId>com.github.luben</groupId>
++            <artifactId>zstd-jni</artifactId>
++            <version>1.5.2-3</version>
++        </dependency>
+     </dependencies>
+ 
+     <repositories>
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index bee4209e7663791494626a0f408bfa213c971140..e7a6fdfce98d453adbbb509aec8d271274d8f8d2 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -3,6 +3,7 @@ package dev.pomf.dionysus;
+ import dev.pomf.dionysus.flare.FlareCommand;
+ import dev.pomf.dionysus.simd.SIMDDetection;
+ import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.RegionFile;
+ import org.bukkit.Bukkit;
+ import org.bukkit.command.SimpleCommandMap;
+ import org.bukkit.configuration.file.YamlConfiguration;
+@@ -377,4 +378,28 @@ public class DionysusConfig {
+         }
+     }
+ 
++    public static boolean zstdCompression = false;
++    private static void zstdCompression() {
++        // Set some defaults
++        zstdCompression = getBoolean("compression.zstd-compression", false);
++        setComment("compression.zstd-compression",
++                "ZSTD is a new compression algorithm that is designed to",
++                "be faster and more efficient than GZIP and ZLIB. It is currently",
++                "not backwards compatible with gzip, so if your server used gzip",
++                "before, conversion will be required. This is a automatic one-time process per file that is being loaded.",
++                "Once a file has been converted, there is no automatic way to revert to gzip.",
++                "Newer Minecraft versions DO NOT support ZSTD. SO you may be locked forever to 1.12.2 unless you have special custom tools to convert your files."
++        );
++    }
++
++
++    public static int chunkCompressionLevel = -1;
++
++    private static void chunkCompressionLevel() {
++        chunkCompressionLevel = getInt("compression.chunk-compression-level", -1);
++        setComment("compression.chunk-compression-level",
++                "This sets the compression level for normal chunk data."
++        );
++        RegionFile.deflater.setLevel(chunkCompressionLevel);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java b/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
+index 76858edadf56a014bb84228689931f66fcaeee26..7258fff83fe76c7c02dd6b87984710878eee522b 100644
+--- a/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
++++ b/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
+@@ -1,5 +1,7 @@
+ package net.minecraft.server;
+ 
++import com.github.luben.zstd.ZstdInputStream;
++import com.github.luben.zstd.ZstdOutputStream;
+ import dev.pomf.dionysus.DionysusConfig;
+ 
+ import java.io.BufferedInputStream;
+@@ -17,7 +19,7 @@ import java.util.zip.GZIPOutputStream;
+ public class NBTCompressedStreamTools {
+ 
+     public static NBTTagCompound a(InputStream inputstream) throws IOException {
+-        DataInputStream datainputstream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(inputstream)));
++        DataInputStream datainputstream = new DataInputStream(new BufferedInputStream(getCompressionInputStream(inputstream))); // Dionysus
+ 
+         NBTTagCompound nbttagcompound;
+ 
+@@ -31,7 +33,7 @@ public class NBTCompressedStreamTools {
+     }
+ 
+     public static void a(NBTTagCompound nbttagcompound, OutputStream outputstream) throws IOException {
+-        DataOutputStream dataoutputstream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(outputstream) {{ def.setLevel(DionysusConfig.compressionLevel);}})); // Dionysus - NBT Compression Level
++        DataOutputStream dataoutputstream = new DataOutputStream(new BufferedOutputStream(getCompressionOutputStream(outputstream))); // Dionysus
+ 
+         try {
+             a(nbttagcompound, (DataOutput) dataoutputstream);
+@@ -96,4 +98,43 @@ public class NBTCompressedStreamTools {
+             }
+         }
+     }
++
++    // Dionysus start- ZSTD and compression level
++    public static InputStream getCompressionInputStream(InputStream inputStream) throws IOException {
++        if (DionysusConfig.zstdCompression) {
++            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
++            if (!isGZipped(bufferedInputStream)) {
++                return new ZstdInputStream(bufferedInputStream);
++            } else {
++                return new GZIPInputStream(bufferedInputStream);
++            }
++        } else {
++            return new GZIPInputStream(inputStream);
++        }
++    }
++
++    public static OutputStream getCompressionOutputStream(OutputStream outputStream) throws IOException {
++        if (DionysusConfig.zstdCompression) {
++            return new ZstdOutputStream(outputStream, DionysusConfig.compressionLevel);
++        } else {
++            return new GZIPOutputStream(outputStream) {{ def.setLevel(DionysusConfig.compressionLevel);}};
++        }
++    }
++
++    public static boolean isGZipped(InputStream in) {
++        if (!in.markSupported()) {
++            in = new BufferedInputStream(in);
++        }
++        in.mark(2);
++        int magic = 0;
++        try {
++            magic = in.read() & 0xff | ((in.read() << 8) & 0xff00);
++            in.reset();
++        } catch (IOException e) {
++            e.printStackTrace(System.err);
++            return false;
++        }
++        return magic == GZIPInputStream.GZIP_MAGIC;
++    }
++    // Dionysus end
+ }
+diff --git a/src/main/java/net/minecraft/server/RegionFile.java b/src/main/java/net/minecraft/server/RegionFile.java
+index 5fecde675808a5c179ff2b055c3faa127b9f962e..db3f7e5219ae625011d27c421375cb0c93912140 100644
+--- a/src/main/java/net/minecraft/server/RegionFile.java
++++ b/src/main/java/net/minecraft/server/RegionFile.java
+@@ -21,6 +21,8 @@ import java.util.zip.InflaterInputStream;
+ import javax.annotation.Nullable;
+ 
+ import dev.pomf.dionysus.DionysusConfig; // Dionysus
++import com.github.luben.zstd.ZstdInputStream;
++import com.github.luben.zstd.ZstdOutputStream;
+ 
+ public class RegionFile {
+ 
+@@ -169,6 +171,12 @@ public class RegionFile {
+                                 abyte = new byte[j1 - 1];
+                                 this.c.read(abyte);
+                                 return new DataInputStream(new BufferedInputStream(new InflaterInputStream(new ByteArrayInputStream(abyte))));
++                            // Dionysus start
++                            } else if (b0 == 6) {
++                                abyte = new byte[j1 - 1];
++                                this.c.read(abyte);
++                                return new DataInputStream(new BufferedInputStream(new ZstdInputStream(new ByteArrayInputStream(abyte))));
++                            // Dionysus end
+                             } else {
+                                 return null;
+                             }
+@@ -281,7 +289,7 @@ public class RegionFile {
+     private void a(int i, byte[] abyte, int j) throws IOException {
+         this.c.seek((long) (i * 4096));
+         this.c.writeInt(j + 1);
+-        this.c.writeByte(2);
++        this.c.writeByte(DionysusConfig.zstdCompression ? 6 : 2);
+         this.c.write(abyte, 0, j);
+     }
+ 
+@@ -484,6 +492,18 @@ public class RegionFile {
+             // Paper start - apply dynamic compression
+             int origLength = this.count;
+             byte[] buf = this.buf;
++
++            // Dionysus start
++            if (DionysusConfig.zstdCompression) {
++                ByteArrayOutputStream out = new ByteArrayOutputStream(origLength);
++                new ZstdOutputStream(this, DionysusConfig.chunkCompressionLevel).write(buf, 0, origLength);
++                byte[] outArray = out.toByteArray();
++
++                RegionFile.this.a(this.b, this.c, outArray, outArray.length); // Paper - change to bytes/length
++                return;
++            }
++            // Dionysus end
++
+             DirectByteArrayOutputStream out = compressData(buf, origLength);
+             byte[] bytes = out.getBuffer();
+             int length = out.size();
+@@ -493,7 +513,8 @@ public class RegionFile {
+     }
+ 
+     private static final byte[] compressionBuffer = new byte[1024 * 64]; // 64k fits most standard chunks input size even, ideally 1 pass through zlib
+-    private static final java.util.zip.Deflater deflater = new java.util.zip.Deflater();
++    public static final java.util.zip.Deflater deflater = new java.util.zip.Deflater(); // Dionysus private->public
++
+     // since file IO is single threaded, no benefit to using per-region file buffers/synchronization, we can change that later if it becomes viable.
+     private static DirectByteArrayOutputStream compressData(byte[] buf, int length) throws IOException {
+         synchronized (deflater) {
