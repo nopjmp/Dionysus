@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Wed, 22 Jun 2022 21:34:13 +0200
+Subject: [PATCH] Add book nbt max size patch
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index bee4209e7663791494626a0f408bfa213c971140..581c53b5248caaf28b4c0ed57bde23c3bcc1c58d 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -377,4 +377,10 @@ public class DionysusConfig {
+         }
+     }
+ 
++    public static int maxProcessedBookNBTSize = 8000;
++
++    private static void maxProcessedBookNBTSize() {
++        maxProcessedBookNBTSize = getInt("max-processed-book-nbt-size", 8000);
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketDataSerializer.java b/src/main/java/net/minecraft/server/PacketDataSerializer.java
+index c1273e988e6a46c20eca54530f928404c03ad947..0c84c8165ac55d74c0959d4c6bd91c966541978a 100644
+--- a/src/main/java/net/minecraft/server/PacketDataSerializer.java
++++ b/src/main/java/net/minecraft/server/PacketDataSerializer.java
+@@ -270,7 +270,7 @@ public class PacketDataSerializer extends ByteBuf {
+ 
+             itemstack.setTag(this.j());
+             // CraftBukkit start
+-            if (itemstack.getTag() != null) {
++            if (itemstack.getTag() != null && itemstack.getTag().guessSize() <= dev.pomf.dionysus.DionysusConfig.maxProcessedBookNBTSize) { // Dionysus - Max book nbt size
+                 CraftItemStack.setItemMeta(itemstack, CraftItemStack.getItemMeta(itemstack));
+             }
+             // CraftBukkit end
