@@ -14,9 +14,10 @@ jobs:
           echo "PR=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> $GITHUB_ENV
 
       - name: Set up JDK 8
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          java-version: 8
+          java-version: '8'
+          distribution: 'temurin'
 
       - uses: actions/cache@v2
         with:
@@ -26,10 +27,21 @@ jobs:
 
       - name: Patch Dionysus
         run: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
           git submodule update --init --recursive
-          ./dionysus jar
+          ./dionysus patch
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Dionysus
+        run: |
+          ./dionysus build
+          ./scripts/paperclip.sh
 
       - uses: actions/upload-artifact@v2
         with:

@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 18 Jun 2022 10:37:00 +0200
+Subject: [PATCH] Disable Paper timings by default
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperConfig.java b/src/main/java/com/destroystokyo/paper/PaperConfig.java
+index 539ae6aeb5e92f55b981d9cf3f11bf2f1816852f..aa259316a2684015c9ee3d7bb423af0040e8006f 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperConfig.java
+@@ -189,6 +189,15 @@ public class PaperConfig {
+         int timingHistoryInterval = getInt("timings.history-interval", 300);
+         int timingHistoryLength = getInt("timings.history-length", 3600);
+ 
++        // Dionysus start
++        boolean reallyEnabled = getBoolean("timings.really-enabled", false);
++        if (timings && !reallyEnabled) {
++            Bukkit.getLogger().log(Level.WARNING, "[Dionysus] To improve performance, timings have been disabled by default");
++            Bukkit.getLogger().log(Level.WARNING, "[Dionysus] You can still use timings by using /timings on, but they will not start on server startup unless you set timings.really-enabled to true in paper.yml");
++            Bukkit.getLogger().log(Level.WARNING, "[Dionysus] If you would like to disable this message, either set timings.really-enabled to true or timings.enabled to false.");
++        }
++        timings = reallyEnabled;
++        // Dionysus end
+ 
+         Timings.setVerboseTimingsEnabled(verboseTimings);
+         Timings.setTimingsEnabled(timings);

@@ -1,0 +1,108 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Fri, 17 Jun 2022 21:36:12 +0200
+Subject: [PATCH] Add SIMD utilities
+
+
+diff --git a/pom.xml b/pom.xml
+index 6d711f3f5e2c658dfc0daec78edf720a22aa7c45..4836e3c4aadf0fae22091a63b683c75878f8f15d 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -170,6 +170,9 @@
+                         <version>2.8.2-spigotmc</version>
+                     </dependency>
+                 </dependencies>
++                <configuration>
++                    <compilerArgs>--add-modules=jdk.incubator.vector</compilerArgs>
++                </configuration>
+             </plugin>
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+diff --git a/src/main/java/dev/pomf/dionysus/simd/SIMDChecker.java b/src/main/java/dev/pomf/dionysus/simd/SIMDChecker.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..c820b35f577bbceef72bfca8dbd7fa2524217e8f
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/simd/SIMDChecker.java
+@@ -0,0 +1,40 @@
++package dev.pomf.dionysus.simd;
++
++import java.util.logging.Level;
++import java.util.logging.Logger;
++import jdk.incubator.vector.FloatVector;
++import jdk.incubator.vector.IntVector;
++import jdk.incubator.vector.VectorSpecies;
++
++/**
++ * Basically, java is annoying and we have to push this out to its own class.
++ */
++@Deprecated
++public class SIMDChecker {
++
++    @Deprecated
++    public static boolean canEnable(Logger logger) {
++        try {
++            if (SIMDDetection.getJavaVersion() != 17 && SIMDDetection.getJavaVersion() != 18) {
++                return false;
++            } else {
++                SIMDDetection.testRun = true;
++
++                VectorSpecies<Integer> ISPEC = IntVector.SPECIES_PREFERRED;
++                VectorSpecies<Float> FSPEC = FloatVector.SPECIES_PREFERRED;
++
++                logger.log(Level.INFO, "Max SIMD vector size on this system is " + ISPEC.vectorBitSize() + " bits (int)");
++                logger.log(Level.INFO, "Max SIMD vector size on this system is " + FSPEC.vectorBitSize() + " bits (float)");
++
++                if (ISPEC.elementSize() < 2 || FSPEC.elementSize() < 2) {
++                    logger.log(Level.WARNING, "SIMD is not properly supported on this system!");
++                    return false;
++                }
++
++                return true;
++            }
++        } catch (NoClassDefFoundError | Exception ignored) {} // Basically, we don't do anything. This lets us detect if it's not functional and disable it.
++        return false;
++    }
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/dev/pomf/dionysus/simd/SIMDDetection.java b/src/main/java/dev/pomf/dionysus/simd/SIMDDetection.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..7b0f1d4aa33070750bb35a2b4de2938f23a81c94
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/simd/SIMDDetection.java
+@@ -0,0 +1,35 @@
++package dev.pomf.dionysus.simd;
++
++import java.util.logging.Logger;
++
++@Deprecated
++public class SIMDDetection {
++
++    public static boolean isEnabled = false;
++    public static boolean versionLimited = false;
++    public static boolean testRun = false;
++
++    @Deprecated
++    public static boolean canEnable(Logger logger) {
++        try {
++            return SIMDChecker.canEnable(logger);
++        } catch (NoClassDefFoundError | Exception ignored) {
++            return false;
++        }
++    }
++
++    @Deprecated
++    public static int getJavaVersion() {
++        // https://stackoverflow.com/a/2591122
++        String version = System.getProperty("java.version");
++        if(version.startsWith("1.")) {
++            version = version.substring(2, 3);
++        } else {
++            int dot = version.indexOf(".");
++            if(dot != -1) { version = version.substring(0, dot); }
++        }
++        version = version.split("-")[0]; // Azul is stupid
++        return Integer.parseInt(version);
++    }
++
++}

@@ -1,0 +1,61 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sun, 19 Jun 2022 14:00:49 +0200
+Subject: [PATCH] Flare Profiler
+
+
+diff --git a/pom.xml b/pom.xml
+index c63bbd1550c58a1ddedf9c7552ff14fc6c81f821..759b9678314efae85c012938834c558dafe70002 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -111,7 +111,7 @@
+         <dependency>
+             <groupId>net.md-5</groupId>
+             <artifactId>bungeecord-chat</artifactId>
+-            <version>1.12-SNAPSHOT</version>
++            <version>1.16-R0.4</version>
+             <type>jar</type>
+             <scope>compile</scope>
+         </dependency>
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 682d2bbf2831e47285f625a41bc0f353c346db7a..045a1ad1efe17ee44e14121b45a1f377eb4feaba 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -110,6 +110,17 @@ public final class Bukkit {
+         return server.getBukkitVersion();
+     }
+ 
++    // Dionysus start - expose game version
++    /**
++     * Gets the version of game this server implements
++     *
++     * @return version of game
++     */
++    public static String getMinecraftVersion() {
++        return server.getMinecraftVersion();
++    }
++    // Dionysus end
++
+     /**
+      * Gets a view of all currently logged in players. This {@linkplain
+      * Collections#unmodifiableCollection(Collection) view} is a reused
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index fc294a94d9c33bc256fdaee1d3a91eeeeaedc6a6..df4e72aebba6dccce0fb9e8b1f59f775b2012bc5 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -90,6 +90,15 @@ public interface Server extends PluginMessageRecipient {
+      */
+     public String getBukkitVersion();
+ 
++    // Dionysus start - expose game version
++    /**
++     * Gets the version of game this server implements
++     *
++     * @return version of game
++     */
++    String getMinecraftVersion();
++    // Dionysus end
++
+     /**
+      * Gets a view of all currently logged in players. This {@linkplain
+      * Collections#unmodifiableCollection(Collection) view} is a reused

@@ -1,0 +1,550 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 18 Jun 2022 09:26:52 +0200
+Subject: [PATCH] Rework config
+
+
+diff --git a/pom.xml b/pom.xml
+index a28f386fb6546d9faa6ed754b62a211dfc1e0919..2e11fae06a234b930f4cdf2bbf4c2550ccb26218 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -155,6 +155,18 @@
+             <version>23.0.0</version>
+             <scope>compile</scope>
+         </dependency>
++        <dependency>
++            <groupId>me.carleslc.Simple-YAML</groupId>
++            <artifactId>Simple-Yaml</artifactId>
++            <version>1.8</version>
++            <scope>compile</scope>
++            <exclusions>
++                <exclusion>
++                    <groupId>org.yaml</groupId>
++                    <artifactId>snakeyaml</artifactId>
++                </exclusion>
++            </exclusions>
++        </dependency>
+     </dependencies>
+ 
+     <repositories>
+@@ -166,6 +178,10 @@
+             <id>spigotmc-public</id>
+             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+         </repository>
++        <repository>
++            <id>jitpack.io</id>
++            <url>https://jitpack.io</url>
++        </repository>
+     </repositories>
+ 
+     <pluginRepositories>
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusCommand.java b/src/main/java/dev/pomf/dionysus/DionysusCommand.java
+index ccd40bd122937a862d531ad2c8f3bed090054874..269b221474f2d3a737996a21b7e0619bf26301cf 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusCommand.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusCommand.java
+@@ -1,6 +1,5 @@
+ package dev.pomf.dionysus;
+ 
+-import com.google.common.collect.ImmutableList;
+ import net.minecraft.server.MinecraftServer;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -9,12 +8,12 @@ import org.bukkit.command.Command;
+ import org.bukkit.command.CommandSender;
+ import org.bukkit.util.StringUtil;
+ 
+-import java.io.File;
++import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.List;
+ 
+ public class DionysusCommand extends Command {
+-    private static final List<String> SUBCOMMANDS = ImmutableList.of("reload", "version");
++    private static final List<String> SUBCOMMANDS = List.of("reload", "version");
+ 
+     public DionysusCommand() {
+         super("dionysus");
+@@ -23,13 +22,17 @@ public class DionysusCommand extends Command {
+         this.setPermission("bukkit.command.dionysus");
+     }
+ 
++    public static void init() {
++        MinecraftServer.getServer().server.getCommandMap().register("dionysus", "Dionysus", new DionysusCommand());
++    }
++
+     @Override
+     public List<String> tabComplete(CommandSender sender, String alias, String[] args, Location location) throws IllegalArgumentException {
+         if (args.length == 1) {
+             return StringUtil.copyPartialMatches(args[0], SUBCOMMANDS,
+                     new ArrayList<>(SUBCOMMANDS.size()));
+         }
+-        return ImmutableList.of();
++        return List.of();
+     }
+ 
+     @Override
+@@ -46,7 +49,13 @@ public class DionysusCommand extends Command {
+             Command.broadcastCommandMessage(sender, ChatColor.RED + "If you encounter any issues please use the /stop command to restart your server.");
+ 
+             MinecraftServer console = MinecraftServer.getServer();
+-            DionysusConfig.init((File) console.options.valueOf("dionysus-settings"));
++            try {
++                DionysusConfig.load();
++            } catch (IOException e) {
++                sender.sendMessage(ChatColor.RED + "Failed to reload.");
++                e.printStackTrace();
++                return true;
++            }
+             console.server.reloadCount++;
+ 
+             Command.broadcastCommandMessage(sender, ChatColor.GREEN + "Dionysus config reload complete.");
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 7740e39d3f15a2727e42d1b3e042920c98b4f469..f3d94ae491aa88b195e1015384c4861f5c7ef4c0 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -1,70 +1,97 @@
+ package dev.pomf.dionysus;
+ 
+-import com.google.common.base.Throwables;
+-import com.google.common.collect.ImmutableMap;
+ import dev.pomf.dionysus.simd.SIMDDetection;
+ import net.minecraft.server.MinecraftServer;
+ import org.bukkit.Bukkit;
+-import org.bukkit.command.Command;
+-import org.bukkit.configuration.InvalidConfigurationException;
+ import org.bukkit.configuration.file.YamlConfiguration;
++import org.jetbrains.annotations.Nullable;
++import org.simpleyaml.configuration.comments.CommentType;
++import org.simpleyaml.configuration.file.YamlFile;
++import org.simpleyaml.exceptions.InvalidConfigurationException;
+ 
+ import java.io.File;
+ import java.io.IOException;
+-import java.lang.reflect.InvocationTargetException;
+ import java.lang.reflect.Method;
+ import java.lang.reflect.Modifier;
+-import java.util.HashMap;
+ import java.util.List;
+-import java.util.Map;
+-import java.util.concurrent.TimeUnit;
+-import java.util.logging.Level;
+-import java.util.regex.Pattern;
+ 
+ public class DionysusConfig {
+ 
+     // TODO Add wiki on github and link in header
+-    private static final String HEADER = "This is the main configuration file for Dionysus.\n"
+-            + "As you can see, there's tons to configure. Some options may impact gameplay, so use\n"
+-            + "with caution, and make sure you know what each option does before configuring.\n";
+-    private static final Pattern SPACE = Pattern.compile(" ");
+-    private static final Pattern NOT_NUMERIC = Pattern.compile("[^-\\d.]");
+-    /*========================================================================*/
+-    public static YamlConfiguration config;
+-    public static String flyingKickPlayerMessage = "Flying is not enabled on this server";
+-    public static String flyingKickVehicleMessage = "Flying is not enabled on this server";
+-    /*========================================================================*/
+-    static int version;
+-    static Map<String, Command> commands;
+-    private static File CONFIG_FILE;
++    private static final YamlFile config = new YamlFile();
++    private static int updates = 0;
+     private static boolean verbose;
+ 
+-    public static void init(File configFile) {
+-        CONFIG_FILE = configFile;
+-        config = new YamlConfiguration();
+-        try {
+-            config.load(CONFIG_FILE);
+-        } catch (IOException ex) {
+-            // continue
+-        } catch (InvalidConfigurationException ex) {
+-            Bukkit.getLogger().log(Level.SEVERE, "Could not load paper.yml, please correct your syntax errors", ex);
+-            throw Throwables.propagate(ex);
++    protected static void logError(String s) {
++        Bukkit.getLogger().severe(s);
++    }
++
++    protected static void log(String s) {
++        if (verbose) {
++            Bukkit.getLogger().info(s);
+         }
+-        config.options().header(HEADER);
+-        config.options().copyDefaults(true);
++    }
++
++    private static YamlConfiguration convertToBukkit(org.simpleyaml.configuration.ConfigurationSection section) {
++        YamlConfiguration newSection = new YamlConfiguration();
++        for (String key : section.getKeys(false)) {
++            if (section.isConfigurationSection(key)) {
++                newSection.set(key, convertToBukkit(section.getConfigurationSection(key)));
++            } else {
++                newSection.set(key, section.get(key));
++            }
++        }
++        return newSection;
++    }
++
++    public static YamlConfiguration getConfigCopy() {
++        return convertToBukkit(config);
++    }
++
++    public static int getUpdates() {
++        return updates;
++    }
++
++    public static void load() throws IOException {
++        File configFile = new File("dionysus.yml");
++
++        if (configFile.exists()) {
++            try {
++                config.load(configFile);
++            } catch (InvalidConfigurationException e) {
++                throw new IOException(e);
++            }
++        }
++
++        getString("config-version", "1");
++        setComment("config-version",
++                "This is the main configuration file for Dionysus.",
++                "As you can see, there's tons to configure. Some options may impact gameplay, so use",
++                "with caution, and make sure you know what each option does before configuring.");
+         verbose = getBoolean("verbose", false);
+ 
+-        commands = ImmutableMap.of("dionysus", new DionysusCommand());
++        for (Method method : DionysusConfig.class.getDeclaredMethods()) {
++            if (Modifier.isStatic(method.getModifiers()) && Modifier.isPrivate(method.getModifiers()) && method.getParameterCount() == 0 &&
++                    method.getReturnType() == Void.TYPE && !method.getName().startsWith("lambda")) {
++                method.setAccessible(true);
++                try {
++                    method.invoke(null);
++                } catch (Throwable t) {
++                    MinecraftServer.LOGGER.warn("Failed to load configuration option from " + method.getName(), t);
++                }
++            }
++        }
++
++        updates++;
+ 
+-        version = getInt("config-version", 1);
+-        set("config-version", 1);
+-        readConfig(DionysusConfig.class, null);
++        config.save(configFile);
+ 
+         // Attempt to detect vectorization
+         try {
+             SIMDDetection.isEnabled = SIMDDetection.canEnable(DionysusLogger.LOGGER);
+             SIMDDetection.versionLimited = SIMDDetection.getJavaVersion() != 17 && SIMDDetection.getJavaVersion() != 18;
+-        } catch (NoClassDefFoundError | Exception ignored) {}
++        } catch (NoClassDefFoundError | Exception ignored) {
++        }
+ 
+         if (SIMDDetection.isEnabled) {
+             DionysusLogger.LOGGER.info("SIMD operations detected as functional. Will replace some operations with faster versions.");
+@@ -78,126 +105,66 @@ public class DionysusConfig {
+         }
+     }
+ 
+-    protected static void logError(String s) {
+-        Bukkit.getLogger().severe(s);
+-    }
+-
+-    protected static void log(String s) {
+-        if (verbose) {
+-            Bukkit.getLogger().info(s);
++    private static void setComment(String key, String... comment) {
++        if (config.contains(key)) {
++            config.setComment(key, String.join("\n", comment), CommentType.BLOCK);
+         }
+     }
+ 
+-    public static void registerCommands() {
+-        for (Map.Entry<String, Command> entry : commands.entrySet()) {
+-            MinecraftServer.getServer().server.getCommandMap().register(entry.getKey(), "Dionysus", entry.getValue());
++    private static void ensureDefault(String key, Object defaultValue, String... comment) {
++        if (!config.contains(key)) {
++            config.set(key, defaultValue);
++            config.setComment(key, String.join("\n", comment), CommentType.BLOCK);
+         }
+     }
+ 
+-    static void readConfig(Class<?> clazz, Object instance) {
+-        for (Method method : clazz.getDeclaredMethods()) {
+-            if (Modifier.isPrivate(method.getModifiers())) {
+-                if (method.getParameterTypes().length == 0 && method.getReturnType() == Void.TYPE) {
+-                    try {
+-                        method.setAccessible(true);
+-                        method.invoke(instance);
+-                    } catch (InvocationTargetException ex) {
+-                        throw Throwables.propagate(ex.getCause());
+-                    } catch (Exception ex) {
+-                        Bukkit.getLogger().log(Level.SEVERE, "Error invoking " + method, ex);
+-                    }
+-                }
+-            }
+-        }
+-
+-        try {
+-            config.save(CONFIG_FILE);
+-        } catch (IOException ex) {
+-            Bukkit.getLogger().log(Level.SEVERE, "Could not save " + CONFIG_FILE, ex);
+-        }
++    private static boolean getBoolean(String key, boolean defaultValue, String... comment) {
++        return getBoolean(key, null, defaultValue, comment);
+     }
+ 
+-    public static int getSeconds(String str) {
+-        str = SPACE.matcher(str).replaceAll("");
+-        final char unit = str.charAt(str.length() - 1);
+-        str = NOT_NUMERIC.matcher(str).replaceAll("");
+-        double num;
+-        try {
+-            num = Double.parseDouble(str);
+-        } catch (Exception e) {
+-            num = 0D;
+-        }
+-        switch (unit) {
+-            case 'd':
+-                num *= (double) 60 * 60 * 24;
+-                break;
+-            case 'h':
+-                num *= (double) 60 * 60;
+-                break;
+-            case 'm':
+-                num *= 60;
+-                break;
+-            default:
+-            case 's':
+-                break;
+-        }
+-        return (int) num;
++    private static boolean getBoolean(String key, @Nullable String oldKey, boolean defaultValue, String... comment) {
++        ensureDefault(key, defaultValue, comment);
++        return config.getBoolean(key, defaultValue);
+     }
+ 
+-    protected static String timeSummary(int seconds) {
+-        String time = "";
+-
+-        if (seconds > 60 * 60 * 24) {
+-            time += TimeUnit.SECONDS.toDays(seconds) + "d";
+-            seconds %= 60 * 60 * 24;
+-        }
+-
+-        if (seconds > 60 * 60) {
+-            time += TimeUnit.SECONDS.toHours(seconds) + "h";
+-            seconds %= 60 * 60;
+-        }
+-
+-        if (seconds > 0) {
+-            time += TimeUnit.SECONDS.toMinutes(seconds) + "m";
+-        }
+-        return time;
++    private static int getInt(String key, int defaultValue, String... comment) {
++        return getInt(key, null, defaultValue, comment);
+     }
+ 
+-    private static void set(String path, Object val) {
+-        config.set(path, val);
++    private static int getInt(String key, @Nullable String oldKey, int defaultValue, String... comment) {
++        ensureDefault(key, defaultValue, comment);
++        return config.getInt(key, defaultValue);
+     }
+ 
+-    private static boolean getBoolean(String path, boolean def) {
+-        config.addDefault(path, def);
+-        return config.getBoolean(path, config.getBoolean(path));
++    private static double getDouble(String key, double defaultValue, String... comment) {
++        return getDouble(key, null, defaultValue, comment);
+     }
+ 
+-    private static double getDouble(String path, double def) {
+-        config.addDefault(path, def);
+-        return config.getDouble(path, config.getDouble(path));
++    private static double getDouble(String key, @Nullable String oldKey, double defaultValue, String... comment) {
++        ensureDefault(key, defaultValue, comment);
++        return config.getDouble(key, defaultValue);
+     }
+ 
+-    private static float getFloat(String path, float def) {
+-        // TODO: Figure out why getFloat() always returns the default value.
+-        return (float) getDouble(path, def);
++    private static String getString(String key, String defaultValue, String... comment) {
++        return getOldString(key, null, defaultValue, comment);
+     }
+ 
+-    private static int getInt(String path, int def) {
+-        config.addDefault(path, def);
+-        return config.getInt(path, config.getInt(path));
++    private static String getOldString(String key, @Nullable String oldKey, String defaultValue, String... comment) {
++        ensureDefault(key, defaultValue, comment);
++        return config.getString(key, defaultValue);
+     }
+ 
+-    private static <T> List<T> getList(String path, T def) {
+-        config.addDefault(path, def);
+-        return (List<T>) config.getList(path, config.getList(path));
++    private static List<String> getStringList(String key, List<String> defaultValue, String... comment) {
++        return getStringList(key, null, defaultValue, comment);
+     }
+ 
+-    private static String getString(String path, String def) {
+-        config.addDefault(path, def);
+-        return config.getString(path, config.getString(path));
++    private static List<String> getStringList(String key, @Nullable String oldKey, List<String> defaultValue, String... comment) {
++        ensureDefault(key, defaultValue, comment);
++        return config.getStringList(key);
+     }
+ 
+     public static int maxLightTimePerTick = 10;
++
+     private static void maxLightTimePerTickMs() {
+         maxLightTimePerTick = getInt("light-updates-max-ms-per-tick", maxLightTimePerTick) * 1000000;
+     }
+@@ -209,6 +176,7 @@ public class DionysusConfig {
+     public static int monsterAiLimitPlayerCount = 90;
+     public static double animalAiLimitTPS = 6;
+     public static int animalAiLimitPlayerCount = 120;
++
+     private static void aiLimit() {
+         customNameAiLimitBypass = getBoolean("ai-limit.bypass.custom-name", true);
+         tamableAiLimitBypass = getBoolean("ai-limit.bypass.tamable", true);
+@@ -221,6 +189,7 @@ public class DionysusConfig {
+     }
+ 
+     public static int compressionLevel = -1;
++
+     private static void compressionLevel() {
+         compressionLevel = getInt("compression-level", -1);
+         if (compressionLevel < -1 || compressionLevel > 9) {
+@@ -230,11 +199,13 @@ public class DionysusConfig {
+     }
+ 
+     public static String serverModName = "Dionysus";
++
+     private static void serverModName() {
+         serverModName = getString("settings.server-mod-name", serverModName);
+     }
+ 
+     public static boolean fairNaturalSpawns = true;
++
+     private static void fairNaturalSpawns() {
+         fairNaturalSpawns = getBoolean("fair-natural-spawns", fairNaturalSpawns);
+         if (fairNaturalSpawns) {
+@@ -243,6 +214,7 @@ public class DionysusConfig {
+     }
+ 
+     public static boolean redactPlayerData = true;
++
+     private static void redactPlayerData() {
+         redactPlayerData = getBoolean("redact-player-data", redactPlayerData);
+         if (redactPlayerData) {
+@@ -251,6 +223,7 @@ public class DionysusConfig {
+     }
+ 
+     public static boolean alternativeBedMechanics = true;
++
+     private static void alternativeBedMechanics() {
+         alternativeBedMechanics = getBoolean("alternative-bed-mechanics", alternativeBedMechanics);
+         if (alternativeBedMechanics) {
+@@ -259,11 +232,13 @@ public class DionysusConfig {
+     }
+ 
+     public static int maxProcessedNBTSize = 80000;
++
+     private static void maxProcessedNBTSize() {
+         maxProcessedNBTSize = getInt("max-processed-nbt-size", 80000);
+     }
+ 
+     public static boolean alternativeBlockPlacement = true;
++
+     private static void alternativeBlockPlacement() {
+         alternativeBlockPlacement = getBoolean("tickless-block-placement", alternativeBlockPlacement);
+         if (alternativeBlockPlacement) {
+@@ -272,12 +247,14 @@ public class DionysusConfig {
+     }
+ 
+     public static int mapDecorationsLimit = 10;
++
+     private static void mapDecorationsLimit() {
+         mapDecorationsLimit = getInt("map-decoration-limit", mapDecorationsLimit);
+     }
+ 
+     public static boolean chunkOverloadDupe = false;
+     public static boolean chunkOverloadDupeLog = false;
++
+     private static void chunkOverloadDupe() {
+         chunkOverloadDupe = getBoolean("chunk-overload-dupe.allow", chunkOverloadDupe);
+         if (chunkOverloadDupe) Bukkit.getLogger().info("Chunk overload dupe activated.");
+@@ -287,27 +264,32 @@ public class DionysusConfig {
+ 
+     public static int tileEntityDataLimit = 750;
+     public static int tileEntitySplitLimit = 15000;
++
+     private static void tileEntityLimit() {
+         tileEntityDataLimit = getInt("tile-entity.data-limit", tileEntityDataLimit);
+         tileEntitySplitLimit = getInt("tile-entity.split-limit", tileEntitySplitLimit);
+     }
+ 
+     public static boolean optimizeArmourStands = true;
++
+     private static void optimizeArmourStands() {
+         optimizeArmourStands = getBoolean("optimize-armourstands", optimizeArmourStands);
+     }
+ 
+     public static boolean improveMergeChecks = true;
++
+     private static void improveMergeChecks() {
+         improveMergeChecks = getBoolean("improve-merge-checks", improveMergeChecks);
+     }
+ 
+     public static boolean noChunksPastWorldBorder = true;
++
+     private static void noChunksPastWorldBorder() {
+         noChunksPastWorldBorder = getBoolean("no-chunks-past-world-border", noChunksPastWorldBorder);
+     }
+ 
+     public static String sentryDsn;
++
+     private static void sentry() {
+         String sentryEnvironment = System.getenv("SENTRY_DSN");
+         String sentryConfig = getString("sentry-dsn", "");
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index 9779311d21d2df5db7828e470303f0250ef9fa0a..9d451ff304fc2eb7398811564ad7956682f28bf5 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -202,8 +202,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+             com.destroystokyo.paper.VersionHistoryManager.INSTANCE.getClass(); // load version history now
+             // Paper end
+             // Dionysus start
+-            dev.pomf.dionysus.DionysusConfig.init((File) options.valueOf("dionysus-settings"));
+-            dev.pomf.dionysus.DionysusConfig.registerCommands();
++            dev.pomf.dionysus.DionysusConfig.load();
++            dev.pomf.dionysus.DionysusCommand.init();
+             // Dionysus end
+ 
+             DedicatedServer.LOGGER.info("Generating keypair");
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index fc969ddeee05779293a7dc0377b66db17ff01017..7eddf0e829f4bd5d341afaca49df5ebcee651d89 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -743,7 +743,6 @@ public final class CraftServer implements Server {
+ 
+         org.spigotmc.SpigotConfig.init((File) console.options.valueOf("spigot-settings")); // Spigot
+         com.destroystokyo.paper.PaperConfig.init((File) console.options.valueOf("paper-settings")); // Paper
+-        dev.pomf.dionysus.DionysusConfig.init((File) console.options.valueOf("dionysus-settings")); // Dionysus
+         for (WorldServer world : console.worlds) {
+             world.worldData.setDifficulty(difficulty);
+             world.setSpawnFlags(monsters, animals);
+@@ -1901,6 +1900,12 @@ public final class CraftServer implements Server {
+             return com.destroystokyo.paper.PaperConfig.config;
+         }
+ 
++        @Override
++        public YamlConfiguration getDionysusConfig()
++        {
++            return dev.pomf.dionysus.DionysusConfig.getConfigCopy();
++        }
++
+         @Override
+         public void restart() {
+             org.spigotmc.RestartCommand.restart();

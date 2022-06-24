@@ -1,0 +1,64 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Fri, 17 Jun 2022 22:16:40 +0200
+Subject: [PATCH] Bump to java 17
+
+
+diff --git a/pom.xml b/pom.xml
+index 4836e3c4aadf0fae22091a63b683c75878f8f15d..c63bbd1550c58a1ddedf9c7552ff14fc6c81f821 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -20,8 +20,9 @@
+ 
+     <properties>
+         <!-- Paper - Bump to 1.8 - Get off your dinosaur and get on this rocket ship... -->
+-        <maven.compiler.source>1.8</maven.compiler.source>
+-        <maven.compiler.target>1.8</maven.compiler.target>
++        <!-- Dionysus - Java 17! -->
++        <maven.compiler.source>17</maven.compiler.source>
++        <maven.compiler.target>17</maven.compiler.target>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+     </properties>
+ 
+@@ -104,7 +105,7 @@
+         <dependency>
+             <groupId>org.yaml</groupId>
+             <artifactId>snakeyaml</artifactId>
+-            <version>1.19</version>
++            <version>1.30</version>
+             <scope>compile</scope>
+         </dependency>
+         <dependency>
+@@ -119,7 +120,7 @@
+         <dependency>
+             <groupId>org.slf4j</groupId>
+             <artifactId>slf4j-api</artifactId>
+-            <version>1.7.25</version>
++            <version>1.7.36</version>
+             <scope>compile</scope>
+         </dependency>
+ 
+@@ -127,7 +128,7 @@
+         <dependency>
+             <groupId>junit</groupId>
+             <artifactId>junit</artifactId>
+-            <version>4.12</version>
++            <version>4.13.2</version>
+             <scope>test</scope>
+         </dependency>
+         <dependency>
+@@ -140,12 +141,12 @@
+         <dependency>
+             <groupId>org.ow2.asm</groupId>
+             <artifactId>asm</artifactId>
+-            <version>6.1.1</version>
++            <version>9.3</version>
+         </dependency>
+         <dependency>
+             <groupId>org.ow2.asm</groupId>
+             <artifactId>asm-commons</artifactId>
+-            <version>6.1.1</version>
++            <version>9.3</version>
+         </dependency>
+         <!-- Dionysus -->
+         <dependency>

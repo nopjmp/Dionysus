@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 18 Jun 2022 10:11:13 +0200
+Subject: [PATCH] Optimize suffocation
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index b3d9b8d81ab1dc8e7e579f0d37f1eb14a2fb0491..197ddb5bec0a83195b619eca81ab684459d77394 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -309,4 +309,13 @@ public class DionysusConfig {
+                 "This can be overridden per-player with the permission dionysus.usebooks");
+     }
+ 
++    public static boolean enableSuffocationOptimization;
++    private static void suffocationOptimization() {
++        enableSuffocationOptimization = getBoolean("enable-suffocation-optimization", true,
++                "Optimizes the suffocation check by selectively skipping",
++                "the check in a way that still appears vanilla. This should",
++                "be left enabled on most servers, but is provided as a",
++                "configuration option if the vanilla deviation is undesirable.");
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 09748606f71e0dd6d7b743048070c7b02a0876a0..c6644f21e3b037e6044ac0c8e1a28b79df4aee08 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -211,7 +211,7 @@ public abstract class EntityLiving extends Entity {
+         boolean flag = this instanceof EntityHuman;
+ 
+         if (this.isAlive()) {
+-            if (this.inBlock()) {
++            if ((!dev.pomf.dionysus.DionysusConfig.enableSuffocationOptimization || (ticksLived % 10 == 0 && couldPossiblyBeHurt(1.0F))) && this.inBlock()) { // Dionysus - optimize suffocation
+                 this.damageEntity(DamageSource.STUCK, 1.0F);
+             } else if (flag && !this.world.getWorldBorder().a(this.getBoundingBox())) {
+                 double d0 = this.world.getWorldBorder().a((Entity) this) + this.world.getWorldBorder().getDamageBuffer();
+@@ -316,6 +316,15 @@ public abstract class EntityLiving extends Entity {
+         this.world.methodProfiler.b();
+     }
+ 
++    // Dionysus start - optimize suffocation
++    public boolean couldPossiblyBeHurt(float amount) {
++        if ((float) this.noDamageTicks > (float) this.maxNoDamageTicks / 2.0F && amount <= this.lastDamage) {
++            return false;
++        }
++        return true;
++    }
++    // Dionysus end
++
+     // CraftBukkit start
+     public int getExpReward() {
+         int exp = this.getExpValue(this.killer);
