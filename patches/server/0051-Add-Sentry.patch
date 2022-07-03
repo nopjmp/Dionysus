@@ -3,6 +3,21 @@ From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
 Date: Sat, 18 Jun 2022 08:44:39 +0200
 Subject: [PATCH] Add Sentry
 
+Pufferfish
+Copyright (C) 2022 Pufferfish Studios LLC
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 index 8ff1d3c79ba7472d2d609bc0cfabea674234f9ca..7740e39d3f15a2727e42d1b3e042920c98b4f469 100644
@@ -26,10 +41,10 @@ index 8ff1d3c79ba7472d2d609bc0cfabea674234f9ca..7740e39d3f15a2727e42d1b3e042920c
  }
 diff --git a/src/main/java/dev/pomf/dionysus/sentry/DionysusSentryAppender.java b/src/main/java/dev/pomf/dionysus/sentry/DionysusSentryAppender.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4203aa8a1a764a47b2fccd869bfb968efe58763f
+index 0000000000000000000000000000000000000000..bcb1d08d388d1b85a07faa2121e3f5faee73c058
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/sentry/DionysusSentryAppender.java
-@@ -0,0 +1,135 @@
+@@ -0,0 +1,136 @@
 +package dev.pomf.dionysus.sentry;
 +
 +import com.google.common.reflect.TypeToken;
@@ -81,6 +96,7 @@ index 0000000000000000000000000000000000000000..4203aa8a1a764a47b2fccd869bfb968e
 +        Message sentryMessage = new Message();
 +        sentryMessage.setMessage(e.getMessage().getFormattedMessage());
 +
++        event.setMessage(sentryMessage);
 +        event.setThrowable(e.getThrown());
 +        event.setLevel(getLevel(e.getLevel()));
 +        event.setLogger(e.getLoggerName());

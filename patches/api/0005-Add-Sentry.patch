@@ -3,9 +3,24 @@ From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
 Date: Fri, 17 Jun 2022 21:27:18 +0200
 Subject: [PATCH] Add Sentry
 
+Pufferfish
+Copyright (C) 2022 Pufferfish Studios LLC
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index e32fd4014b3174678b775f76a643ab4e7338a3a8..6d711f3f5e2c658dfc0daec78edf720a22aa7c45 100644
+index e32fd4014b3174678b775f76a643ab4e7338a3a8..5bff8b241be450b3426c7d448f3c6585612be781 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -147,6 +147,12 @@
@@ -16,7 +31,7 @@ index e32fd4014b3174678b775f76a643ab4e7338a3a8..6d711f3f5e2c658dfc0daec78edf720a
 +        <dependency>
 +            <groupId>io.sentry</groupId>
 +            <artifactId>sentry</artifactId>
-+            <version>6.0.0</version>
++            <version>6.1.4</version>
 +        </dependency>
      </dependencies>
  
