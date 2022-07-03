@@ -5,7 +5,7 @@ Subject: [PATCH] Flare Profiler
 
 
 diff --git a/pom.xml b/pom.xml
-index c63bbd1550c58a1ddedf9c7552ff14fc6c81f821..759b9678314efae85c012938834c558dafe70002 100644
+index 07a2eb79f295e98302c481fad6abb6d1e8ab5231..41480bf55d240cacec8a95af32b76290512a5cd2 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -111,7 +111,7 @@

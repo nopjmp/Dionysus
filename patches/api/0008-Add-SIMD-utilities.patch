@@ -5,7 +5,7 @@ Subject: [PATCH] Add SIMD utilities
 
 
 diff --git a/pom.xml b/pom.xml
-index 6d711f3f5e2c658dfc0daec78edf720a22aa7c45..4836e3c4aadf0fae22091a63b683c75878f8f15d 100644
+index 5bff8b241be450b3426c7d448f3c6585612be781..de795f03a8566a581657e7fde1a9aa532bf407eb 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -170,6 +170,9 @@

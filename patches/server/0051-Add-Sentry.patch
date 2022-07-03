@@ -26,10 +26,10 @@ index 8ff1d3c79ba7472d2d609bc0cfabea674234f9ca..7740e39d3f15a2727e42d1b3e042920c
  }
 diff --git a/src/main/java/dev/pomf/dionysus/sentry/DionysusSentryAppender.java b/src/main/java/dev/pomf/dionysus/sentry/DionysusSentryAppender.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4203aa8a1a764a47b2fccd869bfb968efe58763f
+index 0000000000000000000000000000000000000000..bcb1d08d388d1b85a07faa2121e3f5faee73c058
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/sentry/DionysusSentryAppender.java
-@@ -0,0 +1,135 @@
+@@ -0,0 +1,136 @@
 +package dev.pomf.dionysus.sentry;
 +
 +import com.google.common.reflect.TypeToken;
@@ -81,6 +81,7 @@ index 0000000000000000000000000000000000000000..4203aa8a1a764a47b2fccd869bfb968e
 +        Message sentryMessage = new Message();
 +        sentryMessage.setMessage(e.getMessage().getFormattedMessage());
 +
++        event.setMessage(sentryMessage);
 +        event.setThrowable(e.getThrown());
 +        event.setLevel(getLevel(e.getLevel()));
 +        event.setLogger(e.getLoggerName());
