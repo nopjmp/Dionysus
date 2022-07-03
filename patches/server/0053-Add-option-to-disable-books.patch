@@ -3,6 +3,21 @@ From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
 Date: Sat, 18 Jun 2022 09:40:26 +0200
 Subject: [PATCH] Add option to disable books
 
+Pufferfish
+Copyright (C) 2022 Pufferfish Studios LLC
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 index f3d94ae491aa88b195e1015384c4861f5c7ef4c0..b3d9b8d81ab1dc8e7e579f0d37f1eb14a2fb0491 100644

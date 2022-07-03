@@ -3,6 +3,21 @@ From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
 Date: Sun, 19 Jun 2022 15:33:37 +0200
 Subject: [PATCH] Fix Paper#6045, block goal shouldn't load chunks
 
+Pufferfish
+Copyright (C) 2022 Pufferfish Studios LLC
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java b/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java
 index e3781f3a8b8de6885445fac7f46d640a1b912b9e..a360b60b9f5e74648740f0defafa912419378668 100644

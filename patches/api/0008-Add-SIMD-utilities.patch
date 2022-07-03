@@ -3,6 +3,21 @@ From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
 Date: Fri, 17 Jun 2022 21:36:12 +0200
 Subject: [PATCH] Add SIMD utilities
 
+Pufferfish
+Copyright (C) 2022 Pufferfish Studios LLC
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
 index 5bff8b241be450b3426c7d448f3c6585612be781..de795f03a8566a581657e7fde1a9aa532bf407eb 100644
