@@ -21,7 +21,7 @@ index fec3caf0fa6133a7d0b6ddcf44bbbb5191a543dd..400777d29f82b5cac0053bdc2b25ec92
  
      <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index bee4209e7663791494626a0f408bfa213c971140..e7a6fdfce98d453adbbb509aec8d271274d8f8d2 100644
+index bee4209e7663791494626a0f408bfa213c971140..4d1a8f35a1170a7d9ed522189345c79db457f33b 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -3,6 +3,7 @@ package dev.pomf.dionysus;
@@ -32,7 +32,7 @@ index bee4209e7663791494626a0f408bfa213c971140..e7a6fdfce98d453adbbb509aec8d2712
  import org.bukkit.Bukkit;
  import org.bukkit.command.SimpleCommandMap;
  import org.bukkit.configuration.file.YamlConfiguration;
-@@ -377,4 +378,28 @@ public class DionysusConfig {
+@@ -377,4 +378,34 @@ public class DionysusConfig {
          }
      }
  
@@ -58,6 +58,12 @@ index bee4209e7663791494626a0f408bfa213c971140..e7a6fdfce98d453adbbb509aec8d2712
 +        setComment("compression.chunk-compression-level",
 +                "This sets the compression level for normal chunk data."
 +        );
++
++        if (compressionLevel < -1 || compressionLevel > 9) {
++            logError("Compression level is invalid resetting to default. Valid compression levels are -1 (Default), 0 (None), 1 (Fast) through 9 (Best)");
++            compressionLevel = -1;
++        }
++
 +        RegionFile.deflater.setLevel(chunkCompressionLevel);
 +    }
  }

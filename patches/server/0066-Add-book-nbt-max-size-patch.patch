@@ -5,11 +5,11 @@ Subject: [PATCH] Add book nbt max size patch
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index e7a6fdfce98d453adbbb509aec8d271274d8f8d2..f0c7aa5b259f45d7c25be40eaa8687817ec8cb58 100644
+index 4d1a8f35a1170a7d9ed522189345c79db457f33b..63b2ffe197bc774a5ab870abe973fc3226986203 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -402,4 +402,10 @@ public class DionysusConfig {
-         );
+@@ -408,4 +408,10 @@ public class DionysusConfig {
+ 
          RegionFile.deflater.setLevel(chunkCompressionLevel);
      }
 +
