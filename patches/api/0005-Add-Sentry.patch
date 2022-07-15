@@ -20,7 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index e32fd4014b3174678b775f76a643ab4e7338a3a8..5bff8b241be450b3426c7d448f3c6585612be781 100644
+index e32fd4014b3174678b775f76a643ab4e7338a3a8..d37f302250e07fd09986354074451c5c466baac3 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -147,6 +147,12 @@
@@ -31,7 +31,7 @@ index e32fd4014b3174678b775f76a643ab4e7338a3a8..5bff8b241be450b3426c7d448f3c6585
 +        <dependency>
 +            <groupId>io.sentry</groupId>
 +            <artifactId>sentry</artifactId>
-+            <version>6.1.4</version>
++            <version>6.2.1</version>
 +        </dependency>
      </dependencies>
  
