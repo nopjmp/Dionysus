@@ -5,7 +5,7 @@ Subject: [PATCH] Bump to java 17
 
 
 diff --git a/pom.xml b/pom.xml
-index de795f03a8566a581657e7fde1a9aa532bf407eb..07a2eb79f295e98302c481fad6abb6d1e8ab5231 100644
+index 71484033a16a259b191fc90c96f2c374f119d604..5a64456a05c751e6234773a97ee27dc5a97911a2 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -20,8 +20,9 @@

@@ -5,7 +5,7 @@ Subject: [PATCH] Improve performance of book meta pages
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
-index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..c4205c063afd70bbe56f5c90409cb5dee8ca7d4c 100644
+index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..c623b350af9eb96636f53809bf5f14142d7d9c82 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBook.java
 @@ -30,6 +30,12 @@ import net.md_5.bungee.chat.ComponentSerializer;
@@ -21,7 +21,7 @@ index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..c4205c063afd70bbe56f5c90409cb5de
  @DelegateDeserialization(SerializableMeta.class)
  public class CraftMetaBook extends CraftMetaItem implements BookMeta {
      static final ItemMetaKey BOOK_TITLE = new ItemMetaKey("title");
-@@ -44,7 +50,35 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+@@ -44,7 +50,42 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
  
      protected String title;
      protected String author;
@@ -33,20 +33,27 @@ index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..c4205c063afd70bbe56f5c90409cb5de
 +    public List<IChatBaseComponent> pages = new ForwardingList<>() {
 +        private List<IChatBaseComponent> delegate;
 +        @Override
-+        protected synchronized List<IChatBaseComponent> delegate() {
++        protected List<IChatBaseComponent> delegate() {
 +            if (delegate == null) {
-+                List<IChatBaseComponent> list = new ArrayList<>();
-+                for (Pair<PageType, String> page : pagePreStore) {
-+                    if (page.getLeft() == PageType.RESOLVED) {
-+                        list.add(ChatSerializer.a(page.getRight()));
-+                    } else if (page.getLeft() == PageType.UNRESOLVED) {
-+                        list.add(CraftChatMessage.fromString(page.getRight(), true)[0]);
-+                    }
-+                }
-+                delegate = list;
-+                delegated.set(true);
++                doDelegate();
 +            }
 +            return delegate;
++        }
++
++        private synchronized void doDelegate() {
++            if (delegate != null) {
++                return;
++            }
++            List<IChatBaseComponent> list = new ArrayList<>();
++            for (Pair<PageType, String> page : pagePreStore) {
++                if (page.getLeft() == PageType.RESOLVED) {
++                    list.add(ChatSerializer.a(page.getRight()));
++                } else if (page.getLeft() == PageType.UNRESOLVED) {
++                    list.add(CraftChatMessage.fromString(page.getRight(), true)[0]);
++                }
++            }
++            delegate = list;
++            delegated.set(true);
 +        }
 +
 +        @Override
@@ -58,7 +65,7 @@ index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..c4205c063afd70bbe56f5c90409cb5de
      protected Integer generation;
  
      CraftMetaBook(CraftMetaItem meta) {
-@@ -90,7 +124,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+@@ -90,7 +131,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
                  String page = pages.getString(i);
                  if (resolved) {
                      try {
@@ -67,7 +74,7 @@ index ffdb7ec8290c035fa0dea92622fbdd9a9cd9cd50..c4205c063afd70bbe56f5c90409cb5de
                          continue;
                      } catch (Exception e) {
                          // Ignore and treat as an old book
-@@ -255,7 +289,13 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
+@@ -255,7 +296,13 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
                  page = page.substring(0, MAX_PAGE_LENGTH);
              }
  
