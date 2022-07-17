@@ -5,12 +5,12 @@ Subject: [PATCH] Add opt-in ZSTD support
 
 
 diff --git a/pom.xml b/pom.xml
-index fec3caf0fa6133a7d0b6ddcf44bbbb5191a543dd..400777d29f82b5cac0053bdc2b25ec92cacddd5d 100644
+index 2e11fae06a234b930f4cdf2bbf4c2550ccb26218..a98ba97a7d6dad1164abe3c0cb8379cd7e96d250 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -179,6 +179,11 @@
-             <version>6.1.6</version>
-             <scope>compile</scope>
+@@ -167,6 +167,11 @@
+                 </exclusion>
+             </exclusions>
          </dependency>
 +        <dependency>
 +            <groupId>com.github.luben</groupId>
@@ -21,18 +21,18 @@ index fec3caf0fa6133a7d0b6ddcf44bbbb5191a543dd..400777d29f82b5cac0053bdc2b25ec92
  
      <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index bee4209e7663791494626a0f408bfa213c971140..4d1a8f35a1170a7d9ed522189345c79db457f33b 100644
+index 13b5d2133d27d7d5d6dce25360941dcf85037c79..bec3204a29cb4c174d0c943d415d493a0bea7804 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -3,6 +3,7 @@ package dev.pomf.dionysus;
- import dev.pomf.dionysus.flare.FlareCommand;
+@@ -2,6 +2,7 @@ package dev.pomf.dionysus;
+ 
  import dev.pomf.dionysus.simd.SIMDDetection;
  import net.minecraft.server.MinecraftServer;
 +import net.minecraft.server.RegionFile;
  import org.bukkit.Bukkit;
- import org.bukkit.command.SimpleCommandMap;
  import org.bukkit.configuration.file.YamlConfiguration;
-@@ -377,4 +378,34 @@ public class DionysusConfig {
+ import org.bukkit.entity.EntityType;
+@@ -351,4 +352,34 @@ public class DionysusConfig {
          }
      }
  
