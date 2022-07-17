@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 11 Jul 2022 19:28:55 +0500
+Subject: [PATCH] Prevent-Enderman-from-loading-chunks
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
+index 319f2dffca7503d11bfca2b70f82bf8cdd58a399..cf6f30277cff15112b9161cab97a8803a350b41c 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderman.java
++++ b/src/main/java/net/minecraft/server/EntityEnderman.java
+@@ -341,7 +341,8 @@ public class EntityEnderman extends EntityMonster {
+             int j = MathHelper.floor(this.enderman.locY + random.nextDouble() * 3.0D);
+             int k = MathHelper.floor(this.enderman.locZ - 2.0D + random.nextDouble() * 4.0D);
+             BlockPosition blockposition = new BlockPosition(i, j, k);
+-            IBlockData iblockdata = world.getType(blockposition);
++            IBlockData iblockdata = world.getTypeIfLoaded(blockposition); // NeonPaper
++            if (iblockdata == null) return; // NeonPaper
+             Block block = iblockdata.getBlock();
+             MovingObjectPosition movingobjectposition = world.rayTrace(new Vec3D((double) ((float) MathHelper.floor(this.enderman.locX) + 0.5F), (double) ((float) j + 0.5F), (double) ((float) MathHelper.floor(this.enderman.locZ) + 0.5F)), new Vec3D((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F)), false, true, false);
+             boolean flag = movingobjectposition != null && movingobjectposition.a().equals(blockposition);
+@@ -377,7 +378,8 @@ public class EntityEnderman extends EntityMonster {
+             int j = MathHelper.floor(this.a.locY + random.nextDouble() * 2.0D);
+             int k = MathHelper.floor(this.a.locZ - 1.0D + random.nextDouble() * 2.0D);
+             BlockPosition blockposition = new BlockPosition(i, j, k);
+-            IBlockData iblockdata = world.getType(blockposition);
++            IBlockData iblockdata = world.getTypeIfLoaded(blockposition); // NeonPaper
++            if (iblockdata == null) return; // NeonPaper
+             IBlockData iblockdata1 = world.getType(blockposition.down());
+             IBlockData iblockdata2 = this.a.getCarried();
+ 

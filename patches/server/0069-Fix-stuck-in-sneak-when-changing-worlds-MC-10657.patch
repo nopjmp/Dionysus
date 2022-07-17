@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Wed, 13 Jul 2022 21:17:41 +0500
+Subject: [PATCH] Fix-stuck-in-sneak-when-changing-worlds-MC-10657
+
+twersytaytggfdscx
+
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index a30322f50a8c2b8163fc7036f3a74d58bb3bd8fe..1fe685fce9f79466f4002b87c1e996c145e9a06e 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -1175,6 +1175,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+         this.getDataWatcher().set(EntityPlayer.br, entityplayer.getDataWatcher().get(EntityPlayer.br));
+         this.lastSentExp = -1;
+         this.lastHealthSent = -1.0F;
++        setSneaking(false); // NeonPaper - fix MC-10657
+         this.ch = -1;
+         // this.cr.a((RecipeBook) entityplayer.cr); // CraftBukkit
+         // Paper start - Optimize remove queue
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 7b4adac6f21ea331c4c0c16b518fb9daa6500875..f475e2984940cc3bfb8a322eb1cb3e0f457f8cd4 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -827,6 +827,8 @@ public abstract class PlayerList {
+             entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(entityplayer.getId(), mobEffect));
+         }
+ 
++        entityplayer.setSneaking(false); // NeonPaper - fix MC-10657
++
+         // Fire advancement trigger
+         CriterionTriggers.u.a(entityplayer, ((CraftWorld) fromWorld).getHandle().worldProvider.getDimensionManager(), worldserver.worldProvider.getDimensionManager());
+         if (((CraftWorld) fromWorld).getHandle().worldProvider.getDimensionManager() == DimensionManager.NETHER && worldserver.worldProvider.getDimensionManager() == DimensionManager.OVERWORLD && entityplayer.Q() != null) {

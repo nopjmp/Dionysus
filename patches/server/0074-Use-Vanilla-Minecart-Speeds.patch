@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 11 Jul 2022 18:35:46 +0500
+Subject: [PATCH] Use-Vanilla-Minecart-Speeds
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+index 8d917b9e5a804151c8c5371783e8ef6f4fdf7222..a9bfd30f6a9753db92d757867a1b6e18bfcd9a54 100644
+--- a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
++++ b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+@@ -37,9 +37,9 @@ public abstract class EntityMinecartAbstract extends Entity implements INamableT
+     private double derailedX = 0.5;
+     private double derailedY = 0.5;
+     private double derailedZ = 0.5;
+-    private double flyingX = 0.95;
+-    private double flyingY = 0.95;
+-    private double flyingZ = 0.95;
++    private double flyingX = 0.949999988079071D; // NeonPaper - restore vanilla precision
++    private double flyingY = 0.949999988079071D; // NeonPaper - restore vanilla precision
++    private double flyingZ = 0.949999988079071D; // NeonPaper - restore vanilla precision
+     public double maxSpeed = 0.4D;
+     // CraftBukkit end
+ 

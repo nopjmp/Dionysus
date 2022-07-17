@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 11 Jul 2022 20:10:30 +0500
+Subject: [PATCH] Handle-bad-chunks-more-gracefully
+
+
+diff --git a/src/main/java/net/minecraft/server/RegionFileCache.java b/src/main/java/net/minecraft/server/RegionFileCache.java
+index daa7e997a387e65b15858573497fdf78cb069813..18f17a5bd3100029b1041e5ef3e23d962d869896 100644
+--- a/src/main/java/net/minecraft/server/RegionFileCache.java
++++ b/src/main/java/net/minecraft/server/RegionFileCache.java
+@@ -165,8 +165,22 @@ public class RegionFileCache {
+     private static NBTTagCompound readOversizedChunk(RegionFile regionfile, int i, int j) throws IOException {
+         synchronized (regionfile) {
+             try (DataInputStream datainputstream = regionfile.getReadStream(i & 31, j & 31)) {
+-                NBTTagCompound oversizedData = regionfile.getOversizedData(i, j);
+-                NBTTagCompound chunk = NBTCompressedStreamTools.readNBT(datainputstream);
++                //NBTTagCompound oversizedData = regionfile.getOversizedData(i, j);
++                //BTTagCompound chunk = NBTCompressedStreamTools.readNBT(datainputstream);
++                // NeonPaperPaper start - Handle bad chunks more gracefully - also handle similarly with oversized data
++                NBTTagCompound oversizedData = null;
++
++                try {
++                    oversizedData = regionfile.getOversizedData(i, j);
++                } catch (Exception ex) {}
++
++                NBTTagCompound chunk;
++                try {
++                    chunk = NBTCompressedStreamTools.readNBT(datainputstream);
++                } catch (Exception ex) {
++                    return null;
++                }
++                // NeonPaper end
+                 if (oversizedData == null) {
+                     return chunk;
+                 }
+@@ -244,7 +258,13 @@ public class RegionFileCache {
+             return null;
+         }
+ 
+-        return NBTCompressedStreamTools.a(datainputstream);
++        // NeonPaper start - Handle bad chunks more gracefully
++        try {
++            return NBTCompressedStreamTools.a(datainputstream);
++        } catch (Exception ex) {
++            return null;
++        }
++        // NeonPaper end
+     }
+ 
+     public static void e(File file, int i, int j, NBTTagCompound nbttagcompound) throws IOException { // Paper - remove synchronization

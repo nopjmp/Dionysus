@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 11 Jul 2022 00:24:56 +0500
+Subject: [PATCH] Use-fast-util-in-PlayerChunkMap
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 82cf4407e2af391f72a86e4e1adcf74e5ca13cae..962aedbcab9d5579d7306e0094f668b45641c076 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -31,7 +36,7 @@ public class ChunkProviderServer implements IChunkProvider {
+     private long lastSaveStatPrinted = System.currentTimeMillis();
+     // Paper end
+     // Paper start
+-    public Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>(8192);
++    public Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>(8192, 0.5f); // NeonPaper
+     // Paper end
+     public final WorldServer world;
+ 
+diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+index 99652ae3ed9fffe9a2a8310465b948d504b0595f..9d836e7e12284c1c2bf72f4cc5b4c17802425835 100644
+--- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
++++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+@@ -16,6 +16,8 @@ import java.util.List;
+ import java.util.Set;
+ import javax.annotation.Nullable;
+ 
++import it.unimi.dsi.fastutil.objects.ObjectArrayList;
++
+ // CraftBukkit start
+ import java.util.LinkedList;
+ // CraftBukkit end
+@@ -41,7 +43,7 @@ public class PlayerChunkMap {
+         }
+     };
+     private final WorldServer world;
+-    private final List<EntityPlayer> managedPlayers = Lists.newArrayList();
++    private final List<EntityPlayer> managedPlayers = new ObjectArrayList<>(); // NeonPaper - ArrayList -> ObjectArrayList
+     private final Long2ObjectMap<PlayerChunk> e = new Long2ObjectOpenHashMap(4096);
+     private final Set<PlayerChunk> f = Sets.newHashSet();
+     private final List<PlayerChunk> g = Lists.newLinkedList();

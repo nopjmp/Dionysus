@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 11 Jul 2022 18:24:54 +0500
+Subject: [PATCH] Reset-players-airTicks-on-respawn
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 816a44dc1d9846d7738faf1d19cd9e383e1fe722..aff256a4bcecbb0faab2353b034198391eaf0304 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -2155,7 +2155,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+         }
+     }
+ 
+-    public int aM() {
++    public int getMaxAirTicks() { return aM(); } public int aM() { // NeonPaper - OBF HELPER
+         return 300;
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index 5c7dfe6fe105699b257bd43b650b508797829014..a30322f50a8c2b8163fc7036f3a74d58bb3bd8fe 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -1576,6 +1576,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+ 
+         this.setHealth(this.getMaxHealth());
+         this.fireTicks = 0;
++        this.setAirTicks(this.getMaxAirTicks()); // NeonPaper
+         this.fallDistance = 0;
+         this.foodData = new FoodMetaData(this);
+         this.expLevel = this.newLevel;

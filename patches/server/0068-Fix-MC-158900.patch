@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Wed, 13 Jul 2022 21:31:55 +0500
+Subject: [PATCH] Fix-MC-158900
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index f475e2984940cc3bfb8a322eb1cb3e0f457f8cd4..37016c22e249f2cc621fef594eb93c4574c5fb13 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -618,8 +618,10 @@ public abstract class PlayerList {
+         PlayerLoginEvent event = new PlayerLoginEvent(player, hostname, ((java.net.InetSocketAddress) socketaddress).getAddress(), ((java.net.InetSocketAddress) loginlistener.networkManager.getRawAddress()).getAddress());
+         String s;
+ 
+-        if (getProfileBans().isBanned(gameprofile) && !getProfileBans().get(gameprofile).hasExpired()) {
+-            GameProfileBanEntry gameprofilebanentry = (GameProfileBanEntry) this.k.get(gameprofile);
++        // NeonPaper start - Fix MC-158900
++        GameProfileBanEntry gameprofilebanentry;
++        if (getProfileBans().isBanned(gameprofile) && (gameprofilebanentry = getProfileBans().get(gameprofile)) != null) {
++        // NeonPaper end
+ 
+             s = "You are banned from this server!\nReason: " + gameprofilebanentry.getReason();
+             if (gameprofilebanentry.getExpires() != null) {

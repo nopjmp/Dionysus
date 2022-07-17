@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sat, 9 Jul 2022 02:53:46 +0500
+Subject: [PATCH] Check-for-lava-only-once-per-tick
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 5a5d082bb5953a38004ec5c1e963b8c24e96ea07..ae3065fb234f9011b600ca00ec464856d59028f4 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -200,6 +200,11 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     protected int numCollisions = 0; // Paper
+     public void inactiveTick() { }
+     // Spigot end
++	
++	//NeonPaper start
++    private boolean isInLava;
++    private int lastLavaCheck = Integer.MIN_VALUE;	
++	//NeonPaper end
+ 
+     public float getBukkitYaw() {
+         return this.yaw;
+@@ -1260,9 +1265,15 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+         }
+     }
+ 
+-    public boolean au() {
+-        return this.world.a(this.getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA);
+-    }
++    public boolean au() { 
++		//return this.world.a(this.getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA);
++        int currentTick = MinecraftServer.currentTick; //NeonPaper start
++		if (this.lastLavaCheck != currentTick) {
++            this.lastLavaCheck = currentTick;
++            this.isInLava = this.world.a(this.getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA);
++        }
++        return this.isInLava;  // NeonPaper end
++  }
+ 
+     public void b(float f, float f1, float f2, float f3) {
+         float f4 = f * f + f1 * f1 + f2 * f2;

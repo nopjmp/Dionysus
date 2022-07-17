@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sat, 9 Jul 2022 03:56:18 +0500
+Subject: [PATCH] Prevent-fishing-hooks-from-portal
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityFishingHook.java b/src/main/java/net/minecraft/server/EntityFishingHook.java
+index 177d8582f7f8f9350c1f66fc5d1c3c7c9afdf7a4..7356fa6a5b024ab8f0034e569732bd95d07be7c6 100644
+--- a/src/main/java/net/minecraft/server/EntityFishingHook.java
++++ b/src/main/java/net/minecraft/server/EntityFishingHook.java
+@@ -153,6 +153,7 @@ public class EntityFishingHook extends Entity {
+                             this.locY = this.hooked.getBoundingBox().b + d1 * 0.8D;
+                             this.locZ = this.hooked.locZ;
+                             this.setPosition(this.locX, this.locY, this.locZ);
++							if (this.ak) this.die(); // NeonPaper - Prevent going through portals
+                         }
+                     }
+ 
