@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sat, 9 Jul 2022 01:36:22 +0500
+Subject: [PATCH] Avoid-double-I-O-operation-on
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldNBTStorage.java b/src/main/java/net/minecraft/server/WorldNBTStorage.java
+index 4bb6f600dc665d8f99e50e4ff118085906480fd1..c635639cd0432945e47468cc946bb9e3697d981a 100644
+--- a/src/main/java/net/minecraft/server/WorldNBTStorage.java
++++ b/src/main/java/net/minecraft/server/WorldNBTStorage.java
+@@ -168,8 +168,10 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+             File file = new File(this.playerDir, entityhuman.bn() + ".dat");
+             // Spigot Start
+             boolean usingWrongFile = false;
+-            if ( org.bukkit.Bukkit.getOnlineMode() && !file.exists() ) // Paper - Check online mode first
+-            {
++            //if ( org.bukkit.Bukkit.getOnlineMode() && !file.exists() ) // Paper - Check online mode first
++            boolean normalFile = file.exists() && file.isFile(); // NeonPaper - ensures normal file
++            if ( org.bukkit.Bukkit.getOnlineMode() && !normalFile ) // Paper - Check online mode first // NeonPaper - ensures normal file            
++			{
+                 file = new File( this.playerDir, UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + entityhuman.getName() ).getBytes( "UTF-8" ) ).toString() + ".dat");
+                 if ( file.exists() )
+                 {
+@@ -179,7 +181,8 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+             }
+             // Spigot End
+ 
+-            if (file.exists() && file.isFile()) {
++           // if (file.exists() && file.isFile()) {
++			   if (normalFile) { // NeonPaper - avoid double I/O operation
+                 nbttagcompound = NBTCompressedStreamTools.a((InputStream) (new FileInputStream(file)));
+             }
+             // Spigot Start

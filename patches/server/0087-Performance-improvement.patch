@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sat, 9 Jul 2022 03:51:07 +0500
+Subject: [PATCH] Performance-improvement
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftChunk.java b/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
+index ba3676b67b939a93d51053977bc1489fdcc90218..13e429dedb071f4d1650d30143b6bedda37ef7dc 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
+@@ -84,13 +84,18 @@ public class CraftChunk implements Chunk {
+ 
+         for (int i = 0; i < 16; i++) {
+ 
+-            for (Object obj : chunk.entitySlices[i].toArray()) {
+-                if (!(obj instanceof net.minecraft.server.Entity)) {
++            //for (Object obj : chunk.entitySlices[i].toArray()) {
++            //    if (!(obj instanceof net.minecraft.server.Entity)) {
++            // NeonPaper start - speed up (was with chunk.entitySlices[i].toArray() and cast checks which costs a lot of performance if called often)
++			for (net.minecraft.server.Entity entity : chunk.entitySlices[i]) {
++                if (entity == null) {
+                     continue;
+                 }
+ 
+-                entities[index++] = ((net.minecraft.server.Entity) obj).getBukkitEntity();
++                //entities[index++] = ((net.minecraft.server.Entity) obj).getBukkitEntity();
++				entities[index++] = entity.getBukkitEntity();
+             }
++			//NeonPaper end
+         }
+ 
+         return entities;

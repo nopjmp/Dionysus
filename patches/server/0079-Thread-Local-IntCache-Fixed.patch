@@ -1,0 +1,158 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 11 Jul 2022 00:40:52 +0500
+Subject: [PATCH] Thread-Local-IntCache-Fixed
+
+
+diff --git a/src/main/java/net/minecraft/server/IntCache.java b/src/main/java/net/minecraft/server/IntCache.java
+index c725f716ee05773c7e229dc230bcceebbc1147ce..2bbe2f8ad61638a2c870af7e283570fae12f235d 100644
+--- a/src/main/java/net/minecraft/server/IntCache.java
++++ b/src/main/java/net/minecraft/server/IntCache.java
+@@ -1,63 +1,114 @@
+ package net.minecraft.server;
+ 
+-import com.google.common.collect.Lists;
++// NeonPaper start
++import it.unimi.dsi.fastutil.objects.ObjectArrayList;
++import java.lang.ref.WeakReference;
++import java.util.Iterator;
+ import java.util.List;
++// NeonPaper end
+ 
+ public class IntCache {
+ 
+-    private static int a = 256;
+-    private static final List<int[]> b = Lists.newArrayList();
+-    private static final List<int[]> c = Lists.newArrayList();
+-    private static final List<int[]> d = Lists.newArrayList();
+-    private static final List<int[]> e = Lists.newArrayList();
++    // NeonPaper start - Refactored IntCache to be thread local instead of static
++    private static final ThreadLocal<IntCache> caches = new ThreadLocal<IntCache>() {
++        @Override
++        protected IntCache initialValue() {
++            IntCache cache = new IntCache();
++            synchronized (ALL_CACHES) {
++                ALL_CACHES.add(new WeakReference<>(cache));
++            }
++            return new IntCache();
++        }
++    };
++
++    private static final List<WeakReference<IntCache>> ALL_CACHES = new ObjectArrayList<>();
++
++    private int a = 256;
++    private final List<int[]> b = new ObjectArrayList<>();
++    private final List<int[]> c = new ObjectArrayList<>();
++    private final List<int[]> d = new ObjectArrayList<>();
++    private final List<int[]> e = new ObjectArrayList<>();
++
++    private final int cacheLimit = org.spigotmc.SpigotConfig.intCacheLimit;
++
++    public static int[] a(int i) {
++        return caches.get().aNonStatic(i);
++    }
+ 
+-    public static synchronized int[] a(int i) {
++    public int[] aNonStatic(int i) {
+         int[] aint;
+ 
+         if (i <= 256) {
+-            if (IntCache.b.isEmpty()) {
++            if (this.b.isEmpty()) {
+                 aint = new int[256];
+-                if (c.size() < org.spigotmc.SpigotConfig.intCacheLimit) IntCache.c.add(aint);
++                if (c.size() < cacheLimit) this.c.add(aint);
+                 return aint;
+             } else {
+-                aint = (int[]) IntCache.b.remove(IntCache.b.size() - 1);
+-                if (c.size() < org.spigotmc.SpigotConfig.intCacheLimit) IntCache.c.add(aint);
++                aint = this.b.remove(this.b.size() - 1);
++                if (c.size() < cacheLimit) this.c.add(aint);
+                 return aint;
+             }
+-        } else if (i > IntCache.a) {
+-            IntCache.a = i;
+-            IntCache.d.clear();
+-            IntCache.e.clear();
+-            aint = new int[IntCache.a];
+-            if (e.size() < org.spigotmc.SpigotConfig.intCacheLimit) IntCache.e.add(aint);
++        } else if (i > this.a) {
++            this.a = i;
++            this.d.clear();
++            this.e.clear();
++            aint = new int[this.a];
++            if (e.size() < cacheLimit) this.e.add(aint);
+             return aint;
+-        } else if (IntCache.d.isEmpty()) {
+-            aint = new int[IntCache.a];
+-            if (e.size() < org.spigotmc.SpigotConfig.intCacheLimit) IntCache.e.add(aint);
++        } else if (this.d.isEmpty()) {
++            aint = new int[this.a];
++            if (e.size() < cacheLimit) this.e.add(aint);
+             return aint;
+         } else {
+-            aint = (int[]) IntCache.d.remove(IntCache.d.size() - 1);
+-            if (e.size() < org.spigotmc.SpigotConfig.intCacheLimit) IntCache.e.add(aint);
++            aint = this.d.remove(this.d.size() - 1);
++            if (e.size() < cacheLimit) this.e.add(aint);
+             return aint;
+         }
+     }
+ 
+-    public static synchronized void a() {
+-        if (!IntCache.d.isEmpty()) {
+-            IntCache.d.remove(IntCache.d.size() - 1);
++    public static void a() {
++        caches.get().aNonStatic();
++    }
++
++    public void aNonStatic() {
++        if (!this.d.isEmpty()) {
++            this.d.remove(this.d.size() - 1);
+         }
+ 
+-        if (!IntCache.b.isEmpty()) {
+-            IntCache.b.remove(IntCache.b.size() - 1);
++        if (!this.b.isEmpty()) {
++            this.b.remove(this.b.size() - 1);
+         }
+ 
+-        IntCache.d.addAll(IntCache.e);
+-        IntCache.b.addAll(IntCache.c);
+-        IntCache.e.clear();
+-        IntCache.c.clear();
++        this.d.addAll(this.e);
++        this.b.addAll(this.c);
++        this.e.clear();
++        this.c.clear();
+     }
+ 
+-    public static synchronized String b() {
+-        return "cache: " + IntCache.d.size() + ", tcache: " + IntCache.b.size() + ", allocated: " + IntCache.e.size() + ", tallocated: " + IntCache.c.size();
++    public static String b() {
++        int cache = 0;
++        int tcache = 0;
++        int allocated = 0;
++        int tallocated = 0;
++        int numberOfCaches;
++
++        synchronized (ALL_CACHES) {
++            numberOfCaches = ALL_CACHES.size();
++            Iterator<WeakReference<IntCache>> iter = ALL_CACHES.iterator();
++            while (iter.hasNext()) {
++                WeakReference<IntCache> reference = iter.next();
++                IntCache intcache = reference.get();
++                if (intcache != null) {
++                    cache += intcache.d.size();
++                    tcache += intcache.b.size();
++                    allocated += intcache.e.size();
++                    tallocated += intcache.c.size();
++                } else {
++                    iter.remove();
++                }
++            }
++        }
++        return numberOfCaches + " IntCaches. In Total => cache: " + cache + ", tcache: " + tcache + ", allocated: " + allocated + ", tallocated: " + tallocated;
+     }
++// NeonPaper end
+ }

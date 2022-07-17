@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sat, 9 Jul 2022 05:36:37 +0500
+Subject: [PATCH] Prevent-creature-spawning-in-unloaded-chunks
+
+
+diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
+index 36b5d4343eed368003c674d635eaa3681b459914..d3390faf9d55a760eb9347c87c6e6e3167e26eca 100644
+--- a/src/main/java/net/minecraft/server/SpawnerCreature.java
++++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
+@@ -113,7 +113,7 @@ public final class SpawnerCreature {
+                             long chunkCoords = LongHash.toLong(x, z);
+                             if (!this.b.contains(chunkCoords)) {
+                                 ++i;
+-                                if (!flag4 && worldserver.getWorldBorder().isChunkInBounds(x, z)) {
++                                if (!flag4 && worldserver.isChunkLoaded(x, z, true) && worldserver.getWorldBorder().isChunkInBounds(x, z)) {
+                                     PlayerChunk playerchunk = worldserver.getPlayerChunkMap().getChunk(x, z);
+ 
+                                     if (playerchunk != null && playerchunk.e()) {
