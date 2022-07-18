@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nothub <48992448+nothub@users.noreply.github.com>
+Date: Mon, 24 May 2021 23:49:44 +0200
+Subject: [PATCH] pathfinder selection delay configurable
+
+Original code by moom0o, licensed under GPLv3
+Yoi can find the original code on https://github.com/moom0o/Papaya
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperConfig.java b/src/main/java/com/destroystokyo/paper/PaperConfig.java
+index aa259316a2684015c9ee3d7bb423af0040e8006f..e93fc1af8094173ecae944b610dc4fd5f986ee64 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperConfig.java
+@@ -343,4 +343,10 @@ public class PaperConfig {
+             maxBookTotalSizeMultiplier = 0.98D;
+         }
+     }
++
++    public static int pathfinderGoalSelectionDelay = 3;
++    private static void pathfinderGoalSelectionDelay() {
++        pathfinderGoalSelectionDelay = getInt("settings.pathfinder.goal-selection-delay", pathfinderGoalSelectionDelay);
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalSelector.java b/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
+index c15961602ce6bf2817ca9c6144c1dd9b31794175..089b6b7469a01bf329522a1e44ea43ea8fd80509 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
+@@ -6,6 +6,7 @@ import java.util.Set;
+ import javax.annotation.Nullable;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import com.destroystokyo.paper.PaperConfig;
+ 
+ public class PathfinderGoalSelector {
+ 
+@@ -14,7 +15,7 @@ public class PathfinderGoalSelector {
+     private final Set<PathfinderGoalSelector.PathfinderGoalSelectorItem> c = Sets.newLinkedHashSet();
+     private final MethodProfiler d;
+     private int e;
+-    private int f = 3;
++    private int f = PaperConfig.pathfinderGoalSelectionDelay;
+     private int g;
+ 
+     public PathfinderGoalSelector(MethodProfiler methodprofiler) {

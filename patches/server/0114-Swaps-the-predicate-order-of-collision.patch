@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Tue, 12 Jul 2022 00:13:11 +0500
+Subject: [PATCH] Swaps-the-predicate-order-of-collision
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index aff256a4bcecbb0faab2353b034198391eaf0304..a307b8caf973c22344842ca4d260348f1ba67f97 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -1413,8 +1413,9 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     public void d(EntityHuman entityhuman) {}
+ 
+     public void collide(Entity entity) {
++        if (entity.noclip || this.noclip) return; // NeonPaper - Test this earlier
+         if (!this.x(entity)) {
+-            if (!entity.noclip && !this.noclip) {
++            if (true || !entity.noclip && !this.noclip) { // NeonPaper - Moved up
+                 double d0 = entity.locX - this.locX;
+                 double d1 = entity.locZ - this.locZ;
+                 double d2 = MathHelper.a(d0, d1);

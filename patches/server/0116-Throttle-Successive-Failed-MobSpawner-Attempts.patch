@@ -1,0 +1,42 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Tue, 12 Jul 2022 01:49:15 +0500
+Subject: [PATCH] Throttle-Successive-Failed-MobSpawner-Attempts
+
+
+diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+index 87beea39db72a7380232a705d7e67f8948ea592e..6c5d88c86a52a6e15b6255bf79a8ff503ede1e37 100644
+--- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
++++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+@@ -22,6 +22,7 @@ public abstract class MobSpawnerAbstract {
+     public int requiredPlayerRange = 16; // CraftBukkit private -> public
+     public int spawnRange = 4; // CraftBukkit private -> public
+     private int tickDelay = 0; // Paper
++    private int spawningPenalty = 0; // NeonPaper
+ 
+     // Dionysus start
+     private XoShiRo256PlusPlusRandom random = new XoShiRo256PlusPlusRandom();
+@@ -161,6 +162,14 @@ public abstract class MobSpawnerAbstract {
+                 if (flag) {
+                     this.i();
+                 }
++                // NeonPaper start
++                else {
++                    this.spawnDelay += this.spawningPenalty;
++                    if(this.spawningPenalty < 40) {
++                        this.spawningPenalty++;
++                    }
++                }
++                // NeonPaper end
+             }
+ 
+         }
+@@ -179,6 +188,8 @@ public abstract class MobSpawnerAbstract {
+             this.a((MobSpawnerData) WeightedRandom.a(this.a().random, this.mobs));
+         }
+ 
++        this.spawningPenalty = 0; // NeonPaper
++
+         this.a(1);
+     }
+ 

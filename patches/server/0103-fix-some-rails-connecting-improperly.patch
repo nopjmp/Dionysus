@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Fri, 15 Jul 2022 02:55:16 +0500
+Subject: [PATCH] fix-some-rails-connecting-improperly
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockMinecartDetector.java b/src/main/java/net/minecraft/server/BlockMinecartDetector.java
+index edf61084233dd6cd11bc3d18c1869acc2af21388..58b18f1b6b72cf99a28d6f25689cf139c6b4e8e7 100644
+--- a/src/main/java/net/minecraft/server/BlockMinecartDetector.java
++++ b/src/main/java/net/minecraft/server/BlockMinecartDetector.java
+@@ -60,6 +60,7 @@ public class BlockMinecartDetector extends BlockMinecartTrackAbstract {
+     }
+ 
+     private void e(World world, BlockPosition blockposition, IBlockData iblockdata) {
++        if (iblockdata.getBlock() != this) { return; } // Dionysus - not our block, don't do anything
+         boolean flag = ((Boolean) iblockdata.get(BlockMinecartDetector.POWERED)).booleanValue();
+         boolean flag1 = false;
+         List list = this.a(world, blockposition, EntityMinecartAbstract.class, new Predicate[0]);

@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sat, 9 Jul 2022 06:33:40 +0500
+Subject: [PATCH] Fix-chunk-unloading
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index ca89369cec5423786e0446858301e4e6f3fe5626..82cf4407e2af391f72a86e4e1adcf74e5ca13cae 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -2,8 +2,9 @@ package net.minecraft.server;
+ 
+ import com.destroystokyo.paper.exception.ServerInternalException;
+ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+-import it.unimi.dsi.fastutil.longs.LongArraySet;
++import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+ import it.unimi.dsi.fastutil.longs.LongIterator;
++import it.unimi.dsi.fastutil.longs.LongSet;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+@@ -21,7 +22,7 @@ import java.util.List;
+ public class ChunkProviderServer implements IChunkProvider {
+ 
+     private static final Logger a = LogManager.getLogger();
+-    public final LongArraySet unloadQueue = new LongArraySet(512); // Dionysus
++    public LongSet unloadQueue = new LongOpenHashSet(512); // NeonPaper
+     public final ChunkGenerator chunkGenerator;
+     private final IChunkLoader chunkLoader;
+     // Paper start - chunk save stats

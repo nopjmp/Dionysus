@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sat, 9 Jul 2022 06:37:05 +0500
+Subject: [PATCH] Always-delete-UserCache-on-error
+
+
+diff --git a/src/main/java/net/minecraft/server/UserCache.java b/src/main/java/net/minecraft/server/UserCache.java
+index 6a750c25eb8f5cefef68358135134d5831c71081..ecc46a8486bdf5f783fd23307ea8cf8b2e77ad1b 100644
+--- a/src/main/java/net/minecraft/server/UserCache.java
++++ b/src/main/java/net/minecraft/server/UserCache.java
+@@ -222,15 +222,10 @@ public class UserCache {
+                     }
+                 }
+             }
+-        } catch (FileNotFoundException filenotfoundexception) {
+-            ;
+-        // Spigot Start
+-        } catch (com.google.gson.JsonSyntaxException ex) {
++            } catch (Exception ex) {
++            // NeonPaper - Catch all UserCache exceptions in one and always delete
+             JsonList.a.warn( "Usercache.json is corrupted or has bad formatting. Deleting it to prevent further issues." );
+             this.h.delete();
+-        // Spigot End
+-        } catch (JsonParseException jsonparseexception) {
+-            ;
+         } finally {
+             IOUtils.closeQuietly(bufferedreader);
+         }
