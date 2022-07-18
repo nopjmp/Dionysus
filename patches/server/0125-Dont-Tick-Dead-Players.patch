@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 18 Jul 2022 15:11:32 +0500
+Subject: [PATCH] Dont-Tick-Dead-Players
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index 52d8e8ed1ff91032c4dd6bfb3bbc0eb13a648b70..029ca367d5bb94fa7e51b096a4ecd73540a8dd1e 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -781,7 +781,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+     protected void a(double d0, boolean flag, IBlockData iblockdata, BlockPosition blockposition) {}
+ 
+     protected void b(BlockPosition blockposition) {
+-        if (!this.isSpectator()) {
++        if (valid && (!this.isSpectator() || this.world.isLoaded(new BlockPosition(this)))) { // Dionysus - don't tick dead players that are not in the world currently (pending respawn)
+             super.b(blockposition);
+         }
+ 

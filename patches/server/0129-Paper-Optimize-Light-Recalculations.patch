@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 18 Jul 2022 16:41:09 +0500
+Subject: [PATCH] Paper-Optimize-Light-Recalculations
+
+Optimizes to not repeatedly look up the same chunk for
+ light lookups.
+
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 6552c1ec04ff9a19548a9fe7fb7f18c25e2d01a8..0730434dadcbd13461524f926a88928a4fd27c7f 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -335,7 +335,7 @@ public class Chunk {
+     private void a(int i, int j, int k, int l) {
+         if (l > k && this.areNeighborsLoaded(1)) { // Paper
+             for (int i1 = k; i1 < l; ++i1) {
+-                this.world.c(EnumSkyBlock.SKY, new BlockPosition(i, i1, j));
++                this.world.updateBrightness(EnumSkyBlock.SKY, new BlockPosition(i, i1, j), this); // Paper
+             }
+ 
+             this.s = true;
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index d26e0396088ef1553bb05572344614b575a17174..db8a201e909ee63fc3dd19d6907e5391cb86fe6b 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -510,8 +510,9 @@ public abstract class World implements IBlockAccess {
+         }
+ 
+         if (this.worldProvider.m()) {
+-            for (i1 = k; i1 <= l; ++i1) {
+-                this.c(EnumSkyBlock.SKY, new BlockPosition(i, i1, j));
++            Chunk chunk = getChunkIfLoaded(i >> 4, j >> 4); // Paper
++            for (i1 = k; chunk != null && i1 <= l; ++i1) { // Paper
++                this.updateBrightness(EnumSkyBlock.SKY, new BlockPosition(i, i1, j), chunk); // Paper
+             }
+         }
+ 
+@@ -2470,6 +2471,11 @@ public abstract class World implements IBlockAccess {
+     public boolean c(EnumSkyBlock enumskyblock, BlockPosition blockposition) {
+         // CraftBukkit start - Use neighbor cache instead of looking up
+         Chunk chunk = this.getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4);
++        // Paper start - optimize light updates where chunk is known
++        return updateBrightness(enumskyblock, blockposition, chunk);
++    }
++    public boolean updateBrightness(EnumSkyBlock enumskyblock, BlockPosition blockposition, Chunk chunk) {
++        // Paper end
+         if (chunk == null || !chunk.areNeighborsLoaded(1) /*!this.areChunksLoaded(blockposition, 17, false)*/) {
+             // CraftBukkit end
+             return false;

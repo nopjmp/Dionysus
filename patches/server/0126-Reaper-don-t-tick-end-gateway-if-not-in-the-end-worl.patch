@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 18 Jul 2022 15:19:29 +0500
+Subject: [PATCH] Reaper-don-t-tick-end-gateway-if-not-in-the-end-world
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityEndGateway.java b/src/main/java/net/minecraft/server/TileEntityEndGateway.java
+index 557f06017b1bededaa7b9add58c7fcbdad766cec..2b9598bc47da68fa83ac19c60673336ce86d5509 100644
+--- a/src/main/java/net/minecraft/server/TileEntityEndGateway.java
++++ b/src/main/java/net/minecraft/server/TileEntityEndGateway.java
+@@ -48,6 +48,7 @@ public class TileEntityEndGateway extends TileEntityEnderPortal implements ITick
+     }
+ 
+     public void e() {
++        if (!(this.world.worldProvider instanceof WorldProviderTheEnd)) return; // Reaper - Don't tick if not in the end world
+         boolean flag = this.a();
+         boolean flag1 = this.f();
+ 
