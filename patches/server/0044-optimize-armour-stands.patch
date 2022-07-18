@@ -5,10 +5,10 @@ Subject: [PATCH] optimize armour stands
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 94c92c839852a93867eff6118b0e67bb8dbd5b67..d2a77c76e5bcc9f6432d94691f75cc810466f708 100644
+index d614d6e28963b8aff2e4088734115a5492699a7a..590de2c878c0ef9fe5352c2e32eb79c6bb9bda85 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -239,5 +239,11 @@ public class DionysusConfig {
+@@ -258,5 +258,11 @@ public class DionysusConfig {
          tileEntitySplitLimit = getInt("tile-entity.split-limit", tileEntitySplitLimit);
      }
  

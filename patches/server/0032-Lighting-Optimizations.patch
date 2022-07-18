@@ -21,10 +21,10 @@ index 181cfd7b955dc804234e9da633fd8c75e64efe03..a22b7763ced2ff594b12b2b17dc2674a
      }
  
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index b6f7a605edd5a9b2a8fad007f725545c9f46824b..c161d8c7307445a404b11071e0c4a3bb19694080 100644
+index 0c19a39380182907d34037d6283f86ca84c79d03..510ddb4f8167c9c9a70df3ba0ead1ff754563613 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -144,6 +144,11 @@ public class DionysusConfig {
+@@ -163,6 +163,11 @@ public class DionysusConfig {
          return config.getStringList(key);
      }
  

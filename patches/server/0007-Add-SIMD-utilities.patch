@@ -20,7 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index 12a3289681c50130af913804e1399c991d61cf0d..4219bd4ebff9405e7731df54d8c146e83adbcacb 100644
+index 055e19e3eef37f6658ff89dcca607d4f2872dfdf..fa08092ab5dcea68b4c0466affac95e7525b659d 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -321,6 +321,9 @@
@@ -34,7 +34,7 @@ index 12a3289681c50130af913804e1399c991d61cf0d..4219bd4ebff9405e7731df54d8c146e8
              <plugin>
                  <groupId>org.apache.maven.plugins</groupId>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 54839204d0f24b5dfe2dae68b20123c59be4960a..01ea967d718ab2bd46073c62964ebc57db2b5a8a 100644
+index 43ff5ad21e1f8b38ff3621d6c33fcf534d9ca3c8..7a6d85bcb3e0ed7d1f1e625e7711d75c1f5985ac 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -1,5 +1,6 @@

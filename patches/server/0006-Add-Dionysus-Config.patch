@@ -121,10 +121,10 @@ index 0000000000000000000000000000000000000000..269b221474f2d3a737996a21b7e0619b
 \ No newline at end of file
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4a7dee171ded7d53deeef1f7d8a2190a9a84b067
+index 0000000000000000000000000000000000000000..43ff5ad21e1f8b38ff3621d6c33fcf534d9ca3c8
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,146 @@
 +package dev.pomf.dionysus;
 +
 +import net.minecraft.server.MinecraftServer;
@@ -270,11 +270,6 @@ index 0000000000000000000000000000000000000000..4a7dee171ded7d53deeef1f7d8a2190a
 +        ensureDefault(key, defaultValue, comment);
 +        return config.getStringList(key);
 +    }
-+
-+//    private static void flyingKickMessages() {
-+//        flyingKickPlayerMessage = getString("messages.kick.flying-player", flyingKickPlayerMessage);
-+//        flyingKickVehicleMessage = getString("messages.kick.flying-vehicle", flyingKickVehicleMessage);
-+//    }
 +}
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
 index 6a8292ce4537392bc511419df565e238ac04acb1..9d451ff304fc2eb7398811564ad7956682f28bf5 100644
