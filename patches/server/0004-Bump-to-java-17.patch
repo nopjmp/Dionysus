@@ -5,7 +5,7 @@ Subject: [PATCH] Bump to java 17
 
 
 diff --git a/pom.xml b/pom.xml
-index df5c0857fda789046ac82e167a36d62c1d682ec6..abd6cb0ad18ad406a38ce4430fd68c1846982900 100644
+index df5c0857fda789046ac82e167a36d62c1d682ec6..6c3e9e123260686fc7af88e0ea072e906454b39f 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -16,8 +16,9 @@
@@ -20,37 +20,7 @@ index df5c0857fda789046ac82e167a36d62c1d682ec6..abd6cb0ad18ad406a38ce4430fd68c18
      </properties>
  
      <parent>
-@@ -131,6 +132,29 @@
-             <version>1.3</version>
-             <scope>test</scope>
-         </dependency>
-+        <dependency>
-+            <groupId>org.jetbrains</groupId>
-+            <artifactId>annotations</artifactId>
-+            <version>23.0.0</version>
-+            <scope>compile</scope>
-+        </dependency>
-+        <dependency>
-+            <groupId>me.carleslc.Simple-YAML</groupId>
-+            <artifactId>Simple-Yaml</artifactId>
-+            <version>1.8</version>
-+            <scope>compile</scope>
-+            <exclusions>
-+                <exclusion>
-+                    <groupId>org.yaml</groupId>
-+                    <artifactId>snakeyaml</artifactId>
-+                </exclusion>
-+            </exclusions>
-+        </dependency>
-+        <dependency>
-+            <groupId>com.github.luben</groupId>
-+            <artifactId>zstd-jni</artifactId>
-+            <version>1.5.2-3</version>
-+        </dependency>
-     </dependencies>
- 
-     <repositories>
-@@ -216,7 +240,7 @@
+@@ -216,7 +217,7 @@
              <plugin>
                  <groupId>org.apache.maven.plugins</groupId>
                  <artifactId>maven-shade-plugin</artifactId>
@@ -59,7 +29,7 @@ index df5c0857fda789046ac82e167a36d62c1d682ec6..abd6cb0ad18ad406a38ce4430fd68c18
                  <executions>
                      <execution>
                          <phase>package</phase>
-@@ -294,7 +318,8 @@
+@@ -294,7 +295,8 @@
              <id>development</id>
              <!-- Paper start - activate by default -->
              <activation>
@@ -69,7 +39,7 @@ index df5c0857fda789046ac82e167a36d62c1d682ec6..abd6cb0ad18ad406a38ce4430fd68c18
              </activation>
              <!-- Paper end -->
              <build>
-@@ -314,7 +339,7 @@
+@@ -314,7 +316,7 @@
                          <configuration>
                              <signature>
                                  <groupId>org.codehaus.mojo.signature</groupId>
