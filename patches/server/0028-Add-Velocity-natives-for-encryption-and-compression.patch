@@ -5,25 +5,6 @@ Subject: [PATCH] Add Velocity natives for encryption and compression
 
 Credit to Tuinity!
 
-diff --git a/pom.xml b/pom.xml
-index 066817d5be3ca37635a8b4806d95b839c3b06eaf..933764e10273e796ec7aa2e2657f268378d43657 100644
---- a/pom.xml
-+++ b/pom.xml
-@@ -140,6 +140,14 @@
-             <version>1.3</version>
-             <scope>test</scope>
-         </dependency>
-+
-+        <!-- for optimized protocol handling -->
-+        <dependency>
-+            <groupId>com.velocitypowered</groupId>
-+            <artifactId>velocity-native</artifactId>
-+            <version>1.1.0-SNAPSHOT</version>
-+            <scope>compile</scope>
-+        </dependency>
-     </dependencies>
- 
-     <repositories>
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
 index 5c8e45b46b30429d636b07eb90b2d03a620aacd4..704836bf9caf80d08e3b00fd3afffcee57a38bbf 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java

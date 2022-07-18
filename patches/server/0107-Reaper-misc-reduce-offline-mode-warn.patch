@@ -7,10 +7,10 @@ Original code from https://github.com/ruViolence/Reaper
 Licensed under GPL-3.0
 
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index bf50ce29109755e8af34f0592e56f0d82a9527af..067ec8bccbd3ee6724f64ff07090ee6042ac1c5d 100644
+index 9d451ff304fc2eb7398811564ad7956682f28bf5..0fed3a53188afabda87765a303dd7be4b0428cdd 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
-@@ -233,6 +233,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -229,6 +229,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
  
              if (!this.getOnlineMode()) {
                  DedicatedServer.LOGGER.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
@@ -18,7 +18,7 @@ index bf50ce29109755e8af34f0592e56f0d82a9527af..067ec8bccbd3ee6724f64ff07090ee60
                  DedicatedServer.LOGGER.warn("The server will make no attempt to authenticate usernames. Beware.");
                  // Spigot start
                  if (org.spigotmc.SpigotConfig.bungee) {
-@@ -243,6 +244,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -239,6 +240,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                  }
                  // Spigot end
                  DedicatedServer.LOGGER.warn("To change this, set \"online-mode\" to \"true\" in the server.properties file.");

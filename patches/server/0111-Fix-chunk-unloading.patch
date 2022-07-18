@@ -5,7 +5,7 @@ Subject: [PATCH] Fix-chunk-unloading
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index ca89369cec5423786e0446858301e4e6f3fe5626..82cf4407e2af391f72a86e4e1adcf74e5ca13cae 100644
+index 63028bae9940d63e5c2c68873c3eac41e865b8ff..83415a7f6a617d7561b2f07536f63ecbbc4b7dee 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -2,8 +2,9 @@ package net.minecraft.server;

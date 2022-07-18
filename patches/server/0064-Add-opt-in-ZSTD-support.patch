@@ -4,22 +4,6 @@ Date: Tue, 21 Jun 2022 13:57:18 +0200
 Subject: [PATCH] Add opt-in ZSTD support
 
 
-diff --git a/pom.xml b/pom.xml
-index 2e11fae06a234b930f4cdf2bbf4c2550ccb26218..a98ba97a7d6dad1164abe3c0cb8379cd7e96d250 100644
---- a/pom.xml
-+++ b/pom.xml
-@@ -167,6 +167,11 @@
-                 </exclusion>
-             </exclusions>
-         </dependency>
-+        <dependency>
-+            <groupId>com.github.luben</groupId>
-+            <artifactId>zstd-jni</artifactId>
-+            <version>1.5.2-3</version>
-+        </dependency>
-     </dependencies>
- 
-     <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 index 13b5d2133d27d7d5d6dce25360941dcf85037c79..bec3204a29cb4c174d0c943d415d493a0bea7804 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java

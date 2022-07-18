@@ -5,7 +5,7 @@ Subject: [PATCH] Check-for-lava-only-once-per-tick
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 5a5d082bb5953a38004ec5c1e963b8c24e96ea07..ae3065fb234f9011b600ca00ec464856d59028f4 100644
+index e8272c8bfd9a201f3f2d6dc9fbb3dd094ed24311..004c633886d6f2964d6ff8f3529e49024eb5f8f3 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -200,6 +200,11 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper

@@ -19,23 +19,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-diff --git a/pom.xml b/pom.xml
-index 87c97cfbc07b66af5186eba0f4fefff7f42edbaf..47304ee8cfe0b8bd4f9bbbddf3354c0fbb5d1be4 100644
---- a/pom.xml
-+++ b/pom.xml
-@@ -149,6 +149,12 @@
-             <version>3.1.2-SNAPSHOT</version>
-             <scope>compile</scope>
-         </dependency>
-+        <dependency>
-+            <groupId>org.jetbrains</groupId>
-+            <artifactId>annotations</artifactId>
-+            <version>23.0.0</version>
-+            <scope>compile</scope>
-+        </dependency>
-     </dependencies>
- 
-     <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusLogger.java b/src/main/java/dev/pomf/dionysus/DionysusLogger.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..f290fe1fbcd4c08b93b249f0d20c375f466d3925

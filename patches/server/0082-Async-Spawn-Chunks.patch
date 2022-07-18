@@ -5,10 +5,10 @@ Subject: [PATCH] Async-Spawn-Chunks
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index cb8193ad4875d60a8f6e57b73b32bed9c4dcb8d1..14cde8b1ac2fe991f4d721b4b178830eaec53d6f 100644
+index 896e0c7b09de8ec26760730ee23ef7ce8a203295..65e6fe1e14e11f53cf583d32589cf17da1903cd2 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -396,7 +396,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -390,7 +390,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
                      }
  
                      ++i;
@@ -18,10 +18,10 @@ index cb8193ad4875d60a8f6e57b73b32bed9c4dcb8d1..14cde8b1ac2fe991f4d721b4b178830e
              }
          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 8343331dc65b4af6db0db58283e87456ed0fe245..6e13b6d06f0f907fc8b6fb58f354897d29641979 100644
+index 65024a0b3aa7a783dbfb0ad91ef04d0a3e9a503d..c26b7fc09cd8bbb0b6ba01d46bc9b51e31141540 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -1042,7 +1042,7 @@ public final class CraftServer implements Server {
+@@ -1034,7 +1034,7 @@ public final class CraftServer implements Server {
                      }
  
                      BlockPosition chunkcoordinates = internal.getSpawn();

@@ -5,10 +5,10 @@ Subject: [PATCH] Do-not-load-chunks-for-light-checks
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 548d99e43b55a4efec7143da7c0d9270a9eb09c5..b808e1729abfee05f06b7aaf1146ed567463dece 100644
+index 039b6e9861295f5f2a171b38884e0717dd3871e0..cbc41847c1f3efb21c8a6935593d27f007a8c8e8 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -695,7 +695,7 @@ public abstract class World implements IBlockAccess {
+@@ -693,7 +693,7 @@ public abstract class World implements IBlockAccess {
              if (blockposition.getY() >= 256) {
                  blockposition = new BlockPosition(blockposition.getX(), 255, blockposition.getZ());
              }

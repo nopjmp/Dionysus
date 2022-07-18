@@ -5,10 +5,10 @@ Subject: [PATCH] Use-fast-util-in-PlayerChunkMap
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 82cf4407e2af391f72a86e4e1adcf74e5ca13cae..962aedbcab9d5579d7306e0094f668b45641c076 100644
+index ca89369cec5423786e0446858301e4e6f3fe5626..63028bae9940d63e5c2c68873c3eac41e865b8ff 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -31,7 +36,7 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -30,7 +30,7 @@ public class ChunkProviderServer implements IChunkProvider {
      private long lastSaveStatPrinted = System.currentTimeMillis();
      // Paper end
      // Paper start

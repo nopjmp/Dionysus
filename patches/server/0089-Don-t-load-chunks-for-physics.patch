@@ -5,10 +5,10 @@ Subject: [PATCH] Don-t-load-chunks-for-physics
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index b808e1729abfee05f06b7aaf1146ed567463dece..2555d76316c534a4c31dd1d17a2638c47cbaefe9 100644
+index d26e0396088ef1553bb05572344614b575a17174..039b6e9861295f5f2a171b38884e0717dd3871e0 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -585,7 +585,9 @@ public abstract class World implements IBlockAccess {
+@@ -581,7 +581,9 @@ public abstract class World implements IBlockAccess {
      public void neighborChanged(BlockPosition pos, Block blockIn, BlockPosition fromPos) { a(pos, blockIn, fromPos); } // Paper - OBFHELPER
      public void a(BlockPosition blockposition, final Block block, BlockPosition blockposition1) {
          if (!this.isClientSide) {
