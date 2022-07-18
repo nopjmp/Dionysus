@@ -6,9 +6,8 @@ Subject: [PATCH] Paper-Optimize-Light-Recalculations
 Optimizes to not repeatedly look up the same chunk for
  light lookups.
 
-
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 6552c1ec04ff9a19548a9fe7fb7f18c25e2d01a8..0730434dadcbd13461524f926a88928a4fd27c7f 100644
+index e3b16329f99baff575560082e351c95489845b08..0c731a0810261b5fa7def77a8995890d34b21832 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -335,7 +335,7 @@ public class Chunk {
@@ -21,7 +20,7 @@ index 6552c1ec04ff9a19548a9fe7fb7f18c25e2d01a8..0730434dadcbd13461524f926a88928a
  
              this.s = true;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index d26e0396088ef1553bb05572344614b575a17174..db8a201e909ee63fc3dd19d6907e5391cb86fe6b 100644
+index 2e2dacae053a4822017f36db89848fa04430f421..2f726f68d20db457c0de6cf77191bf28de371783 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -510,8 +510,9 @@ public abstract class World implements IBlockAccess {
@@ -36,7 +35,7 @@ index d26e0396088ef1553bb05572344614b575a17174..db8a201e909ee63fc3dd19d6907e5391
              }
          }
  
-@@ -2470,6 +2471,11 @@ public abstract class World implements IBlockAccess {
+@@ -2472,6 +2473,11 @@ public abstract class World implements IBlockAccess {
      public boolean c(EnumSkyBlock enumskyblock, BlockPosition blockposition) {
          // CraftBukkit start - Use neighbor cache instead of looking up
          Chunk chunk = this.getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4);

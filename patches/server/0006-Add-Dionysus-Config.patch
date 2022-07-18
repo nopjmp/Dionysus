@@ -5,12 +5,12 @@ Subject: [PATCH] Add Dionysus Config
 
 
 diff --git a/pom.xml b/pom.xml
-index cb8012b2481a7707a93e71d13f22fa7f8e7ae6ad..5c520257f15e5e1f97509688856d9cd6f388eed2 100644
+index 7970295c6a539ef551653767871adaef7de228e1..49063fa3fe70668c9a1cff6945631358e1050aa8 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -147,6 +147,18 @@
-             <version>2.2</version>
-             <scope>test</scope>
+@@ -153,6 +153,18 @@
+             <version>23.0.0</version>
+             <scope>compile</scope>
          </dependency>
 +        <dependency>
 +            <groupId>me.carleslc.Simple-YAML</groupId>

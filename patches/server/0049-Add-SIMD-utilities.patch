@@ -20,10 +20,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index 2a1cf6e6d89f7ad59906f33005cd027c8e523cdc..e5fe53a27fb976dfe03028b49d2b2adffd5fecab 100644
+index ad5ccbca3944852eaf2243bc32e19e5c36b8ecc7..ba5510f976236db4730ae8c263929a47a22cf4f9 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -311,6 +311,9 @@
+@@ -317,6 +317,9 @@
                  <groupId>org.apache.maven.plugins</groupId>
                  <artifactId>maven-compiler-plugin</artifactId>
                  <version>3.7.0</version>
