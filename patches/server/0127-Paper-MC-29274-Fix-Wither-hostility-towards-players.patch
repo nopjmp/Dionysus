@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 18 Jul 2022 15:49:35 +0500
+Subject: [PATCH] Paper-MC-29274-Fix-Wither-hostility-towards-players
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityWither.java b/src/main/java/net/minecraft/server/EntityWither.java
+index 9678526059621cd31a9a0dccc8ff803d80e9082a..1b2f4fff7f4bf99c79444069517467052334dd0d 100644
+--- a/src/main/java/net/minecraft/server/EntityWither.java
++++ b/src/main/java/net/minecraft/server/EntityWither.java
+@@ -55,6 +55,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+         this.goalSelector.a(7, new PathfinderGoalRandomLookaround(this));
+         this.targetSelector.a(1, new PathfinderGoalHurtByTarget(this, false, new Class[0]));
+         this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget(this, EntityInsentient.class, 0, false, false, EntityWither.bH));
++        this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget<>(this, EntityHuman.class, 0, false, false, null)); // Paper - Fix MC-29274
+     }
+ 
+     protected void i() {

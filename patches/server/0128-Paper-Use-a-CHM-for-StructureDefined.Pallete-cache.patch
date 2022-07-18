@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 18 Jul 2022 15:56:10 +0500
+Subject: [PATCH] Paper-Use-a-CHM-for-StructureDefined.Pallete-cache
+
+
+diff --git a/src/main/java/net/minecraft/server/DefinedStructure.java b/src/main/java/net/minecraft/server/DefinedStructure.java
+index 23da9467ebc82bd25f2c74ddf88ce415dea61775..5e52b30d73a786269c0bf040bfef5255bf298302 100644
+--- a/src/main/java/net/minecraft/server/DefinedStructure.java
++++ b/src/main/java/net/minecraft/server/DefinedStructure.java
+@@ -116,7 +116,7 @@ public class DefinedStructure {
+     }
+ 
+     public Map<BlockPosition, String> a(BlockPosition blockposition, DefinedStructureInfo definedstructureinfo) {
+-        HashMap hashmap = Maps.newHashMap();
++        HashMap hashmap = (HashMap) Maps.newConcurrentMap();
+         StructureBoundingBox structureboundingbox = definedstructureinfo.i();
+         Iterator iterator = this.a.iterator();
+ 
