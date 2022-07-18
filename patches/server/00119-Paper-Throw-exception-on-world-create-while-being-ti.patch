@@ -1,0 +1,54 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 17 Jul 2022 14:15:35 +0500
+Subject: [PATCH] Paper-Throw-exception-on-world-create-while-being-ticked
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index c6ffd1da9b9c18a12a1e9c7bf5852c6f8b4ec8a5..276ef54f2b80ee8d9650d2855b7f8efed8d0b19e 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -990,6 +990,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+ 
+             // this.i[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
+         }
++        this.isIteratingOverLevels = false; // Paper
+ 
+         this.methodProfiler.c("connection");
+         MinecraftTimings.connectionTimer.startTiming(); // Spigot
+@@ -1233,6 +1234,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+     }
+ 
+     public List<String> tabCompleteCommand(ICommandListener icommandlistener, String s, @Nullable BlockPosition blockposition, boolean flag) {
++        this.isIteratingOverLevels = true; // Paper
+         /* CraftBukkit start - Allow tab-completion of Bukkit commands
+         ArrayList arraylist = Lists.newArrayList();
+         boolean flag1 = s.startsWith("/");
+@@ -1284,6 +1286,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+     public boolean M() {
+         return true; // CraftBukkit
+     }
++    public boolean isIteratingOverLevels = false; // Paper
+ 
+     public String getName() {
+         return "Server";
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index ef5cdbdb231396db5fda9ab2ddeb0e63ba3dcf9b..c405119cb50a7e8b4c7e4cd75c3ec883c3082af5 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -938,6 +938,7 @@ public final class CraftServer implements Server {
+ 
+     @Override
+     public World createWorld(WorldCreator creator) {
++        Preconditions.checkState(!this.console.isIteratingOverLevels, "Cannot create a world while worlds are being ticked"); // Paper
+         Validate.notNull(creator, "Creator may not be null");
+ 
+         String name = creator.name();
+@@ -1056,6 +1057,7 @@ public final class CraftServer implements Server {
+ 
+     @Override
+     public boolean unloadWorld(World world, boolean save) {
++        Preconditions.checkState(!this.console.isIteratingOverLevels, "Cannot unload a world while worlds are being ticked"); // Paper
+         if (world == null) {
+             return false;
+         }

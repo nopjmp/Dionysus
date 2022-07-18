@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 18 Jul 2022 12:38:45 +0500
+Subject: [PATCH] Paper-Fix-enderdragon-exp-dupe
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityEnderDragon.java b/src/main/java/net/minecraft/server/EntityEnderDragon.java
+index c925de971fcf105fe63f32e739e0cfbe5e6668d5..7f96930bc6283ea9d753a6100c5a0e81e6be6d1b 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderDragon.java
++++ b/src/main/java/net/minecraft/server/EntityEnderDragon.java
+@@ -29,7 +29,7 @@ public class EntityEnderDragon extends EntityInsentient implements IComplex, IMo
+     public float bE;
+     public float bF;
+     public boolean bG;
+-    public int bH;
++    public int bH; public final int getDeathTicks() { return this.bH; } public final void setDeathTicks(final int value) { this.bH = value; } // Paper
+     public EntityEnderCrystal currentEnderCrystal;
+     private final EnderDragonBattle bK;
+     private final DragonControllerManager bL;
+@@ -840,6 +840,7 @@ public class EntityEnderDragon extends EntityInsentient implements IComplex, IMo
+     public void b(NBTTagCompound nbttagcompound) {
+         super.b(nbttagcompound);
+         nbttagcompound.setInt("DragonPhase", this.bL.a().getControllerPhase().b());
++        nbttagcompound.setInt("Paper.DeathTick", this.getDeathTicks()); // Paper
+     }
+ 
+     public void a(NBTTagCompound nbttagcompound) {
+@@ -847,6 +848,7 @@ public class EntityEnderDragon extends EntityInsentient implements IComplex, IMo
+         if (nbttagcompound.hasKey("DragonPhase")) {
+             this.bL.setControllerPhase(DragonControllerPhase.getById(nbttagcompound.getInt("DragonPhase")));
+         }
++        this.setDeathTicks(nbttagcompound.getInt("Paper.DeathTick")); // Paper
+ 
+     }
+ 
