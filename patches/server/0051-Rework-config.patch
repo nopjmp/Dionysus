@@ -19,21 +19,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-diff --git a/pom.xml b/pom.xml
-index ba5510f976236db4730ae8c263929a47a22cf4f9..4219bd4ebff9405e7731df54d8c146e83adbcacb 100644
---- a/pom.xml
-+++ b/pom.xml
-@@ -176,6 +176,10 @@
-             <id>spigotmc-public</id>
-             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-         </repository>
-+        <repository>
-+            <id>jitpack.io</id>
-+            <url>https://jitpack.io</url>
-+        </repository>
-     </repositories>
- 
-     <pluginRepositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusCommand.java b/src/main/java/dev/pomf/dionysus/DionysusCommand.java
 index ccd40bd122937a862d531ad2c8f3bed090054874..269b221474f2d3a737996a21b7e0619bf26301cf 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusCommand.java
