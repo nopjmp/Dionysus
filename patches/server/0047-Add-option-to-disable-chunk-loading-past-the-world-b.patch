@@ -5,10 +5,10 @@ Subject: [PATCH] Add option to disable chunk loading past the world border
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 6a61ba4b78709585f9bbbc833b16eedc894b0d8a..54839204d0f24b5dfe2dae68b20123c59be4960a 100644
+index 4dc3f54ce429faae14082def771e457e831ed79b..01ea967d718ab2bd46073c62964ebc57db2b5a8a 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -249,4 +249,9 @@ public class DionysusConfig {
+@@ -268,4 +268,9 @@ public class DionysusConfig {
          improveMergeChecks = getBoolean("improve-merge-checks", improveMergeChecks);
      }
  

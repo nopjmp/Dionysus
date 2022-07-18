@@ -5,10 +5,10 @@ Subject: [PATCH] Change Bed Mechanics
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 731e5ba6d5a7e387b323aafb712c6e9c59fcd33e..b4d43eda70cc3c86413862bbd27bd00f35e4ac24 100644
+index 42a8c56fa28a9883b83615b16a7ac77fdd93e2c4..c0538f565d18c774485591f0f1745cd42c06ff48 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -196,4 +196,13 @@ public class DionysusConfig {
+@@ -215,4 +215,13 @@ public class DionysusConfig {
              Bukkit.getLogger().info("Redact player data enabled, IP Address and location data will be removed.");
          }
      }

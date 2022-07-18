@@ -10,10 +10,10 @@ Don't count some map decorations
 TODO: move modifications to other patches out of this patch.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index e47ba0ed8bae8160ef3c95a5ba0748d922bd42bc..94c92c839852a93867eff6118b0e67bb8dbd5b67 100644
+index f377b0beab436cfdc4694895cf8ed19644ee8c6e..d614d6e28963b8aff2e4088734115a5492699a7a 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -144,9 +144,9 @@ public class DionysusConfig {
+@@ -163,9 +163,9 @@ public class DionysusConfig {
          return config.getStringList(key);
      }
  
@@ -25,7 +25,7 @@ index e47ba0ed8bae8160ef3c95a5ba0748d922bd42bc..94c92c839852a93867eff6118b0e67bb
      }
  
      public static boolean customNameAiLimitBypass = true;
-@@ -212,12 +212,17 @@ public class DionysusConfig {
+@@ -231,12 +231,17 @@ public class DionysusConfig {
  
      public static boolean alternativeBlockPlacement = true;
      private static void alternativeBlockPlacement() {
@@ -44,7 +44,7 @@ index e47ba0ed8bae8160ef3c95a5ba0748d922bd42bc..94c92c839852a93867eff6118b0e67bb
      public static boolean chunkOverloadDupe = false;
      public static boolean chunkOverloadDupeLog = false;
      private static void chunkOverloadDupe() {
-@@ -226,4 +231,13 @@ public class DionysusConfig {
+@@ -245,4 +250,13 @@ public class DionysusConfig {
          chunkOverloadDupeLog = getBoolean("chunk-overload-dupe.log", chunkOverloadDupeLog);
          if (chunkOverloadDupeLog) Bukkit.getLogger().info("Chunk overload dupes will be logged.");
      }

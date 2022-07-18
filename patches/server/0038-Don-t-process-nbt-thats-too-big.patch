@@ -6,10 +6,10 @@ Subject: [PATCH] Don't process nbt thats too big
 Co-authored-by: RemainingToast <59129680+RemainingToast@users.noreply.github.com>
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index b4d43eda70cc3c86413862bbd27bd00f35e4ac24..2aeb41e8359e3975a31c5c13b4aaa2014eb1c584 100644
+index c0538f565d18c774485591f0f1745cd42c06ff48..f84d013a0a04574f33d5eb7a306748ac5c8c8f16 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -205,4 +205,8 @@ public class DionysusConfig {
+@@ -224,4 +224,8 @@ public class DionysusConfig {
          }
      }
  
