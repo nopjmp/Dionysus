@@ -5,10 +5,10 @@ Subject: [PATCH] Don-t-tick-dead-players
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 023ab4603760b82fd1dec4896d3a35fb8bbd1e56..b02067e5ba0a03de4d5d725381c195a93c65e114 100644
+index f43809b13f5f04c5fd74cfecae57492f3efefd53..21d3d8bcdc79107195cbaa9e99442331112dd829 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -847,7 +847,7 @@ public boolean didPlayerJoinEvent = false;
+@@ -781,7 +781,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
      protected void a(double d0, boolean flag, IBlockData iblockdata, BlockPosition blockposition) {}
  
      protected void b(BlockPosition blockposition) {

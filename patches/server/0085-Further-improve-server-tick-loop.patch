@@ -5,7 +5,7 @@ Subject: [PATCH] Further-improve-server-tick-loop
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 5ed519fc94103eff070534e6934841ee6b9b1b87..cb8193ad4875d60a8f6e57b73b32bed9c4dcb8d1 100644
+index 65e6fe1e14e11f53cf583d32589cf17da1903cd2..bf0301a50294bfbcbcc9ce94fc2761dab0981334 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -17,6 +17,7 @@ import java.awt.GraphicsEnvironment;
@@ -16,7 +16,7 @@ index 5ed519fc94103eff070534e6934841ee6b9b1b87..cb8193ad4875d60a8f6e57b73b32bed9
  import java.io.UnsupportedEncodingException;
  import java.net.Proxy;
  import java.net.URLEncoder;
-@@ -590,39 +591,52 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -576,39 +577,52 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
      public static class RollingAverage {
          private final int size;
          private long time;
@@ -78,7 +78,7 @@ index 5ed519fc94103eff070534e6934841ee6b9b1b87..cb8193ad4875d60a8f6e57b73b32bed9
      // Paper End
  
      public void run() {
-@@ -664,7 +678,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -650,7 +664,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
                      if ( ++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0 )
                      {
                          final long diff = curTime - tickSection;

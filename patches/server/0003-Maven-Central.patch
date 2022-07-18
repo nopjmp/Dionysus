@@ -5,10 +5,10 @@ Subject: [PATCH] Maven Central
 
 
 diff --git a/pom.xml b/pom.xml
-index 0e3f45e81fbd4a81cb31b2d753be17fb270d8bbc..e26c9cb00363c7232628abfade0ec967fc309494 100644
+index 224ab807365cb4f5403c2cab12603f32bc3a0826..df5c0857fda789046ac82e167a36d62c1d682ec6 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -131,6 +131,10 @@
+@@ -134,6 +134,10 @@
      </dependencies>
  
      <repositories>

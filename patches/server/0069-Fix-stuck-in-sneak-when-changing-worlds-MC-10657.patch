@@ -6,10 +6,10 @@ Subject: [PATCH] Fix-stuck-in-sneak-when-changing-worlds-MC-10657
 twersytaytggfdscx
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index a30322f50a8c2b8163fc7036f3a74d58bb3bd8fe..1fe685fce9f79466f4002b87c1e996c145e9a06e 100644
+index 52d8e8ed1ff91032c4dd6bfb3bbc0eb13a648b70..6fe460b437849488bb1b84d9ec9a737047d8d095 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -1175,6 +1175,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -1160,6 +1160,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
          this.getDataWatcher().set(EntityPlayer.br, entityplayer.getDataWatcher().get(EntityPlayer.br));
          this.lastSentExp = -1;
          this.lastHealthSent = -1.0F;
@@ -18,10 +18,10 @@ index a30322f50a8c2b8163fc7036f3a74d58bb3bd8fe..1fe685fce9f79466f4002b87c1e996c1
          // this.cr.a((RecipeBook) entityplayer.cr); // CraftBukkit
          // Paper start - Optimize remove queue
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 7b4adac6f21ea331c4c0c16b518fb9daa6500875..f475e2984940cc3bfb8a322eb1cb3e0f457f8cd4 100644
+index 7bfd20347960115e0eecadc0c9a803f22862d1cc..37016c22e249f2cc621fef594eb93c4574c5fb13 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -827,6 +827,8 @@ public abstract class PlayerList {
+@@ -829,6 +829,8 @@ public abstract class PlayerList {
              entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(entityplayer.getId(), mobEffect));
          }
  

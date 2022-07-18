@@ -5,7 +5,7 @@ Subject: [PATCH] fix-some-rails-connecting-improperly
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockMinecartDetector.java b/src/main/java/net/minecraft/server/BlockMinecartDetector.java
-index edf61084233dd6cd11bc3d18c1869acc2af21388..58b18f1b6b72cf99a28d6f25689cf139c6b4e8e7 100644
+index 872543df7a80e84b38ebdac09c40da8d52be71f4..ebabf820d3ce7cc5969f537a9af1a1e5d98c59ae 100644
 --- a/src/main/java/net/minecraft/server/BlockMinecartDetector.java
 +++ b/src/main/java/net/minecraft/server/BlockMinecartDetector.java
 @@ -60,6 +60,7 @@ public class BlockMinecartDetector extends BlockMinecartTrackAbstract {

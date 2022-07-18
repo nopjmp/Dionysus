@@ -5,10 +5,10 @@ Subject: [PATCH] Swaps-the-predicate-order-of-collision
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index aff256a4bcecbb0faab2353b034198391eaf0304..a307b8caf973c22344842ca4d260348f1ba67f97 100644
+index 004c633886d6f2964d6ff8f3529e49024eb5f8f3..53dceb4df4534f2409d19c1399e171ef26358e60 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -1413,8 +1413,9 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+@@ -1408,8 +1408,9 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
      public void d(EntityHuman entityhuman) {}
  
      public void collide(Entity entity) {

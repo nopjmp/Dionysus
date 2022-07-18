@@ -5,7 +5,7 @@ Subject: [PATCH] Paper-Sync-position-on-teleportation
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 65e90e2e291633646b2f4be5a35f8a271121cf5b..b1a6711233cd1d4bc88332a3df894a2b1194f7ee 100644
+index 0a4addf07d7e61267e4292b79f52ba34985d007b..e8861a6e4152e2af77339f6217df4d7bd8d305d1 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -488,6 +488,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {

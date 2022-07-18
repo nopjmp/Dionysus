@@ -5,10 +5,10 @@ Subject: [PATCH] Prevent-Village-Doors-from-Loading-Chunks
 
 
 diff --git a/src/main/java/net/minecraft/server/Village.java b/src/main/java/net/minecraft/server/Village.java
-index 061102419e0c8670b0a24bec2cde3fadfb3d6d06..5ca36d1f8fe0e040d2242b7889b45cf950563f07 100644
+index 6536e5fb843fd6e9f28ad975fc73678fafffff47..6d32ca025d3a2cae463bfac72c0ba73a1644d5a8 100644
 --- a/src/main/java/net/minecraft/server/Village.java
 +++ b/src/main/java/net/minecraft/server/Village.java
-@@ -40,6 +40,31 @@ public class Village {
+@@ -39,6 +39,31 @@ public class Village {
          this.a = world;
      }
  
@@ -40,7 +40,7 @@ index 061102419e0c8670b0a24bec2cde3fadfb3d6d06..5ca36d1f8fe0e040d2242b7889b45cf9
      public void a(World world) {
          this.a = world;
      }
-@@ -51,6 +76,7 @@ public class Village {
+@@ -50,6 +75,7 @@ public class Village {
              return;
          }
          // Paper end
@@ -48,7 +48,7 @@ index 061102419e0c8670b0a24bec2cde3fadfb3d6d06..5ca36d1f8fe0e040d2242b7889b45cf9
          this.g = i;
          this.m();
          this.l();
-@@ -369,6 +395,7 @@ public class Village {
+@@ -368,6 +394,7 @@ public class Village {
  
              this.e = Math.max(32, (int) Math.sqrt((double) j) + 1);
          }
@@ -56,7 +56,7 @@ index 061102419e0c8670b0a24bec2cde3fadfb3d6d06..5ca36d1f8fe0e040d2242b7889b45cf9
      }
  
      public int a(String s) {
-@@ -423,7 +450,7 @@ public class Village {
+@@ -422,7 +449,7 @@ public class Village {
                  this.j.put(nbttagcompound2.getString("Name"), Integer.valueOf(nbttagcompound2.getInt("S")));
              }
          }

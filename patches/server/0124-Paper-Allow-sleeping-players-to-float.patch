@@ -5,7 +5,7 @@ Subject: [PATCH] Paper-Allow-sleeping-players-to-float
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index b1a6711233cd1d4bc88332a3df894a2b1194f7ee..71784e71687177e52aac22457f52c39f6b0b4381 100644
+index e8861a6e4152e2af77339f6217df4d7bd8d305d1..4c42d97a9328bab4ff914cf4a5a021192679b0cb 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -151,7 +151,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {

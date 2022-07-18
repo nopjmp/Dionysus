@@ -5,10 +5,10 @@ Subject: [PATCH] Reset-players-airTicks-on-respawn
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 816a44dc1d9846d7738faf1d19cd9e383e1fe722..aff256a4bcecbb0faab2353b034198391eaf0304 100644
+index 5a5d082bb5953a38004ec5c1e963b8c24e96ea07..e8272c8bfd9a201f3f2d6dc9fbb3dd094ed24311 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -2155,7 +2155,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+@@ -2139,7 +2139,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
          }
      }
  
@@ -18,10 +18,10 @@ index 816a44dc1d9846d7738faf1d19cd9e383e1fe722..aff256a4bcecbb0faab2353b03419839
      }
  
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 5c7dfe6fe105699b257bd43b650b508797829014..a30322f50a8c2b8163fc7036f3a74d58bb3bd8fe 100644
+index 6fe460b437849488bb1b84d9ec9a737047d8d095..f43809b13f5f04c5fd74cfecae57492f3efefd53 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -1576,6 +1576,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -1562,6 +1562,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
  
          this.setHealth(this.getMaxHealth());
          this.fireTicks = 0;

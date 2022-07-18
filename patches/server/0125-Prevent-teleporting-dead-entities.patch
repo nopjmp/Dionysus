@@ -5,7 +5,7 @@ Subject: [PATCH] Prevent-teleporting-dead-entities
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 71784e71687177e52aac22457f52c39f6b0b4381..a9e2d24604bffeedf7562a96575e0b54377aa019 100644
+index 4c42d97a9328bab4ff914cf4a5a021192679b0cb..49aada26cb88a6949ed89b8b971e1c1af8f48bbb 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -833,6 +833,10 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
