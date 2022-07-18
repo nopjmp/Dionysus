@@ -5,37 +5,6 @@ Subject: [PATCH] Xorshift Random
 
 Use xorshift random where we can.
 
-diff --git a/pom.xml b/pom.xml
-index 305a74715b22d8868db098816560b0c0a6a0389b..d2fb4049d4845c624fb240b15eb81854cd3dfc3e 100644
---- a/pom.xml
-+++ b/pom.xml
-@@ -128,6 +128,18 @@
-             <version>8.5.8</version>
-         </dependency>
- 
-+        <dependency>
-+            <groupId>it.unimi.dsi</groupId>
-+            <artifactId>dsiutils</artifactId>
-+            <version>2.6.17</version>
-+        </dependency>
-+
-+        <dependency>
-+            <groupId>it.unimi.dsi</groupId>
-+            <artifactId>fastutil</artifactId>
-+            <version>8.5.6</version>
-+        </dependency>
-+
-         <!-- testing -->
-         <dependency>
-             <groupId>junit</groupId>
-@@ -270,6 +282,7 @@
-                                     <excludes>
-                                         <exclude>io/netty/**</exclude>
-                                         <exclude>org/apache/logging/log4j/**</exclude>
-+                                        <exclude>it/unimi/dsi/fastutil/**</exclude>
-                                     </excludes>
-                                 </filter>
-                             </filters>
 diff --git a/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java b/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java
 index be4b53b4111259382e425a87719d75adf93f28b5..1dddc9f912c0545fef7a06e2f72463153fe830c0 100644
 --- a/src/main/java/com/destroystokyo/paper/loottable/CraftLootableInventoryData.java

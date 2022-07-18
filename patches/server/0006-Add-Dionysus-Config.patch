@@ -4,6 +4,29 @@ Date: Sat, 6 Mar 2021 00:58:44 -0600
 Subject: [PATCH] Add Dionysus Config
 
 
+diff --git a/pom.xml b/pom.xml
+index cb8012b2481a7707a93e71d13f22fa7f8e7ae6ad..5c520257f15e5e1f97509688856d9cd6f388eed2 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -147,6 +147,18 @@
+             <version>2.2</version>
+             <scope>test</scope>
+         </dependency>
++        <dependency>
++            <groupId>me.carleslc.Simple-YAML</groupId>
++            <artifactId>Simple-Yaml</artifactId>
++            <version>1.8</version>
++            <scope>compile</scope>
++            <exclusions>
++                <exclusion>
++                    <groupId>org.yaml</groupId>
++                    <artifactId>snakeyaml</artifactId>
++                </exclusion>
++            </exclusions>
++        </dependency>
+     </dependencies>
+ 
+     <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusCommand.java b/src/main/java/dev/pomf/dionysus/DionysusCommand.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..ccd40bd122937a862d531ad2c8f3bed090054874
