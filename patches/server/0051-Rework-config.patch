@@ -20,10 +20,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index e5fe53a27fb976dfe03028b49d2b2adffd5fecab..0099df8b331d2935ca2906064c0fe8a2f586f72f 100644
+index ba5510f976236db4730ae8c263929a47a22cf4f9..4219bd4ebff9405e7731df54d8c146e83adbcacb 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -170,6 +170,10 @@
+@@ -176,6 +176,10 @@
              <id>spigotmc-public</id>
              <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
          </repository>
