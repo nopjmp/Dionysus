@@ -20,10 +20,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 8ff1d3c79ba7472d2d609bc0cfabea674234f9ca..7740e39d3f15a2727e42d1b3e042920c98b4f469 100644
+index 01ea967d718ab2bd46073c62964ebc57db2b5a8a..642bfc8e0faabe5a37627d34b5946130d78e8d68 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -307,4 +307,15 @@ public class DionysusConfig {
+@@ -273,4 +273,15 @@ public class DionysusConfig {
          noChunksPastWorldBorder = getBoolean("no-chunks-past-world-border", noChunksPastWorldBorder);
      }
  

@@ -20,7 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 69c869af85a28c87e1dc9c4db896271172107449..13b5d2133d27d7d5d6dce25360941dcf85037c79 100644
+index b0cfd46177b0a6cf24cd2cb6af4ea60f71206d65..37457f1d35f7037f1c5adddc4f9b95bffddf0445 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -4,6 +4,7 @@ import dev.pomf.dionysus.simd.SIMDDetection;
@@ -43,7 +43,7 @@ index 69c869af85a28c87e1dc9c4db896271172107449..13b5d2133d27d7d5d6dce25360941dcf
  
  public class DionysusConfig {
  
-@@ -327,4 +332,23 @@ public class DionysusConfig {
+@@ -311,4 +316,23 @@ public class DionysusConfig {
          setComment("projectile", "Optimizes projectile settings");
      }
  

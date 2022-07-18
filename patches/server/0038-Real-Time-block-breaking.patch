@@ -5,10 +5,10 @@ Subject: [PATCH] Real Time block breaking
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index e396bb9cecb8085b949ce025178969b01991218e..0fe33eb470ad0be018d127194273b39cb42be0ff 100644
+index 2aeb41e8359e3975a31c5c13b4aaa2014eb1c584..f21a52880e816a9310e166f88ea389f28b37cde1 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -243,4 +243,12 @@ public class DionysusConfig {
+@@ -209,4 +209,12 @@ public class DionysusConfig {
      private static void maxProcessedNBTSize() {
          maxProcessedNBTSize = getInt("max-processed-nbt-size", 80000);
      }

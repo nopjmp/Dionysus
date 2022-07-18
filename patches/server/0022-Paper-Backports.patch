@@ -376,10 +376,10 @@ index 2156ca3b1b844310b407395784c06ac7053e507a..5ce4270edaab6e658cb477042082dfe0
                  tileentity = this.F(blockposition);
              }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index a1fbda2e61afac93a85d4f2e606ed313b0020525..fc969ddeee05779293a7dc0377b66db17ff01017 100644
+index c7c7a83754d89d2c0ef67da709bd050f74b1ea46..7eddf0e829f4bd5d341afaca49df5ebcee651d89 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -809,6 +809,35 @@ public final class CraftServer implements Server {
+@@ -808,6 +808,35 @@ public final class CraftServer implements Server {
          enablePlugins(PluginLoadOrder.POSTWORLD);
      }
  

@@ -10,19 +10,11 @@ Don't count some map decorations
 TODO: move modifications to other patches out of this patch.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index e0832d7f3a5e8fc992eafc824642b518c1e2810f..043bccf726c5a4cc5455e7eeb65224237addb021 100644
+index e47ba0ed8bae8160ef3c95a5ba0748d922bd42bc..94c92c839852a93867eff6118b0e67bb8dbd5b67 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
- 
- public class DionysusConfig {
- 
-+    // TODO Add wiki on github and link in header
-     private static final String HEADER = "This is the main configuration file for Dionysus.\n"
-             + "As you can see, there's tons to configure. Some options may impact gameplay, so use\n"
-             + "with caution, and make sure you know what each option does before configuring.\n";
-@@ -178,9 +179,9 @@ public class DionysusConfig {
-         return config.getString(path, config.getString(path));
+@@ -144,9 +144,9 @@ public class DionysusConfig {
+         return config.getStringList(key);
      }
  
 -    public static long maxLightTimePerTick;
@@ -33,7 +25,7 @@ index e0832d7f3a5e8fc992eafc824642b518c1e2810f..043bccf726c5a4cc5455e7eeb6522423
      }
  
      public static boolean customNameAiLimitBypass = true;
-@@ -246,12 +247,17 @@ public class DionysusConfig {
+@@ -212,12 +212,17 @@ public class DionysusConfig {
  
      public static boolean alternativeBlockPlacement = true;
      private static void alternativeBlockPlacement() {
@@ -52,7 +44,7 @@ index e0832d7f3a5e8fc992eafc824642b518c1e2810f..043bccf726c5a4cc5455e7eeb6522423
      public static boolean chunkOverloadDupe = false;
      public static boolean chunkOverloadDupeLog = false;
      private static void chunkOverloadDupe() {
-@@ -260,4 +266,13 @@ public class DionysusConfig {
+@@ -226,4 +231,13 @@ public class DionysusConfig {
          chunkOverloadDupeLog = getBoolean("chunk-overload-dupe.log", chunkOverloadDupeLog);
          if (chunkOverloadDupeLog) Bukkit.getLogger().info("Chunk overload dupes will be logged.");
      }

@@ -5,7 +5,7 @@ Subject: [PATCH] Paper-Limit-Client-Sign-length-more
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index a9e2d24604bffeedf7562a96575e0b54377aa019..0c11eb5871c3edce9656286218acbb998efbecfe 100644
+index 49aada26cb88a6949ed89b8b971e1c1af8f48bbb..facf98188e72e523136179e151ed943db9345b7d 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -99,6 +99,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
@@ -16,7 +16,7 @@ index a9e2d24604bffeedf7562a96575e0b54377aa019..0c11eb5871c3edce9656286218acbb99
      private AutoRecipe H = new AutoRecipe();
      private static final long KEEPALIVE_LIMIT = Long.getLong("paper.playerconnection.keepalive", 30) * 1000; // Paper - provide property to set keepalive limit
  
-@@ -2276,6 +2277,15 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -2283,6 +2284,15 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
              String[] lines = new String[4];
  
              for (int i = 0; i < astring.length; ++i) {
