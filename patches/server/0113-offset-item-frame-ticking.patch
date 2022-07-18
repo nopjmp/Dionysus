@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 11 Jul 2022 23:45:54 +0500
+Subject: [PATCH] offset-item-frame-ticking
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHanging.java b/src/main/java/net/minecraft/server/EntityHanging.java
+index cc903e1ea1fc69196b3b369d241b6be1ec9af38d..806497813262decb6e7eea715b2ef73284816699 100644
+--- a/src/main/java/net/minecraft/server/EntityHanging.java
++++ b/src/main/java/net/minecraft/server/EntityHanging.java
+@@ -21,7 +21,7 @@ public abstract class EntityHanging extends Entity {
+             return this.a((Entity) object);
+         }
+     };
+-    private int d;
++    private int d; { this.d = this.getId() % this.world.spigotConfig.hangingTickFrequency; } // Paper
+     public BlockPosition blockPosition;
+     @Nullable
+     public EnumDirection direction;
