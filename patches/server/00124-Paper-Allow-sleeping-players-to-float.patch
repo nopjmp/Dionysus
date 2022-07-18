@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 18 Jul 2022 13:14:00 +0500
+Subject: [PATCH] Paper-Allow-sleeping-players-to-float
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index b1a6711233cd1d4bc88332a3df894a2b1194f7ee..71784e71687177e52aac22457f52c39f6b0b4381 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -151,7 +151,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+             this.player.setLocation(this.l, this.m, this.n, this.player.yaw, this.player.pitch);
+             ++this.e;
+             this.processedMovePackets = this.receivedMovePackets;
+-            if (this.B) {
++            if (this.B && !this.player.isSleeping()) { // Paper - #3176 Allow sleeping players to float
+                 if (++this.C > 80) {
+                     PlayerConnection.LOGGER.warn("{} was kicked for floating too long!", this.player.getName());
+                     this.disconnect(com.destroystokyo.paper.PaperConfig.flyingKickPlayerMessage); // Paper - use configurable kick message
