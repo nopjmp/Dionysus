@@ -34,27 +34,27 @@ index 12a3289681c50130af913804e1399c991d61cf0d..4219bd4ebff9405e7731df54d8c146e8
              <plugin>
                  <groupId>org.apache.maven.plugins</groupId>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 1e2bb1c5095a1d99419c324286494df26f38453d..8ff1d3c79ba7472d2d609bc0cfabea674234f9ca 100644
+index 54839204d0f24b5dfe2dae68b20123c59be4960a..01ea967d718ab2bd46073c62964ebc57db2b5a8a 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -2,6 +2,7 @@ package dev.pomf.dionysus;
+@@ -1,5 +1,6 @@
+ package dev.pomf.dionysus;
  
- import com.google.common.base.Throwables;
- import com.google.common.collect.ImmutableMap;
 +import dev.pomf.dionysus.simd.SIMDDetection;
  import net.minecraft.server.MinecraftServer;
  import org.bukkit.Bukkit;
- import org.bukkit.command.Command;
-@@ -58,6 +59,23 @@ public class DionysusConfig {
-         version = getInt("config-version", 1);
-         set("config-version", 1);
-         readConfig(DionysusConfig.class, null);
+ import org.bukkit.configuration.file.YamlConfiguration;
+@@ -84,6 +85,24 @@ public class DionysusConfig {
+         updates++;
+ 
+         config.save(configFile);
 +
 +        // Attempt to detect vectorization
 +        try {
 +            SIMDDetection.isEnabled = SIMDDetection.canEnable(DionysusLogger.LOGGER);
 +            SIMDDetection.versionLimited = SIMDDetection.getJavaVersion() != 17 && SIMDDetection.getJavaVersion() != 18;
-+        } catch (NoClassDefFoundError | Exception ignored) {}
++        } catch (NoClassDefFoundError | Exception ignored) {
++        }
 +
 +        if (SIMDDetection.isEnabled) {
 +            DionysusLogger.LOGGER.info("SIMD operations detected as functional. Will replace some operations with faster versions.");
@@ -68,4 +68,4 @@ index 1e2bb1c5095a1d99419c324286494df26f38453d..8ff1d3c79ba7472d2d609bc0cfabea67
 +        }
      }
  
-     protected static void logError(String s) {
+     private static void setComment(String key, String... comment) {

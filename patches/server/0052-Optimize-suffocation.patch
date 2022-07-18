@@ -20,10 +20,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index b3d9b8d81ab1dc8e7e579f0d37f1eb14a2fb0491..197ddb5bec0a83195b619eca81ab684459d77394 100644
+index 6946a60ca2a38eb21f622b7d674effa19f02c325..b178a489c4806d7904ebc482f32e6e491e625d62 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -309,4 +309,13 @@ public class DionysusConfig {
+@@ -293,4 +293,13 @@ public class DionysusConfig {
                  "This can be overridden per-player with the permission dionysus.usebooks");
      }
  

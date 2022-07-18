@@ -21,7 +21,7 @@ index 4219bd4ebff9405e7731df54d8c146e83adbcacb..39ed0f198c26494c44870f2b23caef39
  
      <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 13b5d2133d27d7d5d6dce25360941dcf85037c79..bec3204a29cb4c174d0c943d415d493a0bea7804 100644
+index 37457f1d35f7037f1c5adddc4f9b95bffddf0445..ac3609a637d8017f57f1ceaf091c587b717c2ade 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -2,6 +2,7 @@ package dev.pomf.dionysus;
@@ -32,7 +32,7 @@ index 13b5d2133d27d7d5d6dce25360941dcf85037c79..bec3204a29cb4c174d0c943d415d493a
  import org.bukkit.Bukkit;
  import org.bukkit.configuration.file.YamlConfiguration;
  import org.bukkit.entity.EntityType;
-@@ -351,4 +352,34 @@ public class DionysusConfig {
+@@ -335,4 +336,34 @@ public class DionysusConfig {
          }
      }
  

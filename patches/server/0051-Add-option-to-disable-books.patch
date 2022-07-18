@@ -20,10 +20,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index f3d94ae491aa88b195e1015384c4861f5c7ef4c0..b3d9b8d81ab1dc8e7e579f0d37f1eb14a2fb0491 100644
+index 642bfc8e0faabe5a37627d34b5946130d78e8d68..6946a60ca2a38eb21f622b7d674effa19f02c325 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -300,4 +300,13 @@ public class DionysusConfig {
+@@ -284,4 +284,13 @@ public class DionysusConfig {
          }
      }
  

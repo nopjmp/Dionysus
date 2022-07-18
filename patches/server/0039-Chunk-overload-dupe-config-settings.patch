@@ -5,10 +5,10 @@ Subject: [PATCH] Chunk overload dupe config settings
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 0fe33eb470ad0be018d127194273b39cb42be0ff..e0832d7f3a5e8fc992eafc824642b518c1e2810f 100644
+index f21a52880e816a9310e166f88ea389f28b37cde1..e47ba0ed8bae8160ef3c95a5ba0748d922bd42bc 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -251,4 +251,13 @@ public class DionysusConfig {
+@@ -217,4 +217,13 @@ public class DionysusConfig {
              Bukkit.getLogger().info("Tickless Block Placement Mechanics activated. Block placement based on time instead of ticks.");
          }
      }
