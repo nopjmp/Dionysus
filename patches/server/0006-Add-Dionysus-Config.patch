@@ -5,7 +5,7 @@ Subject: [PATCH] Add Dionysus Config
 
 
 diff --git a/pom.xml b/pom.xml
-index 7970295c6a539ef551653767871adaef7de228e1..49063fa3fe70668c9a1cff6945631358e1050aa8 100644
+index 233cc5e84f98263351568a78e9a5bccc180de1c1..055e19e3eef37f6658ff89dcca607d4f2872dfdf 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -153,6 +153,18 @@
