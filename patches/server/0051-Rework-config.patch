@@ -20,25 +20,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index e5fe53a27fb976dfe03028b49d2b2adffd5fecab..134f803508b60422075426c279d4ebdfb087e984 100644
+index e5fe53a27fb976dfe03028b49d2b2adffd5fecab..0099df8b331d2935ca2906064c0fe8a2f586f72f 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -141,6 +141,14 @@
-             <version>2.2</version>
-             <scope>test</scope>
-         </dependency>
-+
-+        <!-- for optimized protocol handling -->
-+        <dependency>
-+            <groupId>com.velocitypowered</groupId>
-+            <artifactId>velocity-native</artifactId>
-+            <version>3.1.2-SNAPSHOT</version>
-+            <scope>compile</scope>
-+        </dependency>
-         <dependency>
-             <groupId>me.carleslc.Simple-YAML</groupId>
-             <artifactId>Simple-Yaml</artifactId>
-@@ -170,6 +178,10 @@
+@@ -170,6 +170,10 @@
              <id>spigotmc-public</id>
              <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
          </repository>
