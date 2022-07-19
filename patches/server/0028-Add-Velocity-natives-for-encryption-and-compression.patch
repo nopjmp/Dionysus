@@ -6,7 +6,7 @@ Subject: [PATCH] Add Velocity natives for encryption and compression
 Credit to Tuinity!
 
 diff --git a/pom.xml b/pom.xml
-index fa08092ab5dcea68b4c0466affac95e7525b659d..3d6dbff02383d9f62d8a590fc4b39bd6a7a08af8 100644
+index 5707cac4b20a8714b1b8159bc829e3b5cbdd40fd..277598c4adb9ad544758820ee3285291159b56d7 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -165,6 +165,12 @@

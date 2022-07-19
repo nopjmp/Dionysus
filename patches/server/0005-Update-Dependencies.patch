@@ -5,7 +5,7 @@ Subject: [PATCH] Update Dependencies
 
 
 diff --git a/pom.xml b/pom.xml
-index 6c3e9e123260686fc7af88e0ea072e906454b39f..233cc5e84f98263351568a78e9a5bccc180de1c1 100644
+index 6c3e9e123260686fc7af88e0ea072e906454b39f..f7c7b0404da9cebd5f1da7c6574872f4ff85b2a8 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -19,6 +19,8 @@
@@ -145,15 +145,6 @@ index 6c3e9e123260686fc7af88e0ea072e906454b39f..233cc5e84f98263351568a78e9a5bccc
      </repositories>
  
      <pluginRepositories>
-@@ -189,7 +214,7 @@
-                             <Specification-Title>Bukkit</Specification-Title>
-                             <Specification-Version>${api.version}</Specification-Version>
-                             <Specification-Vendor>Bukkit Team</Specification-Vendor>
--                            <Multi-Release>true</Multi-Release>
-+                        	<Multi-Release>true</Multi-Release>
-                         </manifestEntries>
-                         <manifestSections>
-                             <manifestSection>
 @@ -226,6 +251,16 @@
                          </goals>
                          <configuration>
