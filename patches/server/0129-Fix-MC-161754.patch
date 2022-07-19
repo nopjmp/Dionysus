@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Tue, 19 Jul 2022 08:10:43 +0200
+Subject: [PATCH] Fix-MC-161754
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 22488895599141ce0f8d0cadca48d49973e67416..448aeed01b5604bf2f129bf31ba0b8c28b4e64fe 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -372,4 +372,12 @@ public class DionysusConfig {
+     private static void maxProcessedBookNBTSize() {
+         maxProcessedBookNBTSize = getInt("max-processed-book-nbt-size", 8000);
+     }
++
++    public static boolean fixDonkeyDupe = true;
++    private static void fixDonkeyDupe() {
++        fixDonkeyDupe = getBoolean("fix-donkey-dupe", fixDonkeyDupe);
++        setComment("fix-donkey-dupe",
++                "Fixes MC-161754"
++        );
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/ContainerHorse.java b/src/main/java/net/minecraft/server/ContainerHorse.java
+index 1f2d0a58fd2bbd319e2bbc74a1f3370b26318c8d..d75e5bcc72dbe8c45ef5b2a334713c036b36ffb8 100644
+--- a/src/main/java/net/minecraft/server/ContainerHorse.java
++++ b/src/main/java/net/minecraft/server/ContainerHorse.java
+@@ -71,7 +71,7 @@ public class ContainerHorse extends Container {
+     }
+ 
+     public boolean canUse(EntityHuman entityhuman) {
+-        return this.a.a(entityhuman) && this.f.isAlive() && this.f.g((Entity) entityhuman) < 8.0F;
++        return this.a.a(entityhuman) && (this.f.isAlive() && (!dev.pomf.dionysus.DionysusConfig.fixDonkeyDupe || this.f.valid)) && this.f.g((Entity) entityhuman) < 8.0F; // NeonPaper! - Fix MC-161754
+     }
+ 
+     public ItemStack shiftClick(EntityHuman entityhuman, int i) {
