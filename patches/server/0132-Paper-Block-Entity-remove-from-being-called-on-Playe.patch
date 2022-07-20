@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Tue, 19 Jul 2022 13:03:04 +0500
+Subject: [PATCH] Paper-Block-Entity-remove-from-being-called-on-Players
+
+This doesn't result in the same behavior as other entities and causes
+several problems. Anyone ever complain about the "Cannot send chat
+message" thing? That's one of the issues this causes, among others.
+
+If a plugin developer can come up with a valid reason to call this on a
+Player we will look at limiting the scope of this change. It appears to
+be unintentional in the few cases we've seen so far.
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 0f9068278f8a89a898a6b38ecf7170c20b786030..a133a968abfd7a0ebe039b3d4fe70c7171f4db70 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -170,6 +170,14 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+             getHandle().playerConnection.sendPacket(new PacketPlayOutChat(component));
+         }
+     }
++    @Override
++    public void remove() {
++        if (this.getHandle().getClass().equals(EntityPlayer.class)) { // special case for NMS plugins inheriting
++            throw new UnsupportedOperationException("Calling Entity#remove on players produces undefined (bad) behavior");
++        } else {
++            super.remove();
++        }
++    }
+ 
+     @Override
+     public void sendMessage(String message) {
