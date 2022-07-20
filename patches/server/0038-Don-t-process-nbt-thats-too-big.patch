@@ -53,18 +53,50 @@ index fa19df341d13c531fd3597362b126ce8f183cd97..09748606f71e0dd6d7b743048070c7b0
                      // Paper start - PlayerArmorChangeEvent
                      if (this instanceof EntityPlayer && enumitemslot.getType() == EnumItemSlot.Function.ARMOR) {
 diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
-index 035a1714d0caa28f90c95cd515e69591e41693c1..a94248c18027aa38f496599e529157b321744796 100644
+index 035a1714d0caa28f90c95cd515e69591e41693c1..0d8d54203adf0eae34b879a23ddd3abe041e5d7b 100644
 --- a/src/main/java/net/minecraft/server/NBTTagCompound.java
 +++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
-@@ -306,6 +306,58 @@ public class NBTTagCompound extends NBTBase {
+@@ -23,13 +23,13 @@ public class NBTTagCompound extends NBTBase {
+ 
+     private static final Logger b = LogManager.getLogger();
+     private static final Pattern c = Pattern.compile("[A-Za-z0-9._+-]+");
+-    public final Map<String, NBTBase> map; // Paper
++    public final CustomObject2ObjectOpenHashMap<String, NBTBase> map; // Paper  // Dionysus - Don't process large NBTs
+ 
+     public NBTTagCompound() {
+-        this(new Object2ObjectOpenHashMap<>(8, 0.8f)); // Paper - reduce memory footprint of NBTTagCompound
++        this(new CustomObject2ObjectOpenHashMap<>(8, 0.8f)); // Paper - reduce memory footprint of NBTTagCompound // Dionysus - Don't process large NBTs
+     }
+ 
+-    protected NBTTagCompound(Map<String, NBTBase> map) {
++    protected NBTTagCompound(CustomObject2ObjectOpenHashMap<String, NBTBase> map) { // Dionysus - Don't process large NBTs
+         this.map = map;
+     }
+ 
+@@ -306,6 +306,71 @@ public class NBTTagCompound extends NBTBase {
      public void remove(String s) {
          this.map.remove(s);
      }
 +    
 +    // Dionysus start - Don't process large NBTs
-+    private int cachedSize = 0;
-+    private int cachedHashCode = 0;
-+    private boolean cached = false;
++    static class CustomObject2ObjectOpenHashMap<K, V> extends Object2ObjectOpenHashMap<K, V> {
++        public boolean validCache = true;
++        public CustomObject2ObjectOpenHashMap(int initialCapacity, float loadFactor) {
++            super(initialCapacity, loadFactor);
++        }
++        @Override
++        public V put(K k, V v) {
++            validCache = false;
++            return super.put(k, v);
++        }
++
++        @Override
++        public V remove(Object o) {
++            validCache = false;
++            return super.remove(o);
++        }
++    }
++    private int cachedSize = -1;
 +    private int itemSize(NBTBase nbt) {
 +        if (nbt instanceof NBTNumber) {
 +            return 16;
@@ -85,15 +117,14 @@ index 035a1714d0caa28f90c95cd515e69591e41693c1..a94248c18027aa38f496599e529157b3
 +            return 0;
 +        }
 +
-+        if (cached && this.map.hashCode() == cachedHashCode) {
++        if (cachedSize > -1 && map.validCache) {
 +            return cachedSize;
 +        }
 +
 +        int accumulator = 0;
 +        for (Map.Entry<String, NBTBase> entry : this.map.entrySet()) {
 +            accumulator += entry.getKey().length();
-+            if (entry.getValue() instanceof NBTTagList) {
-+                NBTTagList nbttaglist = (NBTTagList) entry.getValue();
++            if (entry.getValue() instanceof NBTTagList nbttaglist) {
 +                if (!nbttaglist.isEmpty()) {
 +                    for (NBTBase nbt : nbttaglist.list) {
 +                        accumulator += this.itemSize(nbt);
@@ -106,12 +137,20 @@ index 035a1714d0caa28f90c95cd515e69591e41693c1..a94248c18027aa38f496599e529157b3
 +            }
 +        }
 +
-+        cached = true;
-+        cachedHashCode = this.map.hashCode();
 +        cachedSize = accumulator;
++        map.validCache = true;
 +        return accumulator;
 +    }
 +    // Dionysus end
  
      public String toString() {
          StringBuilder stringbuilder = new StringBuilder("{");
+@@ -362,7 +427,7 @@ public class NBTTagCompound extends NBTBase {
+ 
+     public NBTTagCompound g() {
+         // Paper start - reduce memory footprint of NBTTagCompound
+-        Object2ObjectOpenHashMap<String, NBTBase> ret = new Object2ObjectOpenHashMap<>(this.map.size(), 0.8f);
++        CustomObject2ObjectOpenHashMap<String, NBTBase> ret = new CustomObject2ObjectOpenHashMap<>(this.map.size(), 0.8f); // Dionysus - Don't process large NBTs
+ 
+         Iterator<Map.Entry<String, NBTBase>> iterator = (this.map instanceof Object2ObjectOpenHashMap) ? ((Object2ObjectOpenHashMap)this.map).object2ObjectEntrySet().fastIterator() : this.map.entrySet().iterator();
+         while (iterator.hasNext()) {
