@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Tue, 19 Jul 2022 13:00:12 +0500
+Subject: [PATCH] Paper-BlockPistonRetractEvent-for-all-empty-pistons
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockPiston.java b/src/main/java/net/minecraft/server/BlockPiston.java
+index 0f90172fa015e74beb563d840f770e2bd9cbf434..a25fae257705b8a25653d7e755550933daeae50b 100644
+--- a/src/main/java/net/minecraft/server/BlockPiston.java
++++ b/src/main/java/net/minecraft/server/BlockPiston.java
+@@ -116,14 +116,14 @@ public class BlockPiston extends BlockDirectional {
+             }
+         } else if (!flag && ((Boolean) iblockdata.get(BlockPiston.EXTENDED)).booleanValue()) {
+             // CraftBukkit start
+-            if (!this.sticky) {
++            //if (!this.sticky) { // Paper - Prevents empty sticky pistons from firing retract - history behind is odd
+                 org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+                 BlockPistonRetractEvent event = new BlockPistonRetractEvent(block, ImmutableList.<org.bukkit.block.Block>of(), CraftBlock.notchToBlockFace(enumdirection));
+                 world.getServer().getPluginManager().callEvent(event);
+ 
+                 if (event.isCancelled()) {
+                     return;
+-                }
++                    //} // Paper
+             }
+             // PAIL: checkME - what happened to setTypeAndData?
+             // CraftBukkit end

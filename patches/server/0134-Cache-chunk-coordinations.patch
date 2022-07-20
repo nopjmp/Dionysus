@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Wed, 20 Jul 2022 08:56:58 +0500
+Subject: [PATCH] Cache-chunk-coordinations
+
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 0c731a0810261b5fa7def77a8995890d34b21832..96b73172668c7cebe31366fbe741f2bba0c832c6 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -126,6 +126,7 @@ public class Chunk {
+         return false;
+     }
+     // Airplane end
++    private ChunkCoordIntPair chunkCoords; // Dionysus
+ 
+     public Chunk(World world, int i, int j) {
+         this.sections = new ChunkSection[16];
+@@ -152,6 +153,7 @@ public class Chunk {
+         this.chunkKey = ChunkCoordIntPair.a(this.locX, this.locZ);
+ 
+         this.lightningTick = this.world.random.nextInt(100000) << 1; // Airplane - initialize lightning tick
++        this.chunkCoords = new ChunkCoordIntPair(this.locX, this.locZ); // Dionysus
+     }
+ 
+     public org.bukkit.Chunk bukkitChunk;
+@@ -1238,7 +1240,7 @@ public class Chunk {
+     }
+ 
+     public ChunkCoordIntPair k() {
+-        return new ChunkCoordIntPair(this.locX, this.locZ);
++        return this.chunkCoords; // Dionysus
+     }
+ 
+     public boolean c(int i, int j) {
