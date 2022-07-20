@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Wed, 20 Jul 2022 20:41:26 +0500
+Subject: [PATCH] Paper-fix-dead-slime-setSize-invincibility
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftSlime.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftSlime.java
+index 3768b9573a8f81d6d1eb844a6220a38b0fb20c12..a78fe4e4f23345deaf9e9f65d934d63bdf683896 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftSlime.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftSlime.java
+@@ -19,7 +19,7 @@ public class CraftSlime extends CraftLivingEntity implements Slime, CraftSentien
+     }
+ 
+     public void setSize(int size) {
+-        getHandle().setSize(size, true);
++        getHandle().setSize(size, /* true */ getHandle().isAlive()); // Paper - fix dead slime setSize invincibility
+     }
+ 
+     @Override
