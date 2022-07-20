@@ -5,7 +5,7 @@ Subject: [PATCH] Update Dependencies
 
 
 diff --git a/pom.xml b/pom.xml
-index 6c3e9e123260686fc7af88e0ea072e906454b39f..f7c7b0404da9cebd5f1da7c6574872f4ff85b2a8 100644
+index 6c3e9e123260686fc7af88e0ea072e906454b39f..36b5600fa989d76bf9875039129b099514bd1902 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -19,6 +19,8 @@
@@ -66,7 +66,7 @@ index 6c3e9e123260686fc7af88e0ea072e906454b39f..f7c7b0404da9cebd5f1da7c6574872f4
              <scope>compile</scope>
          </dependency>
  
-@@ -102,36 +98,61 @@
+@@ -102,36 +98,71 @@
          <dependency>
              <groupId>org.apache.logging.log4j</groupId>
              <artifactId>log4j-slf4j-impl</artifactId>
@@ -131,10 +131,20 @@ index 6c3e9e123260686fc7af88e0ea072e906454b39f..f7c7b0404da9cebd5f1da7c6574872f4
 +            <version>23.0.0</version>
 +            <scope>compile</scope>
 +        </dependency>
++        <dependency>
++            <groupId>com.github.ben-manes.caffeine</groupId>
++            <artifactId>caffeine</artifactId>
++            <version>3.1.1</version>
++        </dependency>
++        <dependency>
++            <groupId>com.github.ben-manes.caffeine</groupId>
++            <artifactId>guava</artifactId>
++            <version>3.1.1</version>
++        </dependency>
      </dependencies>
  
      <repositories>
-@@ -143,6 +164,10 @@
+@@ -143,6 +174,10 @@
              <id>spigotmc-public</id>
              <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
          </repository>
@@ -145,7 +155,7 @@ index 6c3e9e123260686fc7af88e0ea072e906454b39f..f7c7b0404da9cebd5f1da7c6574872f4
      </repositories>
  
      <pluginRepositories>
-@@ -226,6 +251,16 @@
+@@ -226,6 +261,16 @@
                          </goals>
                          <configuration>
                              <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation> <!-- Paper -->

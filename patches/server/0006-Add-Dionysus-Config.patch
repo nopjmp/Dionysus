@@ -22,12 +22,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index f7c7b0404da9cebd5f1da7c6574872f4ff85b2a8..46e1bae0ec74691554e38ae8f64bc7e5b2526c44 100644
+index 36b5600fa989d76bf9875039129b099514bd1902..e983363e31aa339ffbd9cfae075cdabd4c4041d4 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -153,6 +153,18 @@
-             <version>23.0.0</version>
-             <scope>compile</scope>
+@@ -163,6 +163,18 @@
+             <artifactId>guava</artifactId>
+             <version>3.1.1</version>
          </dependency>
 +        <dependency>
 +            <groupId>me.carleslc.Simple-YAML</groupId>
