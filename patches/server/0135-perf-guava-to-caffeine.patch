@@ -1,0 +1,89 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruViolence@users.noreply.github.com>
+Date: Wed, 1 Jun 2022 07:47:46 +0500
+Subject: [PATCH] perf: guava to caffeine
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntitySkull.java b/src/main/java/net/minecraft/server/TileEntitySkull.java
+index dd2665881f12697a51a7bd90731258799e13d16e..c99c380d1211d6ea495579fd8545e7870818629d 100644
+--- a/src/main/java/net/minecraft/server/TileEntitySkull.java
++++ b/src/main/java/net/minecraft/server/TileEntitySkull.java
+@@ -9,9 +9,6 @@ import javax.annotation.Nullable;
+ 
+ // Spigot start
+ import com.google.common.base.Predicate;
+-import com.google.common.cache.LoadingCache;
+-import com.google.common.cache.CacheBuilder;
+-import com.google.common.cache.CacheLoader;
+ import com.google.common.util.concurrent.Futures;
+ import java.util.concurrent.Executors;
+ import java.util.concurrent.ExecutorService;
+@@ -24,6 +21,12 @@ import com.mojang.authlib.ProfileLookupCallback;
+ import java.util.concurrent.Callable;
+ // Spigot end
+ 
++// Reaper start - Guava to caffeine
++import com.github.benmanes.caffeine.cache.CacheLoader;
++import com.github.benmanes.caffeine.cache.Caffeine;
++import com.github.benmanes.caffeine.cache.LoadingCache;
++// Reaper end
++
+ public class TileEntitySkull extends TileEntity /*implements ITickable*/ { // Paper - remove tickable
+ 
+     private int a;
+@@ -39,7 +42,7 @@ public class TileEntitySkull extends TileEntity /*implements ITickable*/ { // Pa
+                     .setNameFormat("Head Conversion Thread - %1$d")
+                     .build()
+     );
+-    public static final LoadingCache<String, GameProfile> skinCache = CacheBuilder.newBuilder()
++    public static final LoadingCache<String, GameProfile> skinCache = Caffeine.newBuilder() // Reaper - Guava to caffeine
+             .maximumSize( 5000 )
+             .expireAfterAccess( 60, TimeUnit.MINUTES )
+             .build( new CacheLoader<String, GameProfile>()
+@@ -203,7 +206,7 @@ public class TileEntitySkull extends TileEntity /*implements ITickable*/ { // Pa
+                     Callable<GameProfile> callable = new Callable<GameProfile>() {
+                         @Override
+                         public GameProfile call() {
+-                            final GameProfile profile = skinCache.getUnchecked(gameprofile.getName().toLowerCase(java.util.Locale.ROOT));
++                            final GameProfile profile = skinCache.get(gameprofile.getName().toLowerCase(java.util.Locale.ROOT)); // Reaper - Guava to caffeine
+                             MinecraftServer.getServer().processQueue.add(new Runnable() {
+                                 @Override
+                                 public void run() {
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 8dcdc8216098bc6958a1e276dfb4fc564e6f9bc6..697fb7ea48c3b44173208750e9632973a736b446 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -156,7 +156,7 @@ public final class CraftServer implements Server {
+     private YamlConfiguration configuration;
+     private YamlConfiguration commandsConfiguration;
+     private final Yaml yaml = new Yaml(new SafeConstructor());
+-    private final Map<UUID, OfflinePlayer> offlinePlayers = new MapMaker().weakValues().makeMap();
++    private final com.github.benmanes.caffeine.cache.Cache<UUID, OfflinePlayer> offlinePlayers = com.github.benmanes.caffeine.cache.Caffeine.newBuilder().weakValues().build(); // Reaper - Guava to caffeine
+     private final EntityMetadataStore entityMetadata = new EntityMetadataStore();
+     private final PlayerMetadataStore playerMetadata = new PlayerMetadataStore();
+     private final WorldMetadataStore worldMetadata = new WorldMetadataStore();
+@@ -1429,7 +1429,7 @@ public final class CraftServer implements Server {
+                 result = getOfflinePlayer(profile);
+             }
+         } else {
+-            offlinePlayers.remove(result.getUniqueId());
++            offlinePlayers.invalidate(result.getUniqueId()); // Reaper - Guava to caffeine
+         }
+ 
+         return result;
+@@ -1441,13 +1441,13 @@ public final class CraftServer implements Server {
+ 
+         OfflinePlayer result = getPlayer(id);
+         if (result == null) {
+-            result = offlinePlayers.get(id);
++            result = offlinePlayers.getIfPresent(id); // Reaper - Guava to caffeine
+             if (result == null) {
+                 result = new CraftOfflinePlayer(this, new GameProfile(id, null));
+                 offlinePlayers.put(id, result);
+             }
+         } else {
+-            offlinePlayers.remove(id);
++            offlinePlayers.invalidate(id); // Reaper - Guava to caffeine
+         }
+ 
+         return result;
