@@ -5,7 +5,7 @@ Subject: [PATCH] Dont-load-chunks-for-chests
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockChest.java b/src/main/java/net/minecraft/server/BlockChest.java
-index 91d3308c154096db5c89879d3bdbf2d29ef959a9..5383946ce8e4e74f45f024d62a8f8b527e77b3f8 100644
+index 91d3308c154096db5c89879d3bdbf2d29ef959a9..98e651fb153fe0c1c3b90414313e880fa165b183 100644
 --- a/src/main/java/net/minecraft/server/BlockChest.java
 +++ b/src/main/java/net/minecraft/server/BlockChest.java
 @@ -43,7 +43,12 @@ public class BlockChest extends BlockTileEntity {
@@ -14,7 +14,7 @@ index 91d3308c154096db5c89879d3bdbf2d29ef959a9..5383946ce8e4e74f45f024d62a8f8b52
              BlockPosition blockposition1 = blockposition.shift(enumdirection);
 -            IBlockData iblockdata1 = world.getType(blockposition1);
 +            // NeonPaper start - Dont load chunks for chests
-+            final IBlockData iblockdata1 = world.isLoaded(blockposition1) ? world.getType(blockposition1) : null;
++            final IBlockData iblockdata1 = world.getTypeIfLoaded(blockposition1);
 +            if (iblockdata1 ==  null) {
 +                continue;
 +             }
