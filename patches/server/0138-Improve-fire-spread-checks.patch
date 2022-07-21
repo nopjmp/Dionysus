@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Thu, 21 Jul 2022 13:27:28 +0200
+Subject: [PATCH] Improve fire spread checks
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockStationary.java b/src/main/java/net/minecraft/server/BlockStationary.java
+index 2a741c1235cacdfaa841de37aed14fd97f5d2e61..31ffc3ac5fb2cc7114ae013a0e75983d13b9a0d9 100644
+--- a/src/main/java/net/minecraft/server/BlockStationary.java
++++ b/src/main/java/net/minecraft/server/BlockStationary.java
+@@ -103,6 +103,16 @@ public class BlockStationary extends BlockFluids {
+     }
+ 
+     private boolean d(World world, BlockPosition blockposition) {
+-        return blockposition.getY() >= 0 && blockposition.getY() < 256 && !world.isLoaded(blockposition) ? false : world.getType(blockposition).getMaterial().isBurnable();
++        // Dionysus start - improve fire spread checks
++        if (blockposition.getY() >= 0 && blockposition.getY() < 256) {
++            IBlockData blockData = world.getTypeIfLoaded(blockposition);
++
++            if (blockData != null) {
++                return blockData.getMaterial().isBurnable();
++            }
++        }
++
++        return false;
++        // Dionysus end
+     }
+ }
