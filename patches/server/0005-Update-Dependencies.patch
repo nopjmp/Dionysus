@@ -5,7 +5,7 @@ Subject: [PATCH] Update Dependencies
 
 
 diff --git a/pom.xml b/pom.xml
-index 6c3e9e123260686fc7af88e0ea072e906454b39f..36b5600fa989d76bf9875039129b099514bd1902 100644
+index 4216f43e566394cd7d863be1ee1744083a04faba..cec1844d70ba860f62f15d1c72497afcd3f58325 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -19,6 +19,8 @@
@@ -57,40 +57,34 @@ index 6c3e9e123260686fc7af88e0ea072e906454b39f..36b5600fa989d76bf9875039129b0995
          </dependency>
  
          <!--
-@@ -94,7 +90,7 @@
+@@ -95,7 +91,7 @@
          <dependency>
              <groupId>org.apache.logging.log4j</groupId>
              <artifactId>log4j-core</artifactId>
--            <version>2.8.1</version>
+-            <version>2.17.0</version>
 +            <version>${log4j2.version}</version>
              <scope>compile</scope>
          </dependency>
  
-@@ -102,36 +98,71 @@
+@@ -103,13 +99,13 @@
          <dependency>
              <groupId>org.apache.logging.log4j</groupId>
              <artifactId>log4j-slf4j-impl</artifactId>
--            <version>2.8.1</version>
--            <scope>runtime</scope>
+-            <version>2.17.0</version>
 +            <version>${log4j2.version}</version>
-+            <scope>compile</scope>
+             <scope>runtime</scope>
          </dependency>
          <dependency>
              <groupId>org.apache.logging.log4j</groupId>
              <artifactId>log4j-iostreams</artifactId>
--            <version>2.8.1</version>
+-            <version>2.17.0</version>
 +            <version>${log4j2.version}</version>
-+            <scope>compile</scope>
          </dependency>
  
          <!-- Paper - Async loggers -->
-         <dependency>
-             <groupId>com.lmax</groupId>
-             <artifactId>disruptor</artifactId>
--            <version>3.4.2</version>
-+            <version>3.4.4</version>
-             <scope>runtime</scope>
+@@ -121,19 +117,53 @@
          </dependency>
+         <!-- Paper end - Update Log4j -->
  
 +        <dependency>
 +            <groupId>it.unimi.dsi</groupId>
@@ -144,7 +138,7 @@ index 6c3e9e123260686fc7af88e0ea072e906454b39f..36b5600fa989d76bf9875039129b0995
      </dependencies>
  
      <repositories>
-@@ -143,6 +174,10 @@
+@@ -150,6 +180,10 @@
              <id>spigotmc-public</id>
              <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
          </repository>
@@ -155,23 +149,16 @@ index 6c3e9e123260686fc7af88e0ea072e906454b39f..36b5600fa989d76bf9875039129b0995
      </repositories>
  
      <pluginRepositories>
-@@ -226,6 +261,16 @@
-                         </goals>
-                         <configuration>
-                             <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation> <!-- Paper -->
-+                            <filters>
-+                                <filter>
-+                                    <artifact>org.spigotmc:minecraft-server:**</artifact>
-+                                    <excludes>
+@@ -239,7 +273,9 @@
+                                 <filter>
+                                     <artifact>org.spigotmc:minecraft-server:**</artifact>
+                                     <excludes>
 +                                        <exclude>io/netty/**</exclude>
-+                                        <exclude>org/apache/logging/log4j/**</exclude>
+                                         <exclude>org/apache/logging/log4j/**</exclude>
 +                                        <exclude>it/unimi/dsi/fastutil/**</exclude>
-+                                    </excludes>
-+                                </filter>
-+                            </filters>
-                             <relocations>
-                                 <!-- Paper - Workaround for hardcoded path lookup in dependency, easier than forking it - GH-189 -->
-                                 <!--<relocation>-->
+                                     </excludes>
+                                 </filter>
+                             </filters>
 diff --git a/src/test/java/org/bukkit/ArtTest.java b/src/test/java/org/bukkit/ArtTest.java
 index 7f40288922c7a0ba13184cb54b0d1e133e1f1947..fc6b2f61ed980dae345b6ae383cf689e1e019297 100644
 --- a/src/test/java/org/bukkit/ArtTest.java

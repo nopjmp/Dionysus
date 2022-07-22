@@ -5,7 +5,7 @@ Subject: [PATCH] Dionysus POM Changes
 
 
 diff --git a/pom.xml b/pom.xml
-index 132843880aba81d26e7916baa6a58b176356a6c1..224ab807365cb4f5403c2cab12603f32bc3a0826 100644
+index d600217470ca22243ead794cb1415343bf2ca52d..8c0e6cdc1484d55f917bde4e3a04382db11312cd 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -1,12 +1,12 @@
@@ -47,7 +47,7 @@ index 132843880aba81d26e7916baa6a58b176356a6c1..224ab807365cb4f5403c2cab12603f32
              <version>${project.version}</version>
              <scope>compile</scope>
          </dependency>
-@@ -149,15 +149,15 @@
+@@ -153,15 +153,15 @@
  
      <!-- This builds a completely 'ready to start' jar with all dependencies inside -->
      <build>
@@ -66,14 +66,6 @@ index 132843880aba81d26e7916baa6a58b176356a6c1..224ab807365cb4f5403c2cab12603f32
                      <scmDirectory>..</scmDirectory>
                  </configuration>
                  <executions>
-@@ -184,6 +184,7 @@
-                             <Specification-Title>Bukkit</Specification-Title>
-                             <Specification-Version>${api.version}</Specification-Version>
-                             <Specification-Vendor>Bukkit Team</Specification-Vendor>
-+                            <Multi-Release>true</Multi-Release>
-                         </manifestEntries>
-                         <manifestSections>
-                             <manifestSection>
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
 index 674096cab190d62622f9947853b056f57d43a2a5..e6d3d4f9505442a80cf095fcdeaa65640b407262 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
