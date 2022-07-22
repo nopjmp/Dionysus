@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Fri, 22 Jul 2022 22:02:12 +0200
+Subject: [PATCH] Port databits from newer version
+
+
+diff --git a/src/main/java/net/minecraft/server/DataBits.java b/src/main/java/net/minecraft/server/DataBits.java
+index fa0fd8a9c8a805641d974e1c37f9837a0805a218..fbf1f04ad79928f9c47d9a28a1663d218c77a9ea 100644
+--- a/src/main/java/net/minecraft/server/DataBits.java
++++ b/src/main/java/net/minecraft/server/DataBits.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import java.util.function.IntConsumer;
+ import org.apache.commons.lang3.Validate;
+ 
+ public class DataBits {
+@@ -21,9 +22,9 @@ public class DataBits {
+         //Validate.inclusiveBetween(0L, (long) (this.d - 1), (long) i); // Paper
+         //Validate.inclusiveBetween(0L, this.c, (long) j); // Paper
+         int k = i * this.b;
+-        int l = k / 64;
+-        int i1 = ((i + 1) * this.b - 1) / 64;
+-        int j1 = k % 64;
++        int l = k >> 6;
++        int i1 = (i + 1) * this.b - 1 >> 6;
++        int j1 = k ^ l << 6;
+ 
+         this.a[l] = this.a[l] & ~(this.c << j1) | ((long) j & this.c) << j1;
+         if (l != i1) {
+@@ -38,9 +39,9 @@ public class DataBits {
+     public int a(int i) {
+         //Validate.inclusiveBetween(0L, (long) (this.d - 1), (long) i); // Paper
+         int j = i * this.b;
+-        int k = j / 64;
+-        int l = ((i + 1) * this.b - 1) / 64;
+-        int i1 = j % 64;
++        int k = j >> 6;
++        int l = (i + 1) * this.b - 1 >> 6;
++        int i1 = j ^ k << 6;
+ 
+         if (k == l) {
+             return (int) (this.a[k] >>> i1 & this.c);

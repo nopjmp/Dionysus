@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruViolence@users.noreply.github.com>
+Date: Wed, 8 Jun 2022 13:18:46 +0500
+Subject: [PATCH] fix: don't send unreachable blocks
+
+Fixes Nocom exploit:
+https://github.com/nerdsinspace/nocom-explanation/blob/main/README.md
+https://2b2t.miraheze.org/wiki/Nocom
+Fixes another hidden exploit that allows loading a lot of chunks by interacting with them.
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index fadc7292bcab5549e208142e3ae0e0127a26ea6e..3745d9991555c98c607a9a1e995f4e7d8e8d256c 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -954,6 +954,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+ 
+             if (d3 > 36.0D) {
++                if (d3 < 49.0D) // Reaper - Don't send unreachable blocks
+                 if (worldserver.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, true)) // Paper - Fix block break desync - Don't send for unloaded chunks
+                     this.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition)); // Paper - Fix block break desync
+                 return;
+@@ -1034,7 +1035,13 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+ 
+             chatmessage.getChatModifier().setColor(EnumChatFormat.RED);
+             this.player.playerConnection.sendPacket(new PacketPlayOutChat(chatmessage, ChatMessageType.GAME_INFO));
+-        } else if (this.teleportPos == null && this.player.d((double) blockposition.getX() + 0.5D, (double) blockposition.getY() + 0.5D, (double) blockposition.getZ() + 0.5D) < 64.0D && !this.minecraftServer.a(worldserver, blockposition, this.player) && worldserver.getWorldBorder().a(blockposition)) {
++            // Reaper start - Don't send unreachable blocks
++            return;
++        }
++
++        boolean isBlockInReach = this.player.d((double) blockposition.getX() + 0.5D, (double) blockposition.getY() + 0.5D, (double) blockposition.getZ() + 0.5D) < 64.0D;
++        if (this.teleportPos == null && isBlockInReach && !this.minecraftServer.a(worldserver, blockposition, this.player) && worldserver.getWorldBorder().a(blockposition)) {
++            // Reaper end - Don't send unreachable blocks
+             // CraftBukkit start - Check if we can actually do something over this large a distance
+             Location eyeLoc = this.getPlayer().getEyeLocation();
+             double reachDistance = NumberConversions.square(eyeLoc.getX() - blockposition.getX()) + NumberConversions.square(eyeLoc.getY() - blockposition.getY()) + NumberConversions.square(eyeLoc.getZ() - blockposition.getZ());
+@@ -1045,8 +1052,12 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+             this.player.playerInteractManager.a(this.player, worldserver, itemstack, enumhand, blockposition, enumdirection, packetplayinuseitem.d(), packetplayinuseitem.e(), packetplayinuseitem.f());
+         }
+ 
++        // Reaper start - Don't send unreachable blocks
++        if (isBlockInReach) {
+         this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition));
+         this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition.shift(enumdirection)));
++        }
++        // Reaper end - Don't send unreachable blocks
+     }
+ 
+     public void a(PacketPlayInBlockPlace packetplayinblockplace) {
