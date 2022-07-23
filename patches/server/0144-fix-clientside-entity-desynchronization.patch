@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruViolence@users.noreply.github.com>
+Date: Fri, 3 Jun 2022 23:37:07 +0500
+Subject: [PATCH] fix: clientside entity desynchronization
+
+Ported from 1.8 to prevent recreating entities that are still within view distance of the player.
+
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index d775e5991cdece4a3d6b2063d0ce200d745a4e81..f92bfe4eac977ee3db7edad0821d7d96330b3e4c 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -504,8 +504,10 @@ public class EntityTrackerEntry {
+     }
+     private boolean isInRangeOfPlayer(EntityPlayer entityplayer) {
+         // Paper end
+-        double d0 = entityplayer.locX - (double) this.xLoc / 4096.0D;
+-        double d1 = entityplayer.locZ - (double) this.zLoc / 4096.0D;
++        // Reaper start - Fix clientside entity desynchronization
++        double d0 = entityplayer.locX - this.tracker.locX;
++        double d1 = entityplayer.locZ - this.tracker.locZ;
++        // Reaper end
+         int i = Math.min(this.e, this.f);
+ 
+         return d0 >= (double) (-i) && d0 <= (double) i && d1 >= (double) (-i) && d1 <= (double) i && this.tracker.a(entityplayer);

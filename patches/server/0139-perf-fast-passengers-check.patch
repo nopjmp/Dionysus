@@ -1,0 +1,162 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruviolence@users.noreply.github.com>
+Date: Fri, 22 Jul 2022 11:35:09 +0200
+Subject: [PATCH] perf: fast passengers check
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index b7df8035ca388beac149ce8f95daa4d4e64cba93..b31176eed035fc9d6ccabaf446ca79f79df6e490 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -2123,7 +2123,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     }
+ 
+     protected boolean q(Entity entity) {
+-        return this.bF().size() < 1;
++        return this.isPassengersEmpty(); // Reaper
+     }
+ 
+     public float aI() {
+@@ -2184,7 +2184,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     }
+ 
+     public boolean isVehicle() {
+-        return !this.bF().isEmpty();
++        return !this.isPassengersEmpty(); // Reaper
+     }
+ 
+     public boolean isSneaking() {
+@@ -2909,6 +2909,10 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+         return null;
+     }
+ 
++    // Reaper start
++    public boolean isPassengersEmpty() { return this.passengers.isEmpty(); }
++    public int getPassengersAmount() { return this.passengers.size(); }
++    // Reaper end
+     public List<Entity> bF() {
+         return (List) (this.passengers.isEmpty() ? Collections.emptyList() : new ObjectArrayList<>(this.passengers)); // Dionysus
+     }
+diff --git a/src/main/java/net/minecraft/server/EntityBoat.java b/src/main/java/net/minecraft/server/EntityBoat.java
+index 164e21fe81b3fec3aa1b3c303ebe44d83869f951..8996267658531c726381a3894b2081f2dd30aedf 100644
+--- a/src/main/java/net/minecraft/server/EntityBoat.java
++++ b/src/main/java/net/minecraft/server/EntityBoat.java
+@@ -240,7 +240,7 @@ public class EntityBoat extends Entity {
+         super.B_();
+         this.t();
+         if (this.bI()) {
+-            if (this.bF().isEmpty() || !(this.bF().get(0) instanceof EntityHuman)) {
++            if (this.isPassengersEmpty() || !(this.bF().get(0) instanceof EntityHuman)) { // Reaper
+                 this.a(false, false);
+             }
+ 
+@@ -303,7 +303,7 @@ public class EntityBoat extends Entity {
+                 Entity entity = (Entity) list.get(j);
+ 
+                 if (!entity.w(this)) {
+-                    if (flag && this.bF().size() < 2 && !entity.isPassenger() && entity.width < this.width && entity instanceof EntityLiving && !(entity instanceof EntityWaterAnimal) && !(entity instanceof EntityHuman)) {
++                    if (flag && this.getPassengersAmount() < 2 && !entity.isPassenger() && entity.width < this.width && entity instanceof EntityLiving && !(entity instanceof EntityWaterAnimal) && !(entity instanceof EntityHuman)) { // Reaper
+                         entity.startRiding(this);
+                     } else {
+                         this.collide(entity);
+@@ -618,7 +618,7 @@ public class EntityBoat extends Entity {
+             float f = 0.0F;
+             float f1 = (float) ((this.dead ? 0.009999999776482582D : this.aG()) + entity.aF());
+ 
+-            if (this.bF().size() > 1) {
++            if (this.getPassengersAmount() > 1) { // Reaper
+                 int i = this.bF().indexOf(entity);
+ 
+                 if (i == 0) {
+@@ -638,7 +638,7 @@ public class EntityBoat extends Entity {
+             entity.yaw += this.at;
+             entity.setHeadRotation(entity.getHeadRotation() + this.at);
+             this.a(entity);
+-            if (entity instanceof EntityAnimal && this.bF().size() > 1) {
++            if (entity instanceof EntityAnimal && this.getPassengersAmount() > 1) { // Reaper
+                 int j = entity.getId() % 2 == 0 ? 90 : 270;
+ 
+                 entity.h(((EntityAnimal) entity).aN + (float) j);
+@@ -759,7 +759,7 @@ public class EntityBoat extends Entity {
+     }
+ 
+     protected boolean q(Entity entity) {
+-        return this.bF().size() < 2;
++        return this.getPassengersAmount() < 2; // Reaper
+     }
+ 
+     @Nullable
+diff --git a/src/main/java/net/minecraft/server/EntityHorseAbstract.java b/src/main/java/net/minecraft/server/EntityHorseAbstract.java
+index dcc39236f0cdfdcecff9b62252e0595178138693..8b6b52711a937fdb9fbc33c97182e2328a8aa58f 100644
+--- a/src/main/java/net/minecraft/server/EntityHorseAbstract.java
++++ b/src/main/java/net/minecraft/server/EntityHorseAbstract.java
+@@ -905,7 +905,7 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
+ 
+     @Nullable
+     public Entity bE() {
+-        return this.bF().isEmpty() ? null : (Entity) this.bF().get(0);
++        return this.isPassengersEmpty() ? null : (Entity) this.bF().get(0); // Reaper
+     }
+ 
+     @Nullable
+diff --git a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+index a9bfd30f6a9753db92d757867a1b6e18bfcd9a54..fa0dd4798a24a3b91bdee00c0c92f46187af949e 100644
+--- a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
++++ b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+@@ -478,7 +478,7 @@ public abstract class EntityMinecartAbstract extends Entity implements INamableT
+ 
+         this.motX = d5 * d1 / d3;
+         this.motZ = d5 * d2 / d3;
+-        Entity entity = this.bF().isEmpty() ? null : (Entity) this.bF().get(0);
++        Entity entity = this.isPassengersEmpty() ? null : (Entity) this.bF().get(0); // Reaper
+         double d6;
+         double d7;
+         double d8;
+diff --git a/src/main/java/net/minecraft/server/EntityPig.java b/src/main/java/net/minecraft/server/EntityPig.java
+index fcf99e668fab90369986fc5419242f2bc31174b5..3b0657cb7208e1ad2bf86dc2db1a43752fa7e6cd 100644
+--- a/src/main/java/net/minecraft/server/EntityPig.java
++++ b/src/main/java/net/minecraft/server/EntityPig.java
+@@ -40,7 +40,7 @@ public class EntityPig extends EntityAnimal {
+ 
+     @Nullable
+     public Entity bE() {
+-        return this.bF().isEmpty() ? null : (Entity) this.bF().get(0);
++        return this.isPassengersEmpty() ? null : (Entity) this.bF().get(0); // Reaper
+     }
+ 
+     public boolean cV() {
+@@ -185,7 +185,7 @@ public class EntityPig extends EntityAnimal {
+     }
+ 
+     public void a(float f, float f1, float f2) {
+-        Entity entity = this.bF().isEmpty() ? null : (Entity) this.bF().get(0);
++        Entity entity = this.isPassengersEmpty() ? null : (Entity) this.bF().get(0); // Reaper
+ 
+         if (this.isVehicle() && this.cV()) {
+             this.yaw = entity.yaw;
+diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
+index a60f9460855931755568ae41de104edf32a81762..4822c22b3b1b57d0aa7555aad39a9b6521798448 100644
+--- a/src/main/java/net/minecraft/server/EntityTracker.java
++++ b/src/main/java/net/minecraft/server/EntityTracker.java
+@@ -266,7 +266,7 @@ public class EntityTracker {
+                     arraylist.add(entity);
+                 }
+ 
+-                if (!entity.bF().isEmpty()) {
++                if (!entity.isPassengersEmpty()) { // Reaper
+                     arraylist1.add(entity);
+                 }
+             }
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index 56672a69dd62afe9cb054850843524eb962ed4b4..d775e5991cdece4a3d6b2063d0ce200d745a4e81 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -441,7 +441,7 @@ public class EntityTrackerEntry {
+                         }
+                     }
+ 
+-                    if (!this.tracker.bF().isEmpty()) {
++                    if (!this.tracker.isPassengersEmpty()) { // Reaper
+                         entityplayer.playerConnection.sendPacket(new PacketPlayOutMount(this.tracker));
+                     }
+ 

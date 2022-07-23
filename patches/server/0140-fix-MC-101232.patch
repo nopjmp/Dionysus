@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruViolence@users.noreply.github.com>
+Date: Fri, 27 May 2022 08:23:12 +0500
+Subject: [PATCH] fix: MC-101232
+
+https://bugs.mojang.com/browse/MC-101232
+
+diff --git a/src/main/java/net/minecraft/server/WorldGenBigTree.java b/src/main/java/net/minecraft/server/WorldGenBigTree.java
+index b2fbe1c309101be7795ce5e272a0503b887a7162..dbf5a3431c4159ee39133c5ae7f1cd004f084f32 100644
+--- a/src/main/java/net/minecraft/server/WorldGenBigTree.java
++++ b/src/main/java/net/minecraft/server/WorldGenBigTree.java
+@@ -247,12 +247,14 @@ public class WorldGenBigTree extends WorldGenTreeAbstract {
+         }
+ 
+         if (!this.f()) {
++            l = null; // Reaper - Fix MC-101232
+             return false;
+         } else {
+             this.a();
+             this.b();
+             this.c();
+             this.d();
++            l = null; // Reaper - Fix MC-101232
+             return true;
+         }
+     }

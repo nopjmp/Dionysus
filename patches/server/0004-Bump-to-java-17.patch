@@ -5,7 +5,7 @@ Subject: [PATCH] Bump to java 17
 
 
 diff --git a/pom.xml b/pom.xml
-index df5c0857fda789046ac82e167a36d62c1d682ec6..6c3e9e123260686fc7af88e0ea072e906454b39f 100644
+index b57e0e473f5c33fc1bc9507a16fdfdd3eb6e07eb..4216f43e566394cd7d863be1ee1744083a04faba 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -16,8 +16,9 @@
@@ -20,16 +20,16 @@ index df5c0857fda789046ac82e167a36d62c1d682ec6..6c3e9e123260686fc7af88e0ea072e90
      </properties>
  
      <parent>
-@@ -216,7 +217,7 @@
+@@ -224,7 +225,7 @@
              <plugin>
                  <groupId>org.apache.maven.plugins</groupId>
                  <artifactId>maven-shade-plugin</artifactId>
--                <version>3.1.0</version>
+-                <version>3.2.4</version> <!-- Paper - Update Log4j -->
 +                <version>3.3.0</version>
                  <executions>
                      <execution>
                          <phase>package</phase>
-@@ -294,7 +295,8 @@
+@@ -314,7 +315,8 @@
              <id>development</id>
              <!-- Paper start - activate by default -->
              <activation>
@@ -39,7 +39,7 @@ index df5c0857fda789046ac82e167a36d62c1d682ec6..6c3e9e123260686fc7af88e0ea072e90
              </activation>
              <!-- Paper end -->
              <build>
-@@ -314,7 +316,7 @@
+@@ -334,7 +336,7 @@
                          <configuration>
                              <signature>
                                  <groupId>org.codehaus.mojo.signature</groupId>
