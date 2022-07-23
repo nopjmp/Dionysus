@@ -44,5 +44,5 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: Dionysus-JDK8
+          name: Dionysus-JDK17
           path: dionysus-paperclip.jar
