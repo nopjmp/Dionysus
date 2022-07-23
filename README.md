@@ -40,8 +40,12 @@ Anyone can contribute, even if your patches are not perfectly formated for the E
 I want this to be a community project that will evolve as Anarchy server evolve, even if I'm not fully invested in 1.12.2 with my own communities anymore.
 
 ## Contact
+The Dionysus team has a Discord Server. Only Server Owners and Contributors are allowed to join.
+We use it to help others fix bugs and to discuss the project, but we will not provide help with exploiting issues.
 
-nopjmp#1337 on Discord
+[![Discord Banner](https://discord.com/api/guilds/819436478865997874/widget.png?style=banner2)](https://discord.gg/dV7rp5F4uA)
+
+You may also contact nopjmp#1337 on Discord
 
 Email is on git commits
 
