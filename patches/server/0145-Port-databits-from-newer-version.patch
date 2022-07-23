@@ -5,17 +5,10 @@ Subject: [PATCH] Port databits from newer version
 
 
 diff --git a/src/main/java/net/minecraft/server/DataBits.java b/src/main/java/net/minecraft/server/DataBits.java
-index fa0fd8a9c8a805641d974e1c37f9837a0805a218..fbf1f04ad79928f9c47d9a28a1663d218c77a9ea 100644
+index fa0fd8a9c8a805641d974e1c37f9837a0805a218..4dadc914f2dcbe3a597a7d0e8ef039df0270fe38 100644
 --- a/src/main/java/net/minecraft/server/DataBits.java
 +++ b/src/main/java/net/minecraft/server/DataBits.java
-@@ -1,5 +1,6 @@
- package net.minecraft.server;
- 
-+import java.util.function.IntConsumer;
- import org.apache.commons.lang3.Validate;
- 
- public class DataBits {
-@@ -21,9 +22,9 @@ public class DataBits {
+@@ -21,9 +21,9 @@ public class DataBits {
          //Validate.inclusiveBetween(0L, (long) (this.d - 1), (long) i); // Paper
          //Validate.inclusiveBetween(0L, this.c, (long) j); // Paper
          int k = i * this.b;
@@ -28,7 +21,7 @@ index fa0fd8a9c8a805641d974e1c37f9837a0805a218..fbf1f04ad79928f9c47d9a28a1663d21
  
          this.a[l] = this.a[l] & ~(this.c << j1) | ((long) j & this.c) << j1;
          if (l != i1) {
-@@ -38,9 +39,9 @@ public class DataBits {
+@@ -38,9 +38,9 @@ public class DataBits {
      public int a(int i) {
          //Validate.inclusiveBetween(0L, (long) (this.d - 1), (long) i); // Paper
          int j = i * this.b;
