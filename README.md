@@ -4,6 +4,8 @@ Fork of 1.12.2 [Paper](https://github.com/PaperMC/Paper) aimed at improving serv
 
 I do not actively work on this due to "real life" activities. I'm willing to assistant people as possible, but a community should grow around anarchy server administration.
 
+Nightly Link: [nightly.link dev branch run](https://nightly.link/nopjmp/Dionysus/workflows/dev/dev/Dionysus-JDK17.zip)
+
 ## Config
 
 ```yml
