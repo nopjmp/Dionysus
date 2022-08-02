@@ -5,7 +5,7 @@ Subject: [PATCH] Better-handling-of-some-ItemMeta
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
-index 7b3567894468d7c38c364c6f2be7d8d7c78e860a..87dc96f550b86c6b94dd232772b365e4a5deb303 100644
+index 7b3567894468d7c38c364c6f2be7d8d7c78e860a..cada80c314894ab7bded6db1e64a8ca5c47ffeb6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
 @@ -53,7 +53,14 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
@@ -14,7 +14,7 @@ index 7b3567894468d7c38c364c6f2be7d8d7c78e860a..87dc96f550b86c6b94dd232772b365e4
                  NBTTagCompound p = patterns.get(i);
 -                this.patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInt(COLOR.NBT)), PatternType.getByIdentifier(p.getString(PATTERN.NBT))));
 +                // NeonPaper start - Backport SPIGOT-5428
-+                DyeColor color = DyeColor.getByWoolData((byte) p.getInt(COLOR.NBT));
++                DyeColor color = DyeColor.getByDyeData((byte) p.getInt(COLOR.NBT));
 +                PatternType pattern = PatternType.getByIdentifier(p.getString(PATTERN.NBT));
 +
 +                if (color != null && pattern != null) {
