@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Tue, 2 Aug 2022 09:45:32 +0200
+Subject: [PATCH] Add option to disable duplicate log
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 448aeed01b5604bf2f129bf31ba0b8c28b4e64fe..dba95376bf4385e1bd0a3eb33c731496f52fc0a4 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -380,4 +380,13 @@ public class DionysusConfig {
+                 "Fixes MC-161754"
+         );
+     }
++
++    public static boolean disableDuplicateLog = true;
++    private static void disableDuplicateLog() {
++        disableDuplicateLog = getBoolean("disable-duplicate-log", disableDuplicateLog);
++        setComment("disable-duplicate-log",
++                "Disables the \"Keeping entity that already exists with UUID\"",
++                "and \"Deleting duplicate entity\" log messages."
++        );
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 629b04da5973730468b6d8225df0008c6b578a93..1f2ab25e92160f6fbca1cd11a1d933c96541c1cf 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -1161,8 +1161,10 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                     this.f.remove(entity1);
+                 } else {
+                     if (!(entity instanceof EntityHuman)) {
++                        if (!dev.pomf.dionysus.DionysusConfig.disableDuplicateLog) { // Dionysus start
+                         WorldServer.a.error("Keeping entity {} that already exists with UUID {}", entity1, uuid.toString()); // CraftBukkit // Paper
+                         WorldServer.a.error("Deleting duplicate entity {}", entity); // Paper
++                        } // Dionysus end
+                         if (DEBUG_ENTITIES) {
+                             if (entity1.addedToWorldStack != null) {
+                                 entity1.addedToWorldStack.printStackTrace();
