@@ -22,7 +22,7 @@ index 22488895599141ce0f8d0cadca48d49973e67416..448aeed01b5604bf2f129bf31ba0b8c2
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/ContainerHorse.java b/src/main/java/net/minecraft/server/ContainerHorse.java
-index 1f2d0a58fd2bbd319e2bbc74a1f3370b26318c8d..d75e5bcc72dbe8c45ef5b2a334713c036b36ffb8 100644
+index 1f2d0a58fd2bbd319e2bbc74a1f3370b26318c8d..c33838dd6797a6e6a499066a0858e57b5ad06238 100644
 --- a/src/main/java/net/minecraft/server/ContainerHorse.java
 +++ b/src/main/java/net/minecraft/server/ContainerHorse.java
 @@ -71,7 +71,7 @@ public class ContainerHorse extends Container {
@@ -30,7 +30,7 @@ index 1f2d0a58fd2bbd319e2bbc74a1f3370b26318c8d..d75e5bcc72dbe8c45ef5b2a334713c03
  
      public boolean canUse(EntityHuman entityhuman) {
 -        return this.a.a(entityhuman) && this.f.isAlive() && this.f.g((Entity) entityhuman) < 8.0F;
-+        return this.a.a(entityhuman) && (this.f.isAlive() && (!dev.pomf.dionysus.DionysusConfig.fixDonkeyDupe || this.f.valid)) && this.f.g((Entity) entityhuman) < 8.0F; // NeonPaper! - Fix MC-161754
++        return this.a.a(entityhuman) && this.f.isAlive() && (!dev.pomf.dionysus.DionysusConfig.fixDonkeyDupe || this.f.valid) && this.f.g((Entity) entityhuman) < 8.0F; // NeonPaper! - Fix MC-161754
      }
  
      public ItemStack shiftClick(EntityHuman entityhuman, int i) {
