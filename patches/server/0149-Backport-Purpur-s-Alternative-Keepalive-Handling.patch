@@ -1,0 +1,73 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: comendantmc <2b2t.org.ru@gmail.com>
+Date: Thu, 4 Aug 2022 14:54:59 +0200
+Subject: [PATCH] Backport Purpur's Alternative Keepalive Handling
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index e74a8b2fe6ce80d4bb27a4226184f2c4f105f177..f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -394,4 +394,9 @@ public class DionysusConfig {
+     private static void disableMojangServerCommunicationInOfflineMode() {
+         disableMojangServerCommunicationInOfflineMode = getBoolean("disable-mojang-server-communication-in-offline-mode", false);
+     }
++
++    public static boolean useAlternateKeepAlive = false;
++    private static void useAlternateKeepAlive() {
++        useAlternateKeepAlive = getBoolean("use-alternate-keepalive", useAlternateKeepAlive);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 3745d9991555c98c607a9a1e995f4e7d8e8d256c..c32f21753012521b9664c636a5464408c8fae854 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -102,6 +102,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+     private static final int MAX_SIGN_LINE_LENGTH = Integer.getInteger("Paper.maxSignLength", 80);
+     private AutoRecipe H = new AutoRecipe();
+     private static final long KEEPALIVE_LIMIT = Long.getLong("paper.playerconnection.keepalive", 30) * 1000; // Paper - provide property to set keepalive limit
++    private java.util.List<Long> keepAlives = new java.util.ArrayList<>(); // Purpur
+ 
+     public PlayerConnection(MinecraftServer minecraftserver, NetworkManager networkmanager, EntityPlayer entityplayer) {
+         this.minecraftServer = minecraftserver;
+@@ -193,6 +194,22 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+         // This should effectively place the keepalive handling back to "as it was" before 1.12.2
+         long currentTime = this.getCurrentMillis();
+         long elapsedTime = currentTime - this.getLastPing();
++
++        // Purpur start
++        if (dev.pomf.dionysus.DionysusConfig.useAlternateKeepAlive) {
++            if (elapsedTime >= 1000L) { // 1 second
++                if (!processedDisconnect && keepAlives.size() > KEEPALIVE_LIMIT) {
++                    LOGGER.warn("{} was kicked due to keepalive timeout!", player.getName());
++                    this.disconnect(new ChatMessage("disconnect.timeout"));
++                } else {
++                    this.setLastPing(currentTime); // hijack this field for 1 second intervals
++                    keepAlives.add(currentTime); // currentTime is ID
++                    this.sendPacket(new PacketPlayOutKeepAlive(currentTime));
++                }
++            }
++        } else
++        // Purpur end
++
+         if (this.isPendingPing()) {
+             // We're pending a ping from the client
+             if (!this.processedDisconnect && elapsedTime >= KEEPALIVE_LIMIT) { // check keepalive limit, don't fire if already disconnected
+@@ -2333,6 +2350,17 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+     }
+ 
+     public void a(PacketPlayInKeepAlive packetplayinkeepalive) {
++        // Purpur start
++        if (dev.pomf.dionysus.DionysusConfig.useAlternateKeepAlive) {
++            long id = packetplayinkeepalive.a(); // .getId()
++            if (keepAlives.size() > 0 && keepAlives.contains(id)) {
++                int ping = (int) (this.getCurrentMillis() - id);
++                this.player.ping = (this.player.ping * 3 + ping) / 4;
++                keepAlives.clear(); // we got a valid response, lets roll with it and forget the rest
++            }
++        } else
++        // Purpur end
++
+         //PlayerConnectionUtils.ensureMainThread(packetplayinkeepalive, this, this.player.x()); // CraftBukkit // Paper - This shouldn't be on the main thread
+         if (this.g && packetplayinkeepalive.a() == this.h) {
+             int i = (int) (this.d() - this.f);
