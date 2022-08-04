@@ -1,0 +1,191 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Thu, 4 Aug 2022 20:55:42 +0200
+Subject: [PATCH] Async world tick
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7..a393bfd3d85ec22892af78b958d346cc49641eb3 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -399,4 +399,14 @@ public class DionysusConfig {
+     private static void useAlternateKeepAlive() {
+         useAlternateKeepAlive = getBoolean("use-alternate-keepalive", useAlternateKeepAlive);
+     }
++
++    public static boolean asyncWorldTick = false;
++    private static void asyncWorldTick() {
++        asyncWorldTick = getBoolean("async-world-tick", asyncWorldTick);
++        setComment("async-world-tick",
++                "Async world ticking is a experimental feature that may cause",
++                "issues with some plugins, world corruption or other issues, but",
++                "it can improve server performance by a lot."
++        );
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 2b82bace2a06e2eb22bebe1de92732cfeea05118..7c5de5bbd4c11f67e7f6999dd63cd7a8d5df5b10 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -46,6 +46,9 @@ import joptsimple.OptionSet;
+ import org.spigotmc.SlackActivityAccountant; // Spigot
+ import co.aikar.timings.MinecraftTimings; // Paper
+ 
++import java.util.LinkedList; // Dionysus
++import java.util.concurrent.CompletableFuture; // Dionysus
++
+ public abstract class MinecraftServer implements ICommandListener, Runnable, IAsyncTaskHandler, IMojangStatistics {
+ 
+     private static MinecraftServer SERVER; // Paper
+@@ -905,6 +908,11 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+ 
+         int i;
+ 
++        // Dionysus start - Async world tick
++        if (dev.pomf.dionysus.DionysusConfig.asyncWorldTick) {
++            asyncWorldTick();
++        } else {
++        // Dionysus end
+         for (i = 0; i < this.worlds.size(); ++i) { // CraftBukkit
+             long j = System.nanoTime();
+ 
+@@ -990,6 +998,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+ 
+             // this.i[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
+         }
++        } // Dionysus - Async world tick
+         this.isIteratingOverLevels = false; // Paper
+ 
+         this.methodProfiler.c("connection");
+@@ -1726,4 +1735,85 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+         return SERVER;
+     }
+     // CraftBukkit end
++
++    // Dionysus start - Async world tick
++    private void asyncWorldTick() {
++        Queue<CompletableFuture<Void>> worldTickAsync = new LinkedList<>();
++        int i;
++        for (i = 0; i < this.worlds.size(); ++i) {
++            WorldServer worldserver = this.worlds.get(i);
++            TileEntityHopper.skipHopperEvents = worldserver.paperConfig.disableHopperMoveEvents || org.bukkit.event.inventory.InventoryMoveItemEvent.getHandlerList().getRegisteredListeners().length == 0;
++            worldTickAsync.add(CompletableFuture.runAsync(() -> {
++                CrashReport crashreport;
++                try {
++                    worldserver.timings.doTick.startTiming(); // Spigot
++                    worldserver.doTick();
++                    worldserver.timings.doTick.stopTiming(); // Spigot
++                } catch (Throwable throwable) {
++                    // Spigot Start
++                    try {
++                        crashreport = CrashReport.a(throwable, "Exception ticking world");
++                    } catch (Throwable t) {
++                        throw new RuntimeException("Error generating crash report", t);
++                    }
++                    // Spigot End
++                    worldserver.a(crashreport);
++                    throw new ReportedException(crashreport);
++                }
++            }, worldserver.asyncWorldTickExecutor));
++        }
++        CompletableFuture.allOf(worldTickAsync.toArray(new CompletableFuture[0])).join();
++        for (i = 0; i < this.worlds.size(); ++i) {
++            WorldServer worldserver = this.worlds.get(i);
++            worldTickAsync.add(CompletableFuture.runAsync(() -> {
++                CrashReport crashreport;
++                try {
++                    worldserver.timings.tickEntities.startTiming(); // Spigot
++                    worldserver.tickEntities();
++                    worldserver.timings.tickEntities.stopTiming(); // Spigot
++                } catch (Throwable throwable1) {
++                    // Spigot Start
++                    try {
++                        crashreport = CrashReport.a(throwable1, "Exception ticking world entities");
++                    } catch (Throwable t) {
++                        throw new RuntimeException("Error generating crash report", t);
++                    }
++                    // Spigot End
++                    worldserver.a(crashreport);
++                    throw new ReportedException(crashreport);
++                }
++            }, worldserver.asyncWorldTickExecutor));
++        }
++        CompletableFuture.allOf(worldTickAsync.toArray(new CompletableFuture[0])).join();
++        for (i = 0; i < this.worlds.size(); ++i) {
++            WorldServer worldserver = this.worlds.get(i);
++            worldTickAsync.add(CompletableFuture.runAsync(() -> {
++                // Dionysus start - Flush consolidation
++                List<PlayerConnection> disabledFlushes = new java.util.ArrayList<>(worldserver.players.size());
++                for (EntityHuman entityHuman : worldserver.players) {
++                    if (entityHuman instanceof EntityPlayer) {
++                        net.minecraft.server.PlayerConnection playerConnection = ((EntityPlayer) entityHuman).playerConnection;
++                        if (playerConnection != null) {
++                            playerConnection.networkManager.disableAutomaticFlush();
++                            disabledFlushes.add(playerConnection);
++                        }
++                    }
++                }
++                try { // Dionysus end - Flush consolidation
++                    if (this.getPlayerList().getPlayerCount() != 0) { // NeonPaper
++                        worldserver.getTracker().updatePlayers();
++                    }
++                    // Dionysus start - Flush consolidation
++                } finally {
++                    for (net.minecraft.server.PlayerConnection playerConnection : disabledFlushes) {
++                        playerConnection.networkManager.enableAutomaticFlush();
++                    }
++                }
++                // Dionysus end - Flush consolidation
++                worldserver.explosionDensityCache.clear(); // Paper - Optimize explosions
++            }, worldserver.asyncWorldTickExecutor));
++        }
++        CompletableFuture.allOf(worldTickAsync.toArray(new CompletableFuture[0])).join();
++    }
++    // Dionysus end
+ }
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 1f2ab25e92160f6fbca1cd11a1d933c96541c1cf..3198552078e4e4ae984e26a456060308990634f3 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -15,6 +15,7 @@ import java.util.Random;
+ import java.util.Set;
+ import java.util.TreeSet;
+ import java.util.UUID;
++import java.util.concurrent.*;
+ import java.util.function.Predicate;
+ import java.util.stream.Collectors;
+ import javax.annotation.Nullable;
+@@ -59,6 +60,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+         return new Throwable(entity + " Added to world at " + new Date());
+     }
+     public final int dimension;
++    public final ExecutorService asyncWorldTickExecutor;
+ 
+     // Add env and gen to constructor
+     public WorldServer(MinecraftServer minecraftserver, IDataManager idatamanager, WorldData worlddata, int i, MethodProfiler methodprofiler, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen) {
+@@ -76,6 +78,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+         this.J();
+         this.K();
+         this.getWorldBorder().a(minecraftserver.aE());
++        this.asyncWorldTickExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "WorldTickThread Dimension " + i));
+     }
+ 
+     public World b() {
+diff --git a/src/main/java/org/spigotmc/AsyncCatcher.java b/src/main/java/org/spigotmc/AsyncCatcher.java
+index e44c2301654b8ce8e7a1135ac739bc267048a967..9c6df75052856f2f52d0723e0c0a5af83aed7e83 100644
+--- a/src/main/java/org/spigotmc/AsyncCatcher.java
++++ b/src/main/java/org/spigotmc/AsyncCatcher.java
+@@ -5,11 +5,12 @@ import net.minecraft.server.MinecraftServer;
+ public class AsyncCatcher
+ {
+ 
+-    public static boolean enabled = true;
++    public static boolean enabled = !dev.pomf.dionysus.DionysusConfig.asyncWorldTick; // Dionysus - Async world tick
+     public static boolean shuttingDown = false; // Paper
+ 
+     public static void catchOp(String reason)
+     {
++        enabled = !dev.pomf.dionysus.DionysusConfig.asyncWorldTick; // Dionysus - Async world tick
+         if ( enabled && Thread.currentThread() != MinecraftServer.getServer().primaryThread )
+         {
+             throw new IllegalStateException( "Asynchronous " + reason + "!" );
