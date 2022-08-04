@@ -6,7 +6,7 @@ Subject: [PATCH] Add option to disable communication with mojang servers in
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java b/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
-index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..178ee1a9a34f07bb1f152fab175d146a0338859c 100644
+index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..8f20768564a972df7b30282684412d8528cdaf35 100644
 --- a/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
 +++ b/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
 @@ -6,6 +6,9 @@ import com.mojang.authlib.GameProfile;
@@ -24,10 +24,10 @@ index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..178ee1a9a34f07bb1f152fab175d146a
      @Override
      protected GameProfile fillGameProfile(GameProfile profile, boolean requireSecure) {
 -        return super.fillGameProfile(profile, requireSecure);
-+        if (dev.pomf.dionysus.DionysusConfig.disableMojangServerCommunicationInOfflineMode && !MinecraftServer.getServer().getOnlineMode())
-+            return new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + profile.getName()).getBytes(Charsets.UTF_8)), profile.getName());
-+        else
++        if (!dev.pomf.dionysus.DionysusConfig.disableMojangServerCommunicationInOfflineMode || MinecraftServer.getServer().getOnlineMode())
 +            return super.fillGameProfile(profile, requireSecure);
++
++        return profile;
      }
  }
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
