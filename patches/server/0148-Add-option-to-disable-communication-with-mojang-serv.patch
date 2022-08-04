@@ -6,16 +6,26 @@ Subject: [PATCH] Add option to disable communication with mojang servers in
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java b/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
-index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..7d4e35cf5ae8a8809936fb0e7f762f544365a544 100644
+index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..178ee1a9a34f07bb1f152fab175d146a0338859c 100644
 --- a/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
 +++ b/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
-@@ -34,6 +34,9 @@ public class PaperMinecraftSessionService extends YggdrasilMinecraftSessionServi
+@@ -6,6 +6,9 @@ import com.mojang.authlib.GameProfile;
+ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+ import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
++import net.minecraft.server.MinecraftServer;
++import java.util.UUID;
++import com.google.common.base.Charsets;
+ 
+ import java.util.Map;
+ 
+@@ -34,6 +37,9 @@ public class PaperMinecraftSessionService extends YggdrasilMinecraftSessionServi
  
      @Override
      protected GameProfile fillGameProfile(GameProfile profile, boolean requireSecure) {
 -        return super.fillGameProfile(profile, requireSecure);
 +        if (dev.pomf.dionysus.DionysusConfig.disableMojangServerCommunicationInOfflineMode && !MinecraftServer.getServer().getOnlineMode())
-+            return new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(Charsets.UTF_8)), profile.getName());
++            return new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + profile.getName()).getBytes(Charsets.UTF_8)), profile.getName());
 +        else
 +            return super.fillGameProfile(profile, requireSecure);
      }
