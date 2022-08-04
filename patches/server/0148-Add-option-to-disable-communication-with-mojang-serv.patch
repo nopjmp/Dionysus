@@ -31,7 +31,7 @@ index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..178ee1a9a34f07bb1f152fab175d146a
      }
  }
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index dba95376bf4385e1bd0a3eb33c731496f52fc0a4..20da4c5b06ea094f64c213e30cc9a42a382e5b9a 100644
+index dba95376bf4385e1bd0a3eb33c731496f52fc0a4..e74a8b2fe6ce80d4bb27a4226184f2c4f105f177 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -389,4 +389,9 @@ public class DionysusConfig {
@@ -41,6 +41,6 @@ index dba95376bf4385e1bd0a3eb33c731496f52fc0a4..20da4c5b06ea094f64c213e30cc9a42a
 +
 +    public static boolean disableMojangServerCommunicationInOfflineMode = false;
 +    private static void disableMojangServerCommunicationInOfflineMode() {
-+        disableMojangServerCommunicationInOfflineMode = getInt("disable-mojang-server-communication-in-offline-mode", false);
++        disableMojangServerCommunicationInOfflineMode = getBoolean("disable-mojang-server-communication-in-offline-mode", false);
 +    }
  }
