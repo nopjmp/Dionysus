@@ -1,16 +1,16 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: comendantmc <2b2t.org.ru@gmail.com>
-Date: Thu, 4 Aug 2022 14:54:59 +0200
+Date: Thu, 4 Aug 2022 17:41:19 +0200
 Subject: [PATCH] Backport Purpur's Alternative Keepalive Handling
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index e74a8b2fe6ce80d4bb27a4226184f2c4f105f177..f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7 100644
+index dba95376bf4385e1bd0a3eb33c731496f52fc0a4..ac8a1ca491daeb3f376829629d2ced72217c24fd 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -394,4 +394,9 @@ public class DionysusConfig {
-     private static void disableMojangServerCommunicationInOfflineMode() {
-         disableMojangServerCommunicationInOfflineMode = getBoolean("disable-mojang-server-communication-in-offline-mode", false);
+@@ -389,4 +389,9 @@ public class DionysusConfig {
+                 "and \"Deleting duplicate entity\" log messages."
+         );
      }
 +
 +    public static boolean useAlternateKeepAlive = false;
