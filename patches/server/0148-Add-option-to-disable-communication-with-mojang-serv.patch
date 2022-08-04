@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: comendantmc <2b2t.org.ru@gmail.com>
+Date: Thu, 4 Aug 2022 13:10:53 +0200
+Subject: [PATCH] Add option to disable communication with mojang servers in
+ offline mode
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java b/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
+index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..7d4e35cf5ae8a8809936fb0e7f762f544365a544 100644
+--- a/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
++++ b/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
+@@ -34,6 +34,9 @@ public class PaperMinecraftSessionService extends YggdrasilMinecraftSessionServi
+ 
+     @Override
+     protected GameProfile fillGameProfile(GameProfile profile, boolean requireSecure) {
+-        return super.fillGameProfile(profile, requireSecure);
++        if (dev.pomf.dionysus.DionysusConfig.disableMojangServerCommunicationInOfflineMode && !MinecraftServer.getServer().getOnlineMode())
++            return new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(Charsets.UTF_8)), profile.getName());
++        else
++            return super.fillGameProfile(profile, requireSecure);
+     }
+ }
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index dba95376bf4385e1bd0a3eb33c731496f52fc0a4..20da4c5b06ea094f64c213e30cc9a42a382e5b9a 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -389,4 +389,9 @@ public class DionysusConfig {
+                 "and \"Deleting duplicate entity\" log messages."
+         );
+     }
++
++    public static boolean disableMojangServerCommunicationInOfflineMode = false;
++    private static void disableMojangServerCommunicationInOfflineMode() {
++        disableMojangServerCommunicationInOfflineMode = getInt("disable-mojang-server-communication-in-offline-mode", false);
++    }
+ }
