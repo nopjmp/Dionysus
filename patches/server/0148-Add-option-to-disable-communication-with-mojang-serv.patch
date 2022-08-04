@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: comendantmc <2b2t.org.ru@gmail.com>
+Date: Thu, 4 Aug 2022 13:10:53 +0200
+Subject: [PATCH] Add option to disable communication with mojang servers in
+ offline mode
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java b/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
+index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..178ee1a9a34f07bb1f152fab175d146a0338859c 100644
+--- a/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
++++ b/src/main/java/com/destroystokyo/paper/profile/PaperMinecraftSessionService.java
+@@ -6,6 +6,9 @@ import com.mojang.authlib.GameProfile;
+ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+ import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
++import net.minecraft.server.MinecraftServer;
++import java.util.UUID;
++import com.google.common.base.Charsets;
+ 
+ import java.util.Map;
+ 
+@@ -34,6 +37,9 @@ public class PaperMinecraftSessionService extends YggdrasilMinecraftSessionServi
+ 
+     @Override
+     protected GameProfile fillGameProfile(GameProfile profile, boolean requireSecure) {
+-        return super.fillGameProfile(profile, requireSecure);
++        if (dev.pomf.dionysus.DionysusConfig.disableMojangServerCommunicationInOfflineMode && !MinecraftServer.getServer().getOnlineMode())
++            return new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + profile.getName()).getBytes(Charsets.UTF_8)), profile.getName());
++        else
++            return super.fillGameProfile(profile, requireSecure);
+     }
+ }
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index dba95376bf4385e1bd0a3eb33c731496f52fc0a4..e74a8b2fe6ce80d4bb27a4226184f2c4f105f177 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -389,4 +389,9 @@ public class DionysusConfig {
+                 "and \"Deleting duplicate entity\" log messages."
+         );
+     }
++
++    public static boolean disableMojangServerCommunicationInOfflineMode = false;
++    private static void disableMojangServerCommunicationInOfflineMode() {
++        disableMojangServerCommunicationInOfflineMode = getBoolean("disable-mojang-server-communication-in-offline-mode", false);
++    }
+ }
