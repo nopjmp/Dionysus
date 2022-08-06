@@ -5,7 +5,7 @@ Subject: [PATCH] Async world tick
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7..a393bfd3d85ec22892af78b958d346cc49641eb3 100644
+index f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7..302358c002a9611b1ece57d0854ba872433db1ff 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -399,4 +399,14 @@ public class DionysusConfig {
@@ -18,7 +18,7 @@ index f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7..a393bfd3d85ec22892af78b958d346cc
 +        asyncWorldTick = getBoolean("async-world-tick", asyncWorldTick);
 +        setComment("async-world-tick",
 +                "Async world ticking is a experimental feature that may cause",
-+                "issues with some plugins, world corruption or other issues, but",
++                "issues with some plugins, world corruption, crashes or other issues, but",
 +                "it can improve server performance by a lot."
 +        );
 +    }
