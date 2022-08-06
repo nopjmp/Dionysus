@@ -1,0 +1,97 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 6 Aug 2022 20:33:28 +0200
+Subject: [PATCH] Add faster NBT compare options
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 302358c002a9611b1ece57d0854ba872433db1ff..80f7510422412e009f02650c5c6f49614d40ae12 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -409,4 +409,21 @@ public class DionysusConfig {
+                 "it can improve server performance by a lot."
+         );
+     }
++
++    public enum NBTCompareMethod {
++        EQUAL,
++        HASHCODE,
++        HASHCODE_EQUAL
++    }
++
++    public static NBTCompareMethod nbtCompareMethod = NBTCompareMethod.EQUAL;
++    private static void nbtCompareMethod() {
++        nbtCompareMethod = NBTCompareMethod.valueOf(getString("nbt-compare-method", nbtCompareMethod.name()));
++        setComment("nbt-compare-method",
++                "Modifies the way NBT tags are compared. EQUAL is the default used by vanilla",
++                "EQUAL - NBT tags are compared using equals(), usually slow but reliable",
++                "HASHCODE - NBT tags are compared using hashCode(), fast but not reliable in extremely rare edge cases",
++                "HASHCODE_EQUAL - NBT tags are compared using hashCode() and equals(), if hashCode() succeeds then equals() is checked as well, not as fast as HASHCODE but as reliable as EQUAL"
++        );
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
+index 109e48d9a5aef19e1a7d028c5d856ec5a7386b44..fc23f0938b20548f9f1895b4894f7472b56efff2 100644
+--- a/src/main/java/net/minecraft/server/NBTTagCompound.java
++++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
+@@ -310,6 +310,8 @@ public class NBTTagCompound extends NBTBase {
+     // Dionysus start - Don't process large NBTs
+     static class CustomObject2ObjectOpenHashMap<K, V> extends Object2ObjectOpenHashMap<K, V> {
+         public boolean validSizeCache = false;
++        private boolean validHashCache = false;
++        private int hashCache = -1;
+         public CustomObject2ObjectOpenHashMap(int initialCapacity, float loadFactor) {
+             super(initialCapacity, loadFactor);
+         }
+@@ -317,20 +319,32 @@ public class NBTTagCompound extends NBTBase {
+         @Override
+         public V put(K k, V v) {
+             validSizeCache = false;
++            validHashCache = false;
+             return super.put(k, v);
+         }
+ 
+         @Override
+         public V remove(Object o) {
+             validSizeCache = false;
++            validHashCache = false;
+             return super.remove(o);
+         }
+ 
+         @Override
+         public void clear() {
+             validSizeCache = false;
++            validHashCache = false;
+             super.clear();
+         }
++
++        @Override
++        public int hashCode() {
++            if (!validHashCache) {
++                hashCache = super.hashCode();
++                validHashCache = true;
++            }
++            return hashCache;
++        }
+     }
+     private int cachedSize = -1;
+     private int itemSize(NBTBase nbt) {
+@@ -448,7 +462,17 @@ public class NBTTagCompound extends NBTBase {
+     }
+ 
+     public boolean equals(Object object) {
+-        return super.equals(object) && Objects.equals(this.map.entrySet(), ((NBTTagCompound) object).map.entrySet());
++        // return super.equals(object) && Objects.equals(this.map.entrySet(), ((NBTTagCompound) object).map.entrySet());
++        // Dionysus start
++        if (!super.equals(object)) {
++            return false;
++        }
++        return switch (dev.pomf.dionysus.DionysusConfig.nbtCompareMethod) {
++            case EQUAL -> Objects.equals(this.map.entrySet(), ((NBTTagCompound) object).map.entrySet());
++            case HASHCODE -> this.map.hashCode() == ((NBTTagCompound) object).map.hashCode();
++            case HASHCODE_EQUAL -> this.map.hashCode() == ((NBTTagCompound) object).map.hashCode() && Objects.equals(this.map.entrySet(), ((NBTTagCompound) object).map.entrySet());
++        };
++        // Dionysus end
+     }
+ 
+     public int hashCode() {
