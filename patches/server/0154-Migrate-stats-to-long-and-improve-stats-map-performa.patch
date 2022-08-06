@@ -1,0 +1,159 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 6 Aug 2022 21:53:35 +0200
+Subject: [PATCH] Migrate stats to long and improve stats map performance
+
+
+diff --git a/src/main/java/net/minecraft/server/ServerStatisticManager.java b/src/main/java/net/minecraft/server/ServerStatisticManager.java
+index e3d2c0ff737bce159fb3b81e466a76e2a929c009..1ba3fb4a1979f7466ff250c4c2ddd734e3e357f9 100644
+--- a/src/main/java/net/minecraft/server/ServerStatisticManager.java
++++ b/src/main/java/net/minecraft/server/ServerStatisticManager.java
+@@ -64,7 +64,7 @@ public class ServerStatisticManager extends StatisticManager {
+ 
+     }
+ 
+-    public void setStatistic(EntityHuman entityhuman, Statistic statistic, int i) {
++    public void setStatistic(EntityHuman entityhuman, Statistic statistic, long i) {
+         if ( org.spigotmc.SpigotConfig.disableStatSaving ) return; // Spigot
+         super.setStatistic(entityhuman, statistic, i);
+         this.e.add(statistic);
+@@ -96,12 +96,12 @@ public class ServerStatisticManager extends StatisticManager {
+                     StatisticWrapper statisticwrapper = new StatisticWrapper();
+ 
+                     if (((JsonElement) entry.getValue()).isJsonPrimitive() && ((JsonElement) entry.getValue()).getAsJsonPrimitive().isNumber()) {
+-                        statisticwrapper.a(((JsonElement) entry.getValue()).getAsInt());
++                        statisticwrapper.a(((JsonElement) entry.getValue()).getAsLong()); // Dionysus - migrate stats to long
+                     } else if (((JsonElement) entry.getValue()).isJsonObject()) {
+                         JsonObject jsonobject1 = ((JsonElement) entry.getValue()).getAsJsonObject();
+ 
+                         if (jsonobject1.has("value") && jsonobject1.get("value").isJsonPrimitive() && jsonobject1.get("value").getAsJsonPrimitive().isNumber()) {
+-                            statisticwrapper.a(jsonobject1.getAsJsonPrimitive("value").getAsInt());
++                            statisticwrapper.a(jsonobject1.getAsJsonPrimitive("value").getAsLong()); // Dionysus - migrate stats to long
+                         }
+ 
+                         if (jsonobject1.has("progress") && statistic.g() != null) {
+@@ -145,7 +145,7 @@ public class ServerStatisticManager extends StatisticManager {
+             if (((StatisticWrapper) entry.getValue()).b() != null) {
+                 JsonObject jsonobject1 = new JsonObject();
+ 
+-                jsonobject1.addProperty("value", Integer.valueOf(((StatisticWrapper) entry.getValue()).a()));
++                jsonobject1.addProperty("value", ((StatisticWrapper) entry.getValue()).a()); // Dionysus - migrate stats to long
+ 
+                 try {
+                     jsonobject1.add("progress", ((StatisticWrapper) entry.getValue()).b().a());
+@@ -155,7 +155,7 @@ public class ServerStatisticManager extends StatisticManager {
+ 
+                 jsonobject.add(((Statistic) entry.getKey()).name, jsonobject1);
+             } else {
+-                jsonobject.addProperty(((Statistic) entry.getKey()).name, Integer.valueOf(((StatisticWrapper) entry.getValue()).a()));
++                jsonobject.addProperty(((Statistic) entry.getKey()).name, ((StatisticWrapper) entry.getValue()).a()); // Dionysus - migrate stats to long
+             }
+         }
+ 
+@@ -177,7 +177,7 @@ public class ServerStatisticManager extends StatisticManager {
+             while (iterator.hasNext()) {
+                 Statistic statistic = (Statistic) iterator.next();
+ 
+-                hashmap.put(statistic, Integer.valueOf(this.getStatisticValue(statistic)));
++                hashmap.put(statistic, this.getStatisticValue(statistic)); // Dionysus - migrate stats to long
+             }
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/StatisticManager.java b/src/main/java/net/minecraft/server/StatisticManager.java
+index e3f38a3c6ba95cc4347eae450aad0546bc3bc7bb..806c288b7386a9035dbeb08610318aa03a9d12b5 100644
+--- a/src/main/java/net/minecraft/server/StatisticManager.java
++++ b/src/main/java/net/minecraft/server/StatisticManager.java
+@@ -5,13 +5,13 @@ import java.util.Map;
+ 
+ public class StatisticManager {
+ 
+-    protected final Map<Statistic, StatisticWrapper> a = Maps.newConcurrentMap();
++    protected final Map<Statistic, StatisticWrapper> a = new org.jctools.maps.NonBlockingHashMap<>(); // Dionysus - improve stats speeds
+ 
+     public StatisticManager() {}
+ 
+     public void b(EntityHuman entityhuman, Statistic statistic, int i) {
+         // CraftBukkit start - fire Statistic events
+-        org.bukkit.event.Cancellable cancellable = org.bukkit.craftbukkit.event.CraftEventFactory.handleStatisticsIncrease(entityhuman, statistic, this.getStatisticValue(statistic), i);
++        org.bukkit.event.Cancellable cancellable = org.bukkit.craftbukkit.event.CraftEventFactory.handleStatisticsIncrease(entityhuman, statistic, (int) this.getStatisticValue(statistic), i);
+         if (cancellable != null && cancellable.isCancelled()) {
+             return;
+         }
+@@ -19,7 +19,7 @@ public class StatisticManager {
+         this.setStatistic(entityhuman, statistic, this.getStatisticValue(statistic) + i);
+     }
+ 
+-    public void setStatistic(EntityHuman entityhuman, Statistic statistic, int i) {
++    public void setStatistic(EntityHuman entityhuman, Statistic statistic, long i) { // Dionysus - migrate stats to long
+         StatisticWrapper statisticwrapper = (StatisticWrapper) this.a.get(statistic);
+ 
+         if (statisticwrapper == null) {
+@@ -30,7 +30,7 @@ public class StatisticManager {
+         statisticwrapper.a(i);
+     }
+ 
+-    public int getStatisticValue(Statistic statistic) {
++    public long getStatisticValue(Statistic statistic) { // Dionysus - migrate stats to long
+         StatisticWrapper statisticwrapper = (StatisticWrapper) this.a.get(statistic);
+ 
+         return statisticwrapper == null ? 0 : statisticwrapper.a();
+diff --git a/src/main/java/net/minecraft/server/StatisticWrapper.java b/src/main/java/net/minecraft/server/StatisticWrapper.java
+index 63fbf9447e1b7250613ee39e72c3d7fae35f3081..9842c8375deb6222e19fc650d4e4dbc0cf45136a 100644
+--- a/src/main/java/net/minecraft/server/StatisticWrapper.java
++++ b/src/main/java/net/minecraft/server/StatisticWrapper.java
+@@ -2,20 +2,20 @@ package net.minecraft.server;
+ 
+ public class StatisticWrapper {
+ 
+-    private int a;
++    private long a; // Dionysus - migrate stats to long
+     private IJsonStatistic b;
+ 
+     public StatisticWrapper() {}
+ 
+-    public int a() {
++    public long a() { // Dionysus - migrate stats to long
+         return this.a;
+     }
+ 
+-    public void a(int i) {
++    public void a(long i) { // Dionysus - migrate stats to long
+         this.a = i;
+     }
+ 
+-    public <T extends IJsonStatistic> T b() {
++    public IJsonStatistic b() { // Dionysus - migrate stats to long
+         return this.b;
+     }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index fa104ba4ded09339a3b895969a1f40d3c6923f08..2977c3a5a3c4f04eb09d865a80e55d2df7f6b829 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -751,7 +751,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+     public int getStatistic(Statistic statistic) {
+         Validate.notNull(statistic, "Statistic cannot be null");
+         Validate.isTrue(statistic.getType() == Type.UNTYPED, "Must supply additional paramater for this statistic");
+-        return getHandle().getStatisticManager().getStatisticValue(CraftStatistic.getNMSStatistic(statistic));
++        return (int) getHandle().getStatisticManager().getStatisticValue(CraftStatistic.getNMSStatistic(statistic)); // Dionysus - migrate stats to long
+     }
+ 
+     @Override
+@@ -792,7 +792,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+         Validate.isTrue(statistic.getType() == Type.BLOCK || statistic.getType() == Type.ITEM, "This statistic does not take a Material parameter");
+         net.minecraft.server.Statistic nmsStatistic = CraftStatistic.getMaterialStatistic(statistic, material);
+         Validate.notNull(nmsStatistic, "The supplied Material does not have a corresponding statistic");
+-        return getHandle().getStatisticManager().getStatisticValue(nmsStatistic);
++        return (int) getHandle().getStatisticManager().getStatisticValue(nmsStatistic); // Dionysus - migrate stats to long
+     }
+ 
+     @Override
+@@ -835,7 +835,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+         Validate.isTrue(statistic.getType() == Type.ENTITY, "This statistic does not take an EntityType parameter");
+         net.minecraft.server.Statistic nmsStatistic = CraftStatistic.getEntityStatistic(statistic, entityType);
+         Validate.notNull(nmsStatistic, "The supplied EntityType does not have a corresponding statistic");
+-        return getHandle().getStatisticManager().getStatisticValue(nmsStatistic);
++        return (int) getHandle().getStatisticManager().getStatisticValue(nmsStatistic); // Dionysus - migrate stats to long
+     }
+ 
+     @Override

@@ -5,7 +5,7 @@ Subject: [PATCH] Update Dependencies
 
 
 diff --git a/pom.xml b/pom.xml
-index 4216f43e566394cd7d863be1ee1744083a04faba..cec1844d70ba860f62f15d1c72497afcd3f58325 100644
+index 4216f43e566394cd7d863be1ee1744083a04faba..614779f38fc9d6892a47a15bb28573672a86918c 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -19,6 +19,8 @@
@@ -82,7 +82,7 @@ index 4216f43e566394cd7d863be1ee1744083a04faba..cec1844d70ba860f62f15d1c72497afc
          </dependency>
  
          <!-- Paper - Async loggers -->
-@@ -121,19 +117,53 @@
+@@ -121,19 +117,58 @@
          </dependency>
          <!-- Paper end - Update Log4j -->
  
@@ -135,10 +135,15 @@ index 4216f43e566394cd7d863be1ee1744083a04faba..cec1844d70ba860f62f15d1c72497afc
 +            <artifactId>guava</artifactId>
 +            <version>3.1.1</version>
 +        </dependency>
++        <dependency>
++            <groupId>org.jctools</groupId>
++            <artifactId>jctools-core</artifactId>
++            <version>3.3.0</version>
++        </dependency>
      </dependencies>
  
      <repositories>
-@@ -150,6 +180,10 @@
+@@ -150,6 +185,10 @@
              <id>spigotmc-public</id>
              <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
          </repository>
@@ -149,7 +154,7 @@ index 4216f43e566394cd7d863be1ee1744083a04faba..cec1844d70ba860f62f15d1c72497afc
      </repositories>
  
      <pluginRepositories>
-@@ -239,7 +273,9 @@
+@@ -239,7 +278,9 @@
                                  <filter>
                                      <artifact>org.spigotmc:minecraft-server:**</artifact>
                                      <excludes>
