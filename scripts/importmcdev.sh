@@ -81,6 +81,7 @@ import PacketCompressor
 import PacketDecompressor
 import PacketEncrypter
 import PacketDecrypter
+import StatisticWrapper
 
 ########################################################
 ########################################################
