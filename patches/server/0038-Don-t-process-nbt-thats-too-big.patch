@@ -53,7 +53,7 @@ index fa19df341d13c531fd3597362b126ce8f183cd97..09748606f71e0dd6d7b743048070c7b0
                      // Paper start - PlayerArmorChangeEvent
                      if (this instanceof EntityPlayer && enumitemslot.getType() == EnumItemSlot.Function.ARMOR) {
 diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
-index 035a1714d0caa28f90c95cd515e69591e41693c1..0d8d54203adf0eae34b879a23ddd3abe041e5d7b 100644
+index 035a1714d0caa28f90c95cd515e69591e41693c1..9ee989dd41b45140ea90ea43ae6175c51abd85b5 100644
 --- a/src/main/java/net/minecraft/server/NBTTagCompound.java
 +++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
 @@ -23,13 +23,13 @@ public class NBTTagCompound extends NBTBase {
@@ -73,26 +73,27 @@ index 035a1714d0caa28f90c95cd515e69591e41693c1..0d8d54203adf0eae34b879a23ddd3abe
          this.map = map;
      }
  
-@@ -306,6 +306,71 @@ public class NBTTagCompound extends NBTBase {
+@@ -306,6 +306,72 @@ public class NBTTagCompound extends NBTBase {
      public void remove(String s) {
          this.map.remove(s);
      }
 +    
 +    // Dionysus start - Don't process large NBTs
 +    static class CustomObject2ObjectOpenHashMap<K, V> extends Object2ObjectOpenHashMap<K, V> {
-+        public boolean validCache = true;
++        public boolean validSizeCache = true;
 +        public CustomObject2ObjectOpenHashMap(int initialCapacity, float loadFactor) {
 +            super(initialCapacity, loadFactor);
 +        }
++
 +        @Override
 +        public V put(K k, V v) {
-+            validCache = false;
++            validSizeCache = false;
 +            return super.put(k, v);
 +        }
 +
 +        @Override
 +        public V remove(Object o) {
-+            validCache = false;
++            validSizeCache = false;
 +            return super.remove(o);
 +        }
 +    }
@@ -117,7 +118,7 @@ index 035a1714d0caa28f90c95cd515e69591e41693c1..0d8d54203adf0eae34b879a23ddd3abe
 +            return 0;
 +        }
 +
-+        if (cachedSize > -1 && map.validCache) {
++        if (cachedSize > -1 && map.validSizeCache) {
 +            return cachedSize;
 +        }
 +
@@ -138,14 +139,14 @@ index 035a1714d0caa28f90c95cd515e69591e41693c1..0d8d54203adf0eae34b879a23ddd3abe
 +        }
 +
 +        cachedSize = accumulator;
-+        map.validCache = true;
++        map.validSizeCache = true;
 +        return accumulator;
 +    }
 +    // Dionysus end
  
      public String toString() {
          StringBuilder stringbuilder = new StringBuilder("{");
-@@ -362,7 +427,7 @@ public class NBTTagCompound extends NBTBase {
+@@ -362,7 +428,7 @@ public class NBTTagCompound extends NBTBase {
  
      public NBTTagCompound g() {
          // Paper start - reduce memory footprint of NBTTagCompound
