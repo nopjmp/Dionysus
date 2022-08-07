@@ -60,10 +60,10 @@ index e3d2c0ff737bce159fb3b81e466a76e2a929c009..1ba3fb4a1979f7466ff250c4c2ddd734
          }
  
 diff --git a/src/main/java/net/minecraft/server/StatisticManager.java b/src/main/java/net/minecraft/server/StatisticManager.java
-index e3f38a3c6ba95cc4347eae450aad0546bc3bc7bb..64a8471d76fc89b126b53ae92de2617d6fcc2c15 100644
+index e3f38a3c6ba95cc4347eae450aad0546bc3bc7bb..43a4bf7e47ab90a34c6d83fe4ee2395bfe8704c2 100644
 --- a/src/main/java/net/minecraft/server/StatisticManager.java
 +++ b/src/main/java/net/minecraft/server/StatisticManager.java
-@@ -5,13 +5,13 @@ import java.util.Map;
+@@ -5,21 +5,21 @@ import java.util.Map;
  
  public class StatisticManager {
  
@@ -75,12 +75,13 @@ index e3f38a3c6ba95cc4347eae450aad0546bc3bc7bb..64a8471d76fc89b126b53ae92de2617d
      public void b(EntityHuman entityhuman, Statistic statistic, int i) {
          // CraftBukkit start - fire Statistic events
 -        org.bukkit.event.Cancellable cancellable = org.bukkit.craftbukkit.event.CraftEventFactory.handleStatisticsIncrease(entityhuman, statistic, this.getStatisticValue(statistic), i);
-+        org.bukkit.event.Cancellable cancellable = org.bukkit.craftbukkit.event.CraftEventFactory.handleStatisticsIncrease(entityhuman, statistic, (int) this.getStatisticValue(statistic), i);
++        org.bukkit.event.Cancellable cancellable = org.bukkit.craftbukkit.event.CraftEventFactory.handleStatisticsIncrease(entityhuman, statistic, (int) this.getStatisticValueLong(statistic), i); // Dionysus - migrate stats to long
          if (cancellable != null && cancellable.isCancelled()) {
              return;
          }
-@@ -19,7 +19,7 @@ public class StatisticManager {
-         this.setStatistic(entityhuman, statistic, this.getStatisticValue(statistic) + i);
+         // CraftBukkit end
+-        this.setStatistic(entityhuman, statistic, this.getStatisticValue(statistic) + i);
++        this.setStatistic(entityhuman, statistic, this.getStatisticValueLong(statistic) + i); // Dionysus - migrate stats to long
      }
  
 -    public void setStatistic(EntityHuman entityhuman, Statistic statistic, int i) {
@@ -134,34 +135,3 @@ index 63fbf9447e1b7250613ee39e72c3d7fae35f3081..9842c8375deb6222e19fc650d4e4dbc0
          return this.b;
      }
  
-diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index fa104ba4ded09339a3b895969a1f40d3c6923f08..2977c3a5a3c4f04eb09d865a80e55d2df7f6b829 100644
---- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-+++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -751,7 +751,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
-     public int getStatistic(Statistic statistic) {
-         Validate.notNull(statistic, "Statistic cannot be null");
-         Validate.isTrue(statistic.getType() == Type.UNTYPED, "Must supply additional paramater for this statistic");
--        return getHandle().getStatisticManager().getStatisticValue(CraftStatistic.getNMSStatistic(statistic));
-+        return (int) getHandle().getStatisticManager().getStatisticValue(CraftStatistic.getNMSStatistic(statistic)); // Dionysus - migrate stats to long
-     }
- 
-     @Override
-@@ -792,7 +792,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
-         Validate.isTrue(statistic.getType() == Type.BLOCK || statistic.getType() == Type.ITEM, "This statistic does not take a Material parameter");
-         net.minecraft.server.Statistic nmsStatistic = CraftStatistic.getMaterialStatistic(statistic, material);
-         Validate.notNull(nmsStatistic, "The supplied Material does not have a corresponding statistic");
--        return getHandle().getStatisticManager().getStatisticValue(nmsStatistic);
-+        return (int) getHandle().getStatisticManager().getStatisticValue(nmsStatistic); // Dionysus - migrate stats to long
-     }
- 
-     @Override
-@@ -835,7 +835,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
-         Validate.isTrue(statistic.getType() == Type.ENTITY, "This statistic does not take an EntityType parameter");
-         net.minecraft.server.Statistic nmsStatistic = CraftStatistic.getEntityStatistic(statistic, entityType);
-         Validate.notNull(nmsStatistic, "The supplied EntityType does not have a corresponding statistic");
--        return getHandle().getStatisticManager().getStatisticValue(nmsStatistic);
-+        return (int) getHandle().getStatisticManager().getStatisticValue(nmsStatistic); // Dionysus - migrate stats to long
-     }
- 
-     @Override
