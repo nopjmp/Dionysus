@@ -60,7 +60,7 @@ index e3d2c0ff737bce159fb3b81e466a76e2a929c009..1ba3fb4a1979f7466ff250c4c2ddd734
          }
  
 diff --git a/src/main/java/net/minecraft/server/StatisticManager.java b/src/main/java/net/minecraft/server/StatisticManager.java
-index e3f38a3c6ba95cc4347eae450aad0546bc3bc7bb..806c288b7386a9035dbeb08610318aa03a9d12b5 100644
+index e3f38a3c6ba95cc4347eae450aad0546bc3bc7bb..64a8471d76fc89b126b53ae92de2617d6fcc2c15 100644
 --- a/src/main/java/net/minecraft/server/StatisticManager.java
 +++ b/src/main/java/net/minecraft/server/StatisticManager.java
 @@ -5,13 +5,13 @@ import java.util.Map;
@@ -88,15 +88,23 @@ index e3f38a3c6ba95cc4347eae450aad0546bc3bc7bb..806c288b7386a9035dbeb08610318aa0
          StatisticWrapper statisticwrapper = (StatisticWrapper) this.a.get(statistic);
  
          if (statisticwrapper == null) {
-@@ -30,7 +30,7 @@ public class StatisticManager {
+@@ -30,9 +30,15 @@ public class StatisticManager {
          statisticwrapper.a(i);
      }
  
 -    public int getStatisticValue(Statistic statistic) {
-+    public long getStatisticValue(Statistic statistic) { // Dionysus - migrate stats to long
++    public long getStatisticValueLong(Statistic statistic) { // Dionysus - migrate stats to long
          StatisticWrapper statisticwrapper = (StatisticWrapper) this.a.get(statistic);
  
          return statisticwrapper == null ? 0 : statisticwrapper.a();
+     }
++
++    // Dionysus start - migrate stats to long
++    public int getStatisticValue(Statistic statistic) {
++        return (int) getStatisticValueLong(statistic);
++    }
++    // Dionysus end
+ }
 diff --git a/src/main/java/net/minecraft/server/StatisticWrapper.java b/src/main/java/net/minecraft/server/StatisticWrapper.java
 index 63fbf9447e1b7250613ee39e72c3d7fae35f3081..9842c8375deb6222e19fc650d4e4dbc0cf45136a 100644
 --- a/src/main/java/net/minecraft/server/StatisticWrapper.java
