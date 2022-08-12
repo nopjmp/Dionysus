@@ -1,0 +1,245 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Thu, 11 Aug 2022 21:34:00 +0200
+Subject: [PATCH] Further improve light queue
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockPosition.java b/src/main/java/net/minecraft/server/BlockPosition.java
+index e80adc4f254a28cf9524eaf5a1c8be5132ae280b..b39c5a3a3965f1d4b3e5da555d8e38ecb6298f74 100644
+--- a/src/main/java/net/minecraft/server/BlockPosition.java
++++ b/src/main/java/net/minecraft/server/BlockPosition.java
+@@ -235,6 +235,12 @@ public class BlockPosition extends BaseBlockPosition {
+         return this;
+     }
+ 
++    // Dionysus start - further improve light queue
++    public boolean isInChunk(Chunk chunk) {
++        return this.getX() >> 4 == chunk.k().x && this.getZ() >> 4 == chunk.k().z;
++    }
++    // Dionysus end
++
+     public static Iterable<BlockPosition.MutableBlockPosition> b(BlockPosition blockposition, BlockPosition blockposition1) {
+         return b(Math.min(blockposition.getX(), blockposition1.getX()), Math.min(blockposition.getY(), blockposition1.getY()), Math.min(blockposition.getZ(), blockposition1.getZ()), Math.max(blockposition.getX(), blockposition1.getX()), Math.max(blockposition.getY(), blockposition1.getY()), Math.max(blockposition.getZ(), blockposition1.getZ()));
+     }
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index b138329d00389b7c052f935d59e22dfd5c9ad823..f4fbf76483d841ec62051f03e60448aeb6ed0a09 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -1542,7 +1542,7 @@ public class Chunk {
+         if (this.world.paperConfig.queueLightUpdates) {
+             lightingQueue.add(blockPosition);
+         } else {
+-            this.world.updateLightingAtBlockPos(blockPosition);
++            this.world.updateLightingAtBlockPos(blockPosition, this);
+         }
+     }
+     // Paper end
+diff --git a/src/main/java/net/minecraft/server/DionysusLightingQueue.java b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
+index 33df884c049726c9ebaad7d61ba905ee6946611c..9ea8cdd120375ae05086b5042f114362cfb25e3a 100644
+--- a/src/main/java/net/minecraft/server/DionysusLightingQueue.java
++++ b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
+@@ -74,7 +74,7 @@ final class DionysusLightingQueue {
+                     }
+ 
+                     BlockPosition blockPos = updates.get(i);
+-                    chunk.world.updateLightingAtBlockPos(blockPos);
++                    chunk.world.updateLightingAtBlockPos(blockPos, chunk);
+                 }
+                 updates.clear();
+             }
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index fe249da8e3ba130bb5068cd050113011b49aab23..9cd41aa79e8808ef511ba61692e96f12b27c0a62 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -229,8 +229,9 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public BiomeBase getBiome(final BlockPosition blockposition) {
+-        if (this.isLoaded(blockposition)) {
+-            Chunk chunk = this.getChunkAtWorldCoords(blockposition);
++        // if (this.isLoaded(blockposition)) { // Dionysus
++            Chunk chunk = this.getChunkIfLoaded(blockposition); // Dionysus
++        if (chunk != null) { // Dionysus
+ 
+             try {
+                 return chunk.getBiome(blockposition, this.worldProvider.k());
+@@ -694,8 +695,9 @@ public abstract class World implements IBlockAccess {
+             if (blockposition.getY() >= 256) {
+                 blockposition = new BlockPosition(blockposition.getX(), 255, blockposition.getZ());
+             }
+-			if (!this.isLoaded(blockposition)) return 0; // Paper
+-            return this.getChunkAtWorldCoords(blockposition).a(blockposition, 0);
++            Chunk chunk = getChunkIfLoaded(blockposition); // Dionysus
++			if (chunk == null) return 0; // Paper
++            return chunk.a(blockposition, 0);
+         }
+     }
+ 
+@@ -771,9 +773,10 @@ public abstract class World implements IBlockAccess {
+                 if (blockposition.getY() >= 256) {
+                     blockposition = new BlockPosition(blockposition.getX(), 255, blockposition.getZ());
+                 }
+-                if (!this.isLoaded(blockposition)) return 0; // Paper
+ 
+-                Chunk chunk = this.getChunkAtWorldCoords(blockposition);
++                Chunk chunk = this.getChunkIfLoaded(blockposition); // Dionysus
++
++                if (chunk == null) return 0; // Dionysus
+ 
+                 return chunk.a(blockposition, this.L);
+             }
+@@ -817,6 +820,20 @@ public abstract class World implements IBlockAccess {
+         }
+     }
+ 
++    // Dionysus start - further improve light queue
++    public int getBrightness(EnumSkyBlock enumskyblock, BlockPosition blockposition, Chunk chunk) {
++        if (blockposition.getY() < 0) {
++            blockposition = new BlockPosition(blockposition.getX(), 0, blockposition.getZ());
++        }
++
++        if (!blockposition.isValidLocation()) {
++            return enumskyblock.c;
++        } else {
++            return chunk.getBrightness(enumskyblock, blockposition);
++        }
++    }
++    // Dionysus end
++
+     public int getBrightness(EnumSkyBlock enumskyblock, BlockPosition blockposition) {
+         if (blockposition.getY() < 0) {
+             blockposition = new BlockPosition(blockposition.getX(), 0, blockposition.getZ());
+@@ -824,10 +841,18 @@ public abstract class World implements IBlockAccess {
+ 
+         if (!blockposition.isValidLocation()) { // Paper
+             return enumskyblock.c;
++        // Dionysus start - further improve light queue
++        /*
+         } else if (!this.isLoaded(blockposition)) {
+             return enumskyblock.c;
++        */
+         } else {
+-            Chunk chunk = this.getChunkAtWorldCoords(blockposition);
++            Chunk chunk = this.getChunkIfLoaded(blockposition);
++
++            if (chunk == null) {
++                return enumskyblock.c;
++            }
++            // Dionysus end
+ 
+             return chunk.getBrightness(enumskyblock, blockposition);
+         }
+@@ -835,9 +860,9 @@ public abstract class World implements IBlockAccess {
+ 
+     public void a(EnumSkyBlock enumskyblock, BlockPosition blockposition, int i) {
+         if (blockposition.isValidLocation()) { // Paper
+-            if (this.isLoaded(blockposition)) {
+-                Chunk chunk = this.getChunkAtWorldCoords(blockposition);
+-
++            //if (this.isLoaded(blockposition)) {
++            Chunk chunk = this.getChunkIfLoaded(blockposition); // Dionysus
++            if (chunk != null) {
+                 chunk.a(enumskyblock, blockposition, i);
+                 this.m(blockposition);
+             }
+@@ -1703,8 +1728,9 @@ public abstract class World implements IBlockAccess {
+                     }
+                     // CraftBukkit end */
+ 
+-                    if (this.isLoaded(tileentity1.getPosition())) {
+-                        Chunk chunk = this.getChunkAtWorldCoords(tileentity1.getPosition());
++                    //if (this.isLoaded(tileentity1.getPosition())) {
++                        Chunk chunk = this.getChunkIfLoaded(tileentity1.getPosition()); // Dionysus
++                    if (chunk != null) {
+                         IBlockData iblockdata = chunk.getBlockData(tileentity1.getPosition());
+ 
+                         chunk.a(tileentity1.getPosition(), tileentity1);
+@@ -2406,15 +2432,27 @@ public abstract class World implements IBlockAccess {
+         }
+     }
+ 
++    // Dionysus start - further improve light queue
++    public boolean updateLightingAtBlockPos(BlockPosition blockposition, Chunk chunk) {
++        return w(blockposition, chunk);
++    }
++    // Dionysus end
+     public boolean updateLightingAtBlockPos(BlockPosition blockPosition) { return this.w(blockPosition); } // Dionysus - OBFHELPER
++    // Dionysus start - further improve light queue
+     public boolean w(BlockPosition blockposition) {
++        Chunk chunk = this.getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4);
++
++        return w(blockposition, chunk);
++    }
++
++    public boolean w(BlockPosition blockposition, Chunk chunk) { // Dionysus end
+         boolean flag = false;
+ 
+         if (this.worldProvider.m()) {
+-            flag |= this.c(EnumSkyBlock.SKY, blockposition);
++            flag |= this.updateBrightness(EnumSkyBlock.SKY, blockposition, chunk); // Dionysus
+         }
+ 
+-        flag |= this.c(EnumSkyBlock.BLOCK, blockposition);
++        flag |= this.updateBrightness(EnumSkyBlock.BLOCK, blockposition, chunk); // Dionysus
+         return flag;
+     }
+ 
+@@ -2486,7 +2524,7 @@ public abstract class World implements IBlockAccess {
+             int j = 0;
+ 
+             this.methodProfiler.a("getBrightness");
+-            int k = this.getBrightness(enumskyblock, blockposition);
++            int k = this.getBrightness(enumskyblock, blockposition, chunk); // Dionysus
+             int l = this.a(blockposition, enumskyblock);
+             int i1 = blockposition.getX();
+             int j1 = blockposition.getY();
+@@ -2513,7 +2551,12 @@ public abstract class World implements IBlockAccess {
+                     int l3 = l1 >> 18 & 15;
+                     BlockPosition blockposition1 = new BlockPosition(i2, j2, k2);
+ 
++                    // Dionysus start - further improve light queue
++                    if (blockposition1.isInChunk(chunk)) {
++                        l2 = this.getBrightness(enumskyblock, blockposition1, chunk);
++                    } else {
+                     l2 = this.getBrightness(enumskyblock, blockposition1);
++                    } // Dionysus end
+                     if (l2 == l3) {
+                         this.a(enumskyblock, blockposition1, 0);
+                         if (l3 > 0) {
+@@ -2720,8 +2763,9 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public void b(BlockPosition blockposition, TileEntity tileentity) {
+-        if (this.isLoaded(blockposition)) {
+-            this.getChunkAtWorldCoords(blockposition).markDirty();
++        Chunk chunk = this.getChunkIfLoaded(blockposition);
++        if (chunk != null) {
++            chunk.markDirty();
+         }
+ 
+     }
+@@ -3237,9 +3281,8 @@ public abstract class World implements IBlockAccess {
+             EnumDirection enumdirection = (EnumDirection) iterator.next();
+             BlockPosition blockposition1 = blockposition.shift(enumdirection);
+ 
+-            if (this.isLoaded(blockposition1)) {
+-                IBlockData iblockdata = this.getType(blockposition1);
+-
++            IBlockData iblockdata = this.getTypeIfLoaded(blockposition1);
++            if (iblockdata != null) {
+                 if (Blocks.UNPOWERED_COMPARATOR.D(iblockdata)) {
+                     iblockdata.doPhysics(this, blockposition1, block, blockposition);
+                 } else if (iblockdata.l()) {
+@@ -3258,9 +3301,10 @@ public abstract class World implements IBlockAccess {
+         long i = 0L;
+         float f = 0.0F;
+ 
+-        if (this.isLoaded(blockposition)) {
++        Chunk chunk = this.getChunkIfLoaded(blockposition); // Dionysus
++        if (chunk != null) {
+             f = this.G();
+-            i = this.getChunkAtWorldCoords(blockposition).x();
++            i = chunk.x();
+         }
+ 
+         return new DifficultyDamageScaler(this.getDifficulty(), this.getDayTime(), i, f);
