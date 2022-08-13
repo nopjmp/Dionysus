@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 13 Aug 2022 19:40:15 +0200
+Subject: [PATCH] Improve fire spread patch
+
+I seriously have no idea why aikar did not reuse that variable.
+
+diff --git a/src/main/java/net/minecraft/server/BlockFire.java b/src/main/java/net/minecraft/server/BlockFire.java
+index 6832a19af69cc1d495e809eae1ded9237bf136dc..3acb62dde1071cd2aa43ee7cd60518a50d85ed52 100644
+--- a/src/main/java/net/minecraft/server/BlockFire.java
++++ b/src/main/java/net/minecraft/server/BlockFire.java
+@@ -236,7 +236,7 @@ public class BlockFire extends Block {
+         // Paper start
+         final IBlockData iblockdata = world.getTypeIfLoaded(blockposition);
+         if (iblockdata == null) return;
+-        int k = this.e(world.getType(blockposition).getBlock());
++        int k = this.e(iblockdata.getBlock()); // Dionysus
+ 
+         if (random.nextInt(i) < k) {
+             //IBlockData iblockdata = world.getType(blockposition); // Paper
+@@ -300,7 +300,7 @@ public class BlockFire extends Block {
+ 
+                 final IBlockData type = world.getTypeIfLoaded(blockposition.shift(enumdirection)); // Paper
+                 if (type == null) continue; // Paper
+-                i = Math.max(this.f(world.getType(blockposition.shift(enumdirection)).getBlock()), i);
++                i = Math.max(this.f(type.getBlock()), i); // Dionysus
+             }
+ 
+             return i;
