@@ -78,7 +78,7 @@ index 4539b56012ee2ffcfcce86212f609341e76a9887..a3b6522709cd75ed05a38c4fc4a4cc48
      public static TileEntityHopper getHopper(World world, BlockPosition pos) {
          Chunk chunk = world.getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 95c7eba962a701d35f309cd7150b96f3877e4234..0166f456f903d6b1c31f0d44e272765718a6b0bc 100644
+index 95c7eba962a701d35f309cd7150b96f3877e4234..bac76852f2d58d4786cdf6385e528ae8d12d1951 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -78,9 +78,46 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
@@ -321,11 +321,11 @@ index 95c7eba962a701d35f309cd7150b96f3877e4234..0166f456f903d6b1c31f0d44e2727657
 -                        channelfuture.addListeners(agenericfuturelistener);
 +                    if (genericfuturelistener != null) {
 +                        channelfuture.addListener(genericfuturelistener);
-+                    }
+                     }
 +                    // Paper start
 +                    if (packet.hasFinishListener()) {
 +                        channelfuture.addListener((ChannelFutureListener) channelFuture -> packet.onPacketDispatchFinish(player, channelFuture));
-                     }
++                    }
 +                    // Paper end
  
                      channelfuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
@@ -458,11 +458,14 @@ index 95c7eba962a701d35f309cd7150b96f3877e4234..0166f456f903d6b1c31f0d44e2727657
              }
  
          }
-@@ -375,7 +533,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
-         private final Packet<?> a; private final Packet<?> getPacket() { return this.a; } // Paper - Anti-Xray - OBFHELPER
-         private final GenericFutureListener<? extends Future<? super Void>>[] b; private final GenericFutureListener<? extends Future<? super Void>>[] getGenericFutureListeners() { return this.b; } // Paper - Anti-Xray - OBFHELPER
+@@ -373,9 +531,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+     static class QueuedPacket {
  
+         private final Packet<?> a; private final Packet<?> getPacket() { return this.a; } // Paper - Anti-Xray - OBFHELPER
+-        private final GenericFutureListener<? extends Future<? super Void>>[] b; private final GenericFutureListener<? extends Future<? super Void>>[] getGenericFutureListeners() { return this.b; } // Paper - Anti-Xray - OBFHELPER
+-
 -        public QueuedPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) {
++        private final GenericFutureListener<? extends Future<? super Void>> b; private final GenericFutureListener<? extends Future<? super Void>> getGenericFutureListener() { return this.b; } // Paper - OBFHELPER
 +        public QueuedPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> agenericfuturelistener) {
              this.a = packet;
              this.b = agenericfuturelistener;

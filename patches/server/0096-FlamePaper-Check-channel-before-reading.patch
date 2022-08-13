@@ -7,7 +7,7 @@ Original code by 2lstudios-mc, licensed under MIT
 You can find the original code on https://github.com/2lstudios-mc/FlamePaper
 
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 872891252384f98e48fa1b40ff5a8478f2d3f530..d6657f036b493e2cd9c0b9d9ea41003e0a77911e 100644
+index 11eb3c93aae8d4ba4db8e63413545f17c23455bd..6959f662c5be6ac95b64c484b36005e1d646c6d0 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -548,7 +548,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
