@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Mon, 20 Dec 2021 18:15:48 -0600
+Subject: [PATCH] Real Time block breaking
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index f84d013a0a04574f33d5eb7a306748ac5c8c8f16..f4f19befdbe7301aa97b946215123e9ba24b73d2 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -228,4 +228,12 @@ public class DionysusConfig {
+     private static void maxProcessedNBTSize() {
+         maxProcessedNBTSize = getInt("max-processed-nbt-size", 80000);
+     }
++
++    public static boolean alternativeBlockPlacement = true;
++    private static void alternativeBlockPlacement() {
++        alternativeBedMechanics = getBoolean("tickless-block-placement", alternativeBlockPlacement);
++        if (alternativeBlockPlacement) {
++            Bukkit.getLogger().info("Tickless Block Placement Mechanics activated. Block placement based on time instead of ticks.");
++        }
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+index 3d86798248d2256f394d1f4f848ed5a2f2f0695c..1c27bc570015eca4c70a9552842273060b832398 100644
+--- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
++++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+@@ -16,6 +16,7 @@ public class PlayerInteractManager {
+     private EnumGamemode gamemode;
+     private boolean d;
+     private int lastDigTick;
++    private long lastDigMillis;
+     private BlockPosition f;
+     private int currentTick;
+     private boolean h;
+@@ -148,6 +149,7 @@ public class PlayerInteractManager {
+ 
+             // this.world.douseFire((EntityHuman) null, blockposition, enumdirection); // CraftBukkit - Moved down
+             this.lastDigTick = this.currentTick;
++            this.lastDigMillis = System.currentTimeMillis();
+             float f = 1.0F;
+ 
+             // CraftBukkit start - Swings at air do *NOT* exist.
+@@ -209,7 +211,14 @@ public class PlayerInteractManager {
+     public void a(BlockPosition blockposition) {
+         if (blockposition.equals(this.f)) {
+             this.currentTick = MinecraftServer.currentTick; // CraftBukkit
+-            int i = this.currentTick - this.lastDigTick;
++            
++            int i;
++            if (dev.pomf.dionysus.DionysusConfig.alternativeBlockPlacement) {
++                i = (int) (System.currentTimeMillis() - lastDigMillis) / 50;
++            } else {
++                i = this.currentTick - this.lastDigTick;
++            }
++
+             IBlockData iblockdata = this.world.getType(blockposition);
+ 
+             if (iblockdata.getMaterial() != Material.AIR) {

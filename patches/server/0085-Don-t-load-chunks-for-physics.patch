@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sat, 9 Jul 2022 01:54:21 +0500
+Subject: [PATCH] Don-t-load-chunks-for-physics
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index dbb371f3e93c5fd318c2c4f069d6437d2e8744b7..052a71408da65433896f1048ff3637a08efc30ca 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -587,7 +587,9 @@ public abstract class World implements IBlockAccess {
+     public void neighborChanged(BlockPosition pos, Block blockIn, BlockPosition fromPos) { a(pos, blockIn, fromPos); } // Paper - OBFHELPER
+     public void a(BlockPosition blockposition, final Block block, BlockPosition blockposition1) {
+         if (!this.isClientSide) {
+-            IBlockData iblockdata = this.getType(blockposition);
++        //    IBlockData iblockdata = this.getType(blockposition);
++            IBlockData iblockdata = this.getTypeIfLoaded(blockposition); // NeonPaper Don't load chunks for physics
++            if (iblockdata == null) return; // NeonPaper Don't load chunks for physics
+ 
+             try {
+                 // CraftBukkit start

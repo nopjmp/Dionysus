@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruViolence@users.noreply.github.com>
+Date: Wed, 8 Jun 2022 11:19:08 +0500
+Subject: [PATCH] perf: optimize BlockPosition
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 85889095e85086c655fedb2d1bf5995900cb99de..58f9b9b7ffe2558961a2519dbbcb72099ee96f3a 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -936,7 +936,7 @@ public abstract class World implements IBlockAccess {
+                 int l = MathHelper.floor(vec3d.x);
+                 int i1 = MathHelper.floor(vec3d.y);
+                 int j1 = MathHelper.floor(vec3d.z);
+-                BlockPosition blockposition = new BlockPosition(l, i1, j1);
++                BlockPosition.MutableBlockPosition blockposition = new BlockPosition.MutableBlockPosition(l, i1, j1); // Reaper - Optimize BlockPosition
+                 IBlockData iblockdata = this.getTypeIfLoaded(blockposition); // Paper
+                 if (iblockdata == null) return null; // Paper
+                 Block block = iblockdata.getBlock();
+@@ -1039,7 +1039,7 @@ public abstract class World implements IBlockAccess {
+                     l = MathHelper.floor(vec3d.x) - (enumdirection == EnumDirection.EAST ? 1 : 0);
+                     i1 = MathHelper.floor(vec3d.y) - (enumdirection == EnumDirection.UP ? 1 : 0);
+                     j1 = MathHelper.floor(vec3d.z) - (enumdirection == EnumDirection.SOUTH ? 1 : 0);
+-                    blockposition = new BlockPosition(l, i1, j1);
++                    blockposition.c(l, i1, j1); // Reaper - Optimize BlockPosition
+                     IBlockData iblockdata1 = this.getTypeIfLoaded(blockposition); // Paper
+                     if (iblockdata1 == null) return null; // Paper
+                     Block block1 = iblockdata1.getBlock();

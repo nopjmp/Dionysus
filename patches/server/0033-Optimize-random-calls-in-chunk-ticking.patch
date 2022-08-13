@@ -1,0 +1,106 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Thu, 11 Mar 2021 23:21:10 -0600
+Subject: [PATCH] Optimize random calls in chunk ticking
+
+Especially at over 30,000 chunks these random calls are fairly heavy. We
+use a different method here for checking lightning, and for checking
+ice.
+
+Lighting: Each chunk now keeps an int of how many ticks until the
+lightning should strike. This int is a random number from 0 to 100000 * 2,
+the multiplication is required to keep the probability the same.
+
+Ice and snow: We just generate a single random number 0-16 and increment
+it, while checking if it's 0 for the current chunk.
+
+Depending on configuration for things that tick in a chunk, this is a
+5-10% improvement.
+
+Airplane
+Copyright (C) 2020 Technove LLC
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index ac7186fc85839cbe7e196f4272b1be82d6110036..e087e3707412506ef5704d39286db69aa3bf341c 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -115,6 +115,18 @@ public class Chunk {
+     }
+     // CraftBukkit end
+ 
++    // Airplane start - instead of using a random every time the chunk is ticked, define when lightning strikes preemptively
++    private int lightningTick;
++    // shouldDoLightning compiles down to 29 bytes, which with the default of 35 byte inlining should guarantee an inline
++    public final boolean shouldDoLightning(Random random) {
++        if (this.lightningTick-- <= 0) {
++            this.lightningTick = random.nextInt(100000) << 1;
++            return true;
++        }
++        return false;
++    }
++    // Airplane end
++
+     public Chunk(World world, int i, int j) {
+         this.sections = new ChunkSection[16];
+         this.g = new byte[256];
+@@ -138,6 +150,8 @@ public class Chunk {
+         // CraftBukkit start
+         this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
+         this.chunkKey = ChunkCoordIntPair.a(this.locX, this.locZ);
++
++        this.lightningTick = this.world.random.nextInt(100000) << 1; // Airplane - initialize lightning tick
+     }
+ 
+     public org.bukkit.Chunk bukkitChunk;
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 4ab42aa93c57be327fb7dd60e49eec3021eb795a..629b04da5973730468b6d8225df0008c6b578a93 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -451,6 +451,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+         this.methodProfiler.b();
+     }
+ 
++    private int currentIceAndSnowTick = 0; protected void resetIceAndSnowTick() { this.currentIceAndSnowTick = this.random.nextInt(16); } // Airplane
++
+     protected void j() {
+         this.i();
+         if (this.worldData.getType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
+@@ -466,6 +468,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+             boolean flag1 = this.X();
+ 
+             this.methodProfiler.a("pollingChunks");
++            this.resetIceAndSnowTick();
+ 
+             for (Iterator iterator1 = this.manager.b(); iterator1.hasNext(); this.methodProfiler.b()) {
+                 this.methodProfiler.a("getChunk");
+@@ -483,7 +486,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                 BlockPosition blockposition;
+ 
+                 // Paper - Disable thunder
+-                if (!this.paperConfig.disableThunder && flag && flag1 && this.random.nextInt(100000) == 0) {
++                if (!this.paperConfig.disableThunder && flag && flag1 && chunk.shouldDoLightning(this.random)) {
+                     this.l = this.l * 3 + 1013904223;
+                     l = this.l >> 2;
+                     blockposition = this.a(new BlockPosition(j + (l & 15), 0, k + (l >> 8 & 15)));
+@@ -505,7 +508,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                 }
+ 
+                 this.methodProfiler.c("iceandsnow");
+-                if (!this.paperConfig.disableIceAndSnow && this.random.nextInt(16) == 0) { // Paper - Disable ice and snow
++                if (!this.paperConfig.disableIceAndSnow && (currentIceAndSnowTick++ & 15) == 0) { // Paper - Disable ice and snow // Airplane - optimize further random ticking
+                     this.l = this.l * 3 + 1013904223;
+                     l = this.l >> 2;
+                     blockposition = this.p(new BlockPosition(j + (l & 15), 0, k + (l >> 8 & 15)));
