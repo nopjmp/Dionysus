@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Thu, 7 Jul 2022 01:55:42 +0500
+Subject: [PATCH] Do-not-load-chunks-for-light-checks
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 052a71408da65433896f1048ff3637a08efc30ca..1cbe8e8705f6e3ddcc3e3721c5a959208e8ed1f8 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -699,7 +699,7 @@ public abstract class World implements IBlockAccess {
+             if (blockposition.getY() >= 256) {
+                 blockposition = new BlockPosition(blockposition.getX(), 255, blockposition.getZ());
+             }
+-
++			if (!this.isLoaded(blockposition)) return 0; // Paper
+             return this.getChunkAtWorldCoords(blockposition).a(blockposition, 0);
+         }
+     }

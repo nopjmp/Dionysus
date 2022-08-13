@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruViolence@users.noreply.github.com>
+Date: Wed, 1 Jun 2022 09:05:15 +0500
+Subject: [PATCH] (Reaper) fix: MC-103516
+
+https://bugs.mojang.com/browse/MC-103516
+
+Original code from https://github.com/ruViolence/Reaper
+Licensed under GPL-3.0
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 1cbe8e8705f6e3ddcc3e3721c5a959208e8ed1f8..e745116694b999abe01b0e891c092237e33e58e0 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -1893,7 +1893,7 @@ public abstract class World implements IBlockAccess {
+         for (int i = 0; i < list.size(); ++i) {
+             Entity entity1 = (Entity) list.get(i);
+ 
+-            if (!entity1.dead && entity1.i && entity1 != entity && (entity == null || entity1.x(entity))) {
++            if (!entity1.dead && entity1.i && entity1 != entity && (entity == null || !entity1.x(entity))) { // Reaper - Fix MC-103516
+                 return false;
+             }
+         }

@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: PermisosDev <55111245+PermisosDev@users.noreply.github.com>
+Date: Thu, 8 Apr 2021 19:10:27 -0300
+Subject: [PATCH] (FlamePaper) Check channel before reading
+
+Original code by 2lstudios-mc, licensed under MIT
+You can find the original code on https://github.com/2lstudios-mc/FlamePaper
+
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index a9746f4eb4207345ae5ccfcd893ff1c1ec74d034..e0909a6542a3a880002330943a8fca1b25292d06 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -548,7 +548,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+     }
+ 
+     protected void channelRead0(ChannelHandlerContext channelhandlercontext, Packet object) throws Exception { // CraftBukkit - fix decompile error
+-        this.a(channelhandlercontext, (Packet) object);
++        // FlamePaper - Check if channel is opened before reading packet
++        if (isConnected()) {
++            this.a(channelhandlercontext, object);
++        }
+     }
+ 
+     static class QueuedPacket {
