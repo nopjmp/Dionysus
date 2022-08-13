@@ -40,7 +40,7 @@ index 668ab0d3bbc85d961a4748095455a2026a869107..01fa40071a47ef12967b58645041e1b1
      private GameProfile i; private void setGameProfile(GameProfile profile) { i = profile; } private GameProfile getGameProfile() { return i; } // Paper - OBFHELPER
      private final String j;
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index bac76852f2d58d4786cdf6385e528ae8d12d1951..8aa0baa8a9450d68e4fba22da089894a5791b8f1 100644
+index a2b71497c7bd1050d9733011638c1597d82d8ad4..54baae87999c0ce0d966db1198df2e054525c5d6 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -413,10 +413,27 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
