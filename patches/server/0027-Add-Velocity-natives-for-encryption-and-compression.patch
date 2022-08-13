@@ -1,0 +1,361 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Fri, 24 Dec 2021 16:14:10 -0600
+Subject: [PATCH] Add Velocity natives for encryption and compression
+
+Credit to Tuinity!
+
+diff --git a/pom.xml b/pom.xml
+index acb87b2e3b50267079cdc7633c95f4cf26f4907f..bcefa70d5d40d1d6e00e15abd4dbd473870bcf9b 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -181,6 +181,12 @@
+                 </exclusion>
+             </exclusions>
+         </dependency>
++        <dependency>
++            <groupId>com.velocitypowered</groupId>
++            <artifactId>velocity-native</artifactId>
++            <version>3.1.2-SNAPSHOT</version>
++            <scope>compile</scope>
++        </dependency>
+     </dependencies>
+ 
+     <repositories>
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index ab9974f003f2dec21f3d4a6fc9be47a27909fb79..872891252384f98e48fa1b40ff5a8478f2d3f530 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -475,8 +475,14 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
+ 
+     public void a(SecretKey secretkey) {
+         this.o = true;
+-        this.channel.pipeline().addBefore("splitter", "decrypt", new PacketDecrypter(MinecraftEncryption.a(2, secretkey)));
+-        this.channel.pipeline().addBefore("prepender", "encrypt", new PacketEncrypter(MinecraftEncryption.a(1, secretkey)));
++        // Tuinity start
++        try {
++            this.channel.pipeline().addBefore("splitter", "decrypt", new PacketDecrypter(/*MinecraftEncryption.a(2, secretkey)*/ secretkey));
++            this.channel.pipeline().addBefore("prepender", "encrypt", new PacketEncrypter(/*MinecraftEncryption.a(1, secretkey)*/ secretkey));
++        } catch (java.security.GeneralSecurityException e) {
++            throw new RuntimeException("Couldn't enable encryption", e);
++        }
++        // Tuinity end
+     }
+ 
+     public boolean isConnected() {
+diff --git a/src/main/java/net/minecraft/server/PacketCompressor.java b/src/main/java/net/minecraft/server/PacketCompressor.java
+index a80d293b8a37ff86a243d6167a30639f7105749c..fdbae0f67eb8c3cafd89f093860a4002525586f0 100644
+--- a/src/main/java/net/minecraft/server/PacketCompressor.java
++++ b/src/main/java/net/minecraft/server/PacketCompressor.java
+@@ -1,55 +1,74 @@
+ package net.minecraft.server;
+ 
+-import dev.pomf.dionysus.DionysusConfig;
+ import io.netty.buffer.ByteBuf;
+ import io.netty.channel.ChannelHandlerContext;
+ import io.netty.handler.codec.MessageToByteEncoder;
+-import java.util.zip.Deflater;
+ 
+ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
+ 
+-    private final byte[] a = new byte[8192];
+-    private final Deflater b;
++    private final com.velocitypowered.natives.compression.VelocityCompressor compressor;
++    // Tuinity start - use Velocity natives
++//    private final byte[] a = new byte[8192];
++//    private final Deflater b;
+     private int c;
+ 
+     public PacketCompressor(int i) {
+         this.c = i;
+-        this.b = new Deflater();
+-        this.b.setLevel(DionysusConfig.compressionLevel); // Dionysus - Packet Compression Level
++//        this.b = new Deflater();
++        this.compressor = com.velocitypowered.natives.util.Natives.compress.get().create(-1);
+     }
++    // Tuinity end
+ 
+-    protected void a(ChannelHandlerContext channelhandlercontext, ByteBuf incoming, ByteBuf outgoing) throws Exception {
+-        int i = incoming.readableBytes();
+-        PacketDataSerializer packetdataserializer = new PacketDataSerializer(outgoing);
++    @Override
++    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
++        int i = bytebuf.readableBytes();
++        PacketDataSerializer packetdataserializer = new PacketDataSerializer(bytebuf1);
+ 
+         if (i < this.c) {
+             packetdataserializer.d(0);
+-            packetdataserializer.writeBytes(incoming);
++            packetdataserializer.writeBytes(bytebuf);
+         } else {
+-            byte[] abyte = new byte[i];
+-
+-            incoming.readBytes(abyte);
+-            packetdataserializer.d(abyte.length);
+-            this.b.setInput(abyte, 0, i);
+-            this.b.finish();
+-
+-            while (!this.b.finished()) {
+-                int j = this.b.deflate(this.a);
+-
+-                packetdataserializer.writeBytes(this.a, 0, j);
++            // Tuinity start - delegate to Velocity natives
++//            byte[] abyte = new byte[i];
++//
++//            bytebuf.readBytes(abyte);
++//            packetdataserializer.d(abyte.length);
++//            this.b.setInput(abyte, 0, i);
++//            this.b.finish();
++//
++//            while (!this.b.finished()) {
++//                int j = this.b.deflate(this.a);
++//
++//                packetdataserializer.writeBytes(this.a, 0, j);
++//            }
++//
++//            this.b.reset();
++            packetdataserializer.d(i);
++            ByteBuf source = com.velocitypowered.natives.util.MoreByteBufUtils.ensureCompatible(channelhandlercontext.alloc(),
++                    this.compressor, bytebuf);
++            try {
++                this.compressor.deflate(source, bytebuf1);
++            } finally {
++                source.release();
+             }
+-
+-            this.b.reset();
++            // Tuinity end
+         }
+ 
+     }
+ 
+-    public void a(int i) {
+-        this.c = i;
++    // Tuinity start
++    @Override
++    protected ByteBuf allocateBuffer(ChannelHandlerContext ctx, ByteBuf msg, boolean preferDirect) throws Exception {
++        return com.velocitypowered.natives.util.MoreByteBufUtils.preferredBuffer(ctx.alloc(), this.compressor, msg.readableBytes() + 1);
+     }
+ 
+     @Override
+-    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf incoming, ByteBuf outgoing) throws Exception {
+-        this.a(channelhandlercontext, incoming, outgoing);
++    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
++        this.compressor.close();
++    }
++    // Tuinity end
++
++    public void a(int i) {
++        this.c = i;
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketDecompressor.java b/src/main/java/net/minecraft/server/PacketDecompressor.java
+index ae558c33cbc0aca5c4c855620b2e0d6e329d9cb8..87ed96b3ed1366eb33b6112fa6da06c89344087d 100644
+--- a/src/main/java/net/minecraft/server/PacketDecompressor.java
++++ b/src/main/java/net/minecraft/server/PacketDecompressor.java
+@@ -1,23 +1,27 @@
+ package net.minecraft.server;
+ 
+ import io.netty.buffer.ByteBuf;
+-import io.netty.buffer.Unpooled;
+ import io.netty.channel.ChannelHandlerContext;
+ import io.netty.handler.codec.ByteToMessageDecoder;
+ import io.netty.handler.codec.DecoderException;
++
+ import java.util.List;
+-import java.util.zip.Inflater;
+ 
+ public class PacketDecompressor extends ByteToMessageDecoder {
+ 
+-    private final Inflater a;
++    // Tuinity start - use Velocity natives
++    //private final Inflater a;
++    private final com.velocitypowered.natives.compression.VelocityCompressor compressor;
+     private int b;
+ 
+     public PacketDecompressor(int i) {
+         this.b = i;
+-        this.a = new Inflater();
++        //this.a = new Inflater();
++        this.compressor = com.velocitypowered.natives.util.Natives.compress.get().create(-1);
+     }
++    // Tuinity end
+ 
++    @Override
+     protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, List<Object> list) throws Exception {
+         if (bytebuf.readableBytes() != 0) {
+             PacketDataSerializer packetdataserializer = new PacketDataSerializer(bytebuf);
+@@ -34,20 +38,41 @@ public class PacketDecompressor extends ByteToMessageDecoder {
+                     throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of " + 2097152);
+                 }
+ 
+-                byte[] abyte = new byte[packetdataserializer.readableBytes()];
+-
+-                packetdataserializer.readBytes(abyte);
+-                this.a.setInput(abyte);
+-                byte[] abyte1 = new byte[i];
+-
+-                this.a.inflate(abyte1);
+-                list.add(Unpooled.wrappedBuffer(abyte1));
+-                this.a.reset();
++                // Tuinity start
++                ByteBuf compatibleIn = com.velocitypowered.natives.util.MoreByteBufUtils.ensureCompatible(channelhandlercontext.alloc(), compressor, bytebuf);
++                ByteBuf uncompressed = com.velocitypowered.natives.util.MoreByteBufUtils.preferredBuffer(channelhandlercontext.alloc(), compressor, i);
++                try {
++                    compressor.inflate(compatibleIn, uncompressed, i);
++                    list.add(uncompressed);
++                    bytebuf.clear();
++                } catch (Exception e) {
++                    uncompressed.release();
++                    throw e;
++                } finally {
++                    compatibleIn.release();
++                }
++//                byte[] abyte = new byte[packetdataserializer.readableBytes()];
++//
++//                packetdataserializer.readBytes(abyte);
++//                this.a.setInput(abyte);
++//                byte[] abyte1 = new byte[i];
++//
++//                this.a.inflate(abyte1);
++//                list.add(Unpooled.wrappedBuffer(abyte1));
++//                this.a.reset();
++                // Tuinity end
+             }
+ 
+         }
+     }
+ 
++    // Tuinity start
++    @Override
++    public void handlerRemoved0(ChannelHandlerContext ctx) throws Exception {
++        this.compressor.close();
++    }
++    // Tuinity end
++
+     public void a(int i) {
+         this.b = i;
+     }
+diff --git a/src/main/java/net/minecraft/server/PacketDecrypter.java b/src/main/java/net/minecraft/server/PacketDecrypter.java
+index 4d02db906ec31f627454fde8c5ca9f268b68e933..afef9dfaf61b74806e70226ec7fea973573513a5 100644
+--- a/src/main/java/net/minecraft/server/PacketDecrypter.java
++++ b/src/main/java/net/minecraft/server/PacketDecrypter.java
+@@ -3,22 +3,29 @@ package net.minecraft.server;
+ import io.netty.buffer.ByteBuf;
+ import io.netty.channel.ChannelHandlerContext;
+ import io.netty.handler.codec.MessageToMessageDecoder;
++
+ import java.util.List;
+-import javax.crypto.Cipher;
+ 
+ public class PacketDecrypter extends MessageToMessageDecoder<ByteBuf> {
+ 
+-    private final PacketEncryptionHandler a;
+-
+-    public PacketDecrypter(Cipher cipher) {
+-        this.a = new PacketEncryptionHandler(cipher);
+-    }
++    // Tuinity start
++    private final com.velocitypowered.natives.encryption.VelocityCipher cipher;
++    //private final PacketEncryptionHandler a;
+ 
+-    protected void a(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, List<Object> list) throws Exception {
+-        list.add(this.a.a(channelhandlercontext, bytebuf));
++    public PacketDecrypter(javax.crypto.SecretKey key /* Cipher cipher */) throws java.security.GeneralSecurityException {
++        //this.a = new PacketEncryptionHandler(cipher);
++        this.cipher = com.velocitypowered.natives.util.Natives.cipher.get().forDecryption(key);
+     }
+ 
+-    protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf object, List list) throws Exception {
+-        this.a(channelhandlercontext, object, list);
++    protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, List<Object> list) throws Exception {
++        ByteBuf compatible = com.velocitypowered.natives.util.MoreByteBufUtils.ensureCompatible(channelhandlercontext.alloc(), cipher, bytebuf).slice();
++        try {
++            cipher.process(compatible);
++            list.add(compatible);
++        } catch (Exception e) {
++            compatible.release(); // compatible will never be used if we throw an exception
++            throw e;
++        }
+     }
++    // Tuinity end
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketEncrypter.java b/src/main/java/net/minecraft/server/PacketEncrypter.java
+index 87e73ead65e023d4c75a36def83d9f27ce7b6ab1..8e64fda1cf35ff94f287babac083be10407e74c0 100644
+--- a/src/main/java/net/minecraft/server/PacketEncrypter.java
++++ b/src/main/java/net/minecraft/server/PacketEncrypter.java
+@@ -2,23 +2,37 @@ package net.minecraft.server;
+ 
+ import io.netty.buffer.ByteBuf;
+ import io.netty.channel.ChannelHandlerContext;
+-import io.netty.handler.codec.MessageToByteEncoder;
+-import javax.crypto.Cipher;
++import io.netty.handler.codec.MessageToMessageEncoder;
+ 
+-public class PacketEncrypter extends MessageToByteEncoder<ByteBuf> {
++public class PacketEncrypter extends MessageToMessageEncoder<ByteBuf> {
+ 
+-    private final PacketEncryptionHandler a;
++    private final com.velocitypowered.natives.encryption.VelocityCipher cipher;
++    //private final PacketEncryptionHandler a;
+ 
+-    public PacketEncrypter(Cipher cipher) {
+-        this.a = new PacketEncryptionHandler(cipher);
++    public PacketEncrypter(javax.crypto.SecretKey key /* Cipher cipher */) throws java.security.GeneralSecurityException {
++        // this.a = new PacketEncryptionHandler(cipher);
++        this.cipher = com.velocitypowered.natives.util.Natives.cipher.get().forEncryption(key);
+     }
+ 
+-    protected void a(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
+-        this.a.a(bytebuf, bytebuf1);
++//    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
++//        this.a.a(bytebuf, bytebuf1);
++//    }
++
++    @Override
++    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, java.util.List<Object> out) throws Exception {
++        ByteBuf compatible = com.velocitypowered.natives.util.MoreByteBufUtils.ensureCompatible(ctx.alloc(), this.cipher, msg);
++        try {
++            this.cipher.process(compatible);
++            out.add(compatible);
++        } catch (Exception e) {
++            compatible.release(); // compatible will never be used if we throw an exception
++            throw e;
++        }
+     }
+ 
+     @Override
+-    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, object, bytebuf);
++    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
++        cipher.close();
+     }
+ }
++// Tuinity end
+diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
+index db9c96c733da547afb7a786fc8fd36e22178d3a2..efa0c8ec29e659ac8c9691939f0b4482e500e516 100644
+--- a/src/main/java/net/minecraft/server/ServerConnection.java
++++ b/src/main/java/net/minecraft/server/ServerConnection.java
+@@ -99,7 +99,12 @@ public class ServerConnection {
+                 ServerConnection.e.info("Using default channel type");
+             }
+ 
+-            this.g.add(((ServerBootstrap) ((ServerBootstrap) (new ServerBootstrap()).channel(oclass)).childHandler(new ChannelInitializer() {
++            // Tuinity start - indicate Velocity natives in use
++            ServerConnection.e.info("Tuinity: Using " + com.velocitypowered.natives.util.Natives.compress.getLoadedVariant() + " compression from Velocity.");
++            ServerConnection.e.info("Tuinity: Using " + com.velocitypowered.natives.util.Natives.cipher.getLoadedVariant() + " cipher from Velocity.");
++            // Tuinity end
++
++            this.g.add((new ServerBootstrap()).channel(oclass).childHandler(new ChannelInitializer() {
+                 protected void initChannel(Channel channel) throws Exception {
+                     try {
+                         channel.config().setOption(ChannelOption.TCP_NODELAY, Boolean.valueOf(true));
+@@ -114,7 +119,7 @@ public class ServerConnection {
+                     channel.pipeline().addLast("packet_handler", networkmanager);
+                     networkmanager.setPacketListener(new HandshakeListener(ServerConnection.this.f, networkmanager));
+                 }
+-            }).group((EventLoopGroup) lazyinitvar.c()).localAddress(inetaddress, i)).bind().syncUninterruptibly());
++            }).group((EventLoopGroup) lazyinitvar.c()).localAddress(inetaddress, i).bind().syncUninterruptibly());
+         }
+     }
+ 

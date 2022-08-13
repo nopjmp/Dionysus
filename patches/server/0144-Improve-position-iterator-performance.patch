@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 30 Jul 2022 20:38:56 +0200
+Subject: [PATCH] Improve position iterator performance
+
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 69e78e1c0cbc2a4c7ad7ebf206e9e4063e9a2fb2..eddf52edc4fb2d820bf21b768e57723712e1b2a6 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -1206,9 +1206,11 @@ public class Chunk {
+             this.o();
+         }
+ 
+-        while (!this.y.isEmpty()) {
++        while (true) { // Dionysus - Improve position iterator performance
+             BlockPosition blockposition = (BlockPosition) this.y.poll();
+ 
++            if (blockposition == null) break; // Dionysus - Improve position iterator performance
++
+             if (this.a(blockposition, Chunk.EnumTileEntityState.CHECK) == null && this.getBlockData(blockposition).getBlock().isTileEntity()) {
+                 TileEntity tileentity = this.g(blockposition);
+ 
