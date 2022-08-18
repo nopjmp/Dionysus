@@ -69,10 +69,10 @@ Dionysus-API maven dependency:
 ```xml
 
 <dependency>
-    <groupId>dev.pomf.dionysusdev.pomf.dionysus</groupId>
-    <artifactId>dionysus-api</artifactId>
-    <version>1.12.2-R0.1-SNAPSHOT</version>
-    <scope>provided</scope>
+  <groupId>dev.pomf.dionysusdev.pomf.dionysus</groupId>
+  <artifactId>dionysus-api</artifactId>
+  <version>1.12.2-R0.1-SNAPSHOT</version>
+  <scope>provided</scope>
 </dependency>
 ```
 
@@ -81,10 +81,10 @@ Dionysus-Server maven dependency:
 ```xml
 
 <dependency>
-    <groupId>dev.pomf.dionysusdev.pomf.dionysus</groupId>
-    <artifactId>dionysus</artifactId>
-    <version>1.12.2-R0.1-SNAPSHOT</version>
-    <scope>provided</scope>
+  <groupId>dev.pomf.dionysusdev.pomf.dionysus</groupId>
+  <artifactId>dionysus</artifactId>
+  <version>1.12.2-R0.1-SNAPSHOT</version>
+  <scope>provided</scope>
 </dependency>
 ```
 
@@ -98,7 +98,7 @@ Requirements:
 - You need `git` installed, with a configured user name and email.
   On windows you need to run from git bash.
 - You need `maven` installed
-- You need `jdk` 8+ installed to compile (and `jre` 8+ to run)
+- You need `jdk 1.8` to decompile and `jdk` 17+ installed to compile (and `jre` 17+ to run)
 - Anything else that `paper` requires to build
 
 If all you want is a paperclip server jar, just run `./dionysus jar`
