@@ -1,0 +1,119 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 20 Aug 2022 20:30:36 +0200
+Subject: [PATCH] Port DataWatcher from newer versions
+
+
+diff --git a/src/main/java/net/minecraft/server/DataWatcher.java b/src/main/java/net/minecraft/server/DataWatcher.java
+index fe84844531ab06d20de9ca4988ee12e69ab5f2f7..ee3cd05c822edbb917e8e7906347a6dd28f4f3c9 100644
+--- a/src/main/java/net/minecraft/server/DataWatcher.java
++++ b/src/main/java/net/minecraft/server/DataWatcher.java
+@@ -71,7 +71,9 @@ public class DataWatcher {
+         }
+     }
+ 
++    boolean registrationLocked; // Spigot
+     public <T> void register(DataWatcherObject<T> datawatcherobject, Object t0) { // CraftBukkit T -> Object
++        if (this.registrationLocked) throw new IllegalStateException("Registering datawatcher object after entity initialization"); // Spigot
+         int i = datawatcherobject.a();
+ 
+         if (i > 254) {
+@@ -88,13 +90,14 @@ public class DataWatcher {
+     private <T> void registerObject(DataWatcherObject<T> datawatcherobject, Object t0) { // CraftBukkit Object
+         DataWatcher.Item datawatcher_item = new DataWatcher.Item(datawatcherobject, t0);
+ 
+-        this.e.writeLock().lock();
++        // this.e.writeLock().lock(); // Spigot - not required
+         this.d.put(Integer.valueOf(datawatcherobject.a()), datawatcher_item);
+         this.f = false;
+-        this.e.writeLock().unlock();
++        // this.e.writeLock().unlock(); // Spigot - not required
+     }
+ 
+     private <T> DataWatcher.Item<T> c(DataWatcherObject<T> datawatcherobject) {
++        /* // Spigot - not required
+         this.e.readLock().lock();
+ 
+         DataWatcher.Item datawatcher_item;
+@@ -110,7 +113,8 @@ public class DataWatcher {
+         }
+ 
+         this.e.readLock().unlock();
+-        return datawatcher_item;
++        return datawatcher_item;*/
++        return (DataWatcher.Item) this.d.get(Integer.valueOf(datawatcherobject.a()));
+     }
+ 
+     public <T> T get(DataWatcherObject<T> datawatcherobject) {
+@@ -157,7 +161,7 @@ public class DataWatcher {
+         ArrayList arraylist = null;
+ 
+         if (this.g) {
+-            this.e.readLock().lock();
++            // this.e.readLock().lock(); // Spigot - not required
+             Iterator iterator = this.d.values().iterator();
+ 
+             while (iterator.hasNext()) {
+@@ -173,7 +177,7 @@ public class DataWatcher {
+                 }
+             }
+ 
+-            this.e.readLock().unlock();
++            // this.e.readLock().unlock(); // Spigot - not required
+         }
+ 
+         this.g = false;
+@@ -181,7 +185,7 @@ public class DataWatcher {
+     }
+ 
+     public void a(PacketDataSerializer packetdataserializer) throws IOException {
+-        this.e.readLock().lock();
++        // this.e.readLock().lock(); // Spigot - not required
+         Iterator iterator = this.d.values().iterator();
+ 
+         while (iterator.hasNext()) {
+@@ -190,7 +194,7 @@ public class DataWatcher {
+             a(packetdataserializer, datawatcher_item);
+         }
+ 
+-        this.e.readLock().unlock();
++        // this.e.readLock().unlock(); // Spigot - not required
+         packetdataserializer.writeByte(255);
+     }
+ 
+@@ -198,7 +202,7 @@ public class DataWatcher {
+     public List<DataWatcher.Item<?>> c() {
+         ArrayList arraylist = null;
+ 
+-        this.e.readLock().lock();
++        // this.e.readLock().lock(); // Spigot - not required
+ 
+         DataWatcher.Item datawatcher_item;
+ 
+@@ -209,7 +213,7 @@ public class DataWatcher {
+             }
+         }
+ 
+-        this.e.readLock().unlock();
++        // this.e.readLock().unlock(); // Spigot - not required
+         return arraylist;
+     }
+ 
+@@ -256,7 +260,7 @@ public class DataWatcher {
+ 
+     public void e() {
+         this.g = false;
+-        this.e.readLock().lock();
++        // this.e.readLock().lock(); // Spigot - not required
+         Iterator iterator = this.d.values().iterator();
+ 
+         while (iterator.hasNext()) {
+@@ -265,7 +269,7 @@ public class DataWatcher {
+             datawatcher_item.a(false);
+         }
+ 
+-        this.e.readLock().unlock();
++        // this.e.readLock().unlock(); // Spigot - not required
+     }
+ 
+     public static class Item<T> {

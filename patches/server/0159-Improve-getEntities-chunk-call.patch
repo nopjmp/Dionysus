@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sat, 20 Aug 2022 20:31:25 +0200
+Subject: [PATCH] Improve getEntities chunk call
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 527143ac119022273f3613d5f91b0a1b9d93cfb5..cc9f467cc85704d536545aa63985340013e63703 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -2679,9 +2679,11 @@ public abstract class World implements IBlockAccess {
+ 
+         for (int i1 = i; i1 <= j; ++i1) {
+             for (int j1 = k; j1 <= l; ++j1) {
+-                if (this.isChunkLoaded(i1, j1, true)) {
+-                    this.getChunkAt(i1, j1).a(entity, axisalignedbb, arraylist, predicate);
+-                }
++                // Dionysus start
++                Chunk chunk = this.getChunkIfLoaded(i1, j1);
++                if (chunk != null)
++                    chunk.a(entity, axisalignedbb, arraylist, predicate);
++                // Dionysus end
+             }
+         }
+ 
