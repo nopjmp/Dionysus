@@ -7,10 +7,10 @@ Original code by 2lstudios-mc, licensed under MIT
 You can find the original code on https://github.com/2lstudios-mc/FlamePaper
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 25c7db0456cce1998ba87dc722f35e5d2dd9757f..b6ff0742f7d6e8edb1c8e898de4d627fc2dca9f2 100644
+index 3064103d908aebcb8af5302087b70bf23fa6f1f0..f3d0760a02a06588fa182822fb4b9b4c451e5b08 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
-@@ -1539,4 +1539,15 @@ public class Chunk {
+@@ -1542,4 +1542,15 @@ public class Chunk {
  
          private EnumTileEntityState() {}
      }

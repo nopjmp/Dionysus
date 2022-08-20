@@ -4,6 +4,22 @@ Date: Thu, 7 Jul 2022 01:55:42 +0500
 Subject: [PATCH] Do-not-load-chunks-for-light-checks
 
 
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 25c7db0456cce1998ba87dc722f35e5d2dd9757f..3064103d908aebcb8af5302087b70bf23fa6f1f0 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -1328,7 +1328,10 @@ public class Chunk {
+                             EnumDirection enumdirection = aenumdirection[k1];
+                             BlockPosition blockposition2 = blockposition1.shift(enumdirection);
+ 
+-                            if (this.world.getType(blockposition2).d() > 0) {
++                            // Dionysus start - Do not load chunks for light checks
++                            IBlockData type = this.world.getTypeIfLoaded(blockposition2);
++                            if (type == null) continue;
++                            if (type.d() > 0) { // Dionysus end
+                                 this.world.w(blockposition2);
+                             }
+                         }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
 index 052a71408da65433896f1048ff3637a08efc30ca..1cbe8e8705f6e3ddcc3e3721c5a959208e8ed1f8 100644
 --- a/src/main/java/net/minecraft/server/World.java
