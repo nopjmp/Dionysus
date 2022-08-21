@@ -18,7 +18,7 @@ index 52d8e8ed1ff91032c4dd6bfb3bbc0eb13a648b70..6fe460b437849488bb1b84d9ec9a7370
          // this.cr.a((RecipeBook) entityplayer.cr); // CraftBukkit
          // Paper start - Optimize remove queue
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 7bfd20347960115e0eecadc0c9a803f22862d1cc..37016c22e249f2cc621fef594eb93c4574c5fb13 100644
+index aa3136cc0b6dc75af52eb51403a22dec638b5ab7..897a49eda09df4654ea31808907cb60c8fa94f77 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -829,6 +829,8 @@ public abstract class PlayerList {

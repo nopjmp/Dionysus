@@ -222,7 +222,7 @@ index 480e2ca972bc9dedc6d77c7f2a2621e01c51f21c..e0276b11cdfda75a3bd1ec75cfecbbe0
  
              if ((float) k > f) {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 0e9c0466ec0108a822d6e2f9e6b90363159e6f67..d15079f9bb3c77a3268d9d19f1445060ff7342e7 100644
+index 1c089b2b08d15b98142c6f7d95af272f17832892..3ab6b7897f5d05049287cc0388e4621aff20b54d 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -73,8 +73,20 @@ public abstract class PlayerList {

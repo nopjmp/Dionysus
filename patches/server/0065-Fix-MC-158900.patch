@@ -5,7 +5,7 @@ Subject: [PATCH] Fix-MC-158900
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 7b4adac6f21ea331c4c0c16b518fb9daa6500875..7bfd20347960115e0eecadc0c9a803f22862d1cc 100644
+index 18db4ca5cfc2827801443efe396d2474c1d0c564..aa3136cc0b6dc75af52eb51403a22dec638b5ab7 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -618,8 +618,10 @@ public abstract class PlayerList {

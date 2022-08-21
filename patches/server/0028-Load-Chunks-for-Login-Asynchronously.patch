@@ -167,7 +167,7 @@ index 95718fceea6bd080bc03619d9c1c5123faccbfaa..ed04602163ba61e94a15d6538e4bc681
          this.minecraftServer.methodProfiler.a("keepAlive");
          // Paper Start - give clients a longer time to respond to pings as per pre 1.12.2 timings
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 80e9c9200c2afc3005c6a8bc5f5140eab71f4a40..0e9c0466ec0108a822d6e2f9e6b90363159e6f67 100644
+index 80e9c9200c2afc3005c6a8bc5f5140eab71f4a40..1c089b2b08d15b98142c6f7d95af272f17832892 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -54,11 +54,12 @@ public abstract class PlayerList {
@@ -227,7 +227,7 @@ index 80e9c9200c2afc3005c6a8bc5f5140eab71f4a40..0e9c0466ec0108a822d6e2f9e6b90363
 +    }
 +
 +    private void delayChunkUnload(WorldServer worldserver, int chunkX, int chunkZ) {
-+        Chunk chunk = worldserver.getChunkProviderServer().getOrLoadChunkAt(chunkX, chunkZ);
++        Chunk chunk = worldserver.getChunkProviderServer().getChunkIfLoaded(chunkX, chunkZ);
 +        if (chunk != null && chunk.scheduledForUnload != null) {
 +            chunk.scheduledForUnload = null; // Delay chunk unloading
 +        }
