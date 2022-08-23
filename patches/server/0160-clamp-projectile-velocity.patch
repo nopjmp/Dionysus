@@ -23,45 +23,20 @@ index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..48319f349c63bf9d04197a48ef756b8c
          setComment("projectile", "Optimizes projectile settings");
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
-index 9c750efc74448fb7cf6faf3f36c3fb3b5e1588f5..0a4e2d6b8d93977adfd8a2dee1025b90b2f05077 100644
+index 9c750efc74448fb7cf6faf3f36c3fb3b5e1588f5..366c959c57a1fb9215669ff45c48be73488d33cd 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
-@@ -6,32 +6,8 @@ import java.util.Iterator;
- import java.util.List;
- import java.util.Set;
- 
--import net.minecraft.server.DamageSource;
--import net.minecraft.server.EntityArmorStand;
--import net.minecraft.server.EntityArrow;
--import net.minecraft.server.EntityDragonFireball;
--import net.minecraft.server.EntityEgg;
--import net.minecraft.server.EntityEnderPearl;
--import net.minecraft.server.EntityFishingHook;
--import net.minecraft.server.EntityHuman;
--import net.minecraft.server.EntityFireball;
--import net.minecraft.server.EntityInsentient;
--import net.minecraft.server.EntityLargeFireball;
--import net.minecraft.server.EntityLiving;
--import net.minecraft.server.EntityLlamaSpit;
--import net.minecraft.server.EntityPotion;
--import net.minecraft.server.EntityProjectile;
--import net.minecraft.server.EntityShulkerBullet;
--import net.minecraft.server.EntitySmallFireball;
--import net.minecraft.server.EntitySnowball;
--import net.minecraft.server.EntityThrownExpBottle;
--import net.minecraft.server.EntityTippedArrow;
--import net.minecraft.server.EntitySpectralArrow;
--import net.minecraft.server.EntityWither;
--import net.minecraft.server.EntityWitherSkull;
--import net.minecraft.server.GenericAttributes;
--import net.minecraft.server.MobEffect;
--import net.minecraft.server.MobEffectList;
+@@ -32,6 +32,9 @@ import net.minecraft.server.EntityWitherSkull;
+ import net.minecraft.server.GenericAttributes;
+ import net.minecraft.server.MobEffect;
+ import net.minecraft.server.MobEffectList;
++import net.minecraft.server.MathHelper;
++
 +import dev.pomf.dionysus.DionysusConfig;
-+import net.minecraft.server.*;
  
  import org.apache.commons.lang.Validate;
  import org.bukkit.Location;
-@@ -382,6 +358,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+@@ -382,6 +385,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
          Validate.notNull(launch, "Projectile not supported");
  
          if (velocity != null) {
