@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RemainingToast <Remainingtoast@gmail.com>
+Date: Tue, 23 Aug 2022 23:56:52 +1000
+Subject: [PATCH] clamp projectile velocity
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+index 9c750efc74448fb7cf6faf3f36c3fb3b5e1588f5..5bebe0399b2942fb6ac26dfdab892f5544b4a5c2 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+@@ -6,32 +6,7 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Set;
+ 
+-import net.minecraft.server.DamageSource;
+-import net.minecraft.server.EntityArmorStand;
+-import net.minecraft.server.EntityArrow;
+-import net.minecraft.server.EntityDragonFireball;
+-import net.minecraft.server.EntityEgg;
+-import net.minecraft.server.EntityEnderPearl;
+-import net.minecraft.server.EntityFishingHook;
+-import net.minecraft.server.EntityHuman;
+-import net.minecraft.server.EntityFireball;
+-import net.minecraft.server.EntityInsentient;
+-import net.minecraft.server.EntityLargeFireball;
+-import net.minecraft.server.EntityLiving;
+-import net.minecraft.server.EntityLlamaSpit;
+-import net.minecraft.server.EntityPotion;
+-import net.minecraft.server.EntityProjectile;
+-import net.minecraft.server.EntityShulkerBullet;
+-import net.minecraft.server.EntitySmallFireball;
+-import net.minecraft.server.EntitySnowball;
+-import net.minecraft.server.EntityThrownExpBottle;
+-import net.minecraft.server.EntityTippedArrow;
+-import net.minecraft.server.EntitySpectralArrow;
+-import net.minecraft.server.EntityWither;
+-import net.minecraft.server.EntityWitherSkull;
+-import net.minecraft.server.GenericAttributes;
+-import net.minecraft.server.MobEffect;
+-import net.minecraft.server.MobEffectList;
++import net.minecraft.server.*;
+ 
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.Location;
+@@ -382,6 +357,12 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+         Validate.notNull(launch, "Projectile not supported");
+ 
+         if (velocity != null) {
++            // Dionysus start - clamp projectile velocity
++            velocity = velocity
++                    .setX(MathHelper.a(velocity.getX(), -3.0D, 3.0D))
++                    .setY(MathHelper.a(velocity.getY(), -3.0D, 3.0D))
++                    .setZ(MathHelper.a(velocity.getZ(), -3.0D, 3.0D));
++            // Dionysus end
+             ((T) launch.getBukkitEntity()).setVelocity(velocity);
+         }
+ 
