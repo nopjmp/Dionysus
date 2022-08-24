@@ -86,10 +86,10 @@ index 0000000000000000000000000000000000000000..349376562ed8b91496496dbf2d9fea32
 +}
 diff --git a/src/main/java/dev/pomf/dionysus/util/BookUtil.java b/src/main/java/dev/pomf/dionysus/util/BookUtil.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..b13e225760506d0de1d8dc5f65dff2e3440595e8
+index 0000000000000000000000000000000000000000..b5c17328c42348b7940a1b8a0856e848e3f106c8
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/util/BookUtil.java
-@@ -0,0 +1,143 @@
+@@ -0,0 +1,144 @@
 +package dev.pomf.dionysus.util;
 +
 +import com.google.gson.Gson;
@@ -201,12 +201,13 @@ index 0000000000000000000000000000000000000000..b13e225760506d0de1d8dc5f65dff2e3
 +    }
 +
 +    private static ItemStack loadBook(ItemStack book) {
++        System.out.println("Load Book");
 +        ItemStack clone = book;
 +        NBTItem nbtItem = new NBTItem(clone);
 +        try {
 +            Reader reader = Files.newBufferedReader(Paths.get(FILE_PATH.formatted(nbtItem.getString("key"))));
 +            BookObject bookObject = GSON.fromJson(reader, BookObject.class);
-+            System.out.printf("%s %s%n", bookObject.getAuthor(), bookObject.getPages());
++            System.out.printf("book object: %s %s%n", bookObject.getAuthor(), bookObject.getPages());
 +            reader.close();
 +            BookMeta bookMeta = (BookMeta) clone.getItemMeta();
 +            bookMeta.setAuthor(bookObject.getAuthor());
@@ -234,7 +235,7 @@ index 0000000000000000000000000000000000000000..b13e225760506d0de1d8dc5f65dff2e3
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
-index 4fafb4977a40176d88e790924afba8fa9e17867b..29bc48dc67030e7bb2f10f55f97bc5acca04c574 100644
+index 4fafb4977a40176d88e790924afba8fa9e17867b..a2e3739bd5d8b019be174ffe7d1999601de51ca5 100644
 --- a/src/main/java/net/minecraft/server/EntityItem.java
 +++ b/src/main/java/net/minecraft/server/EntityItem.java
 @@ -2,9 +2,13 @@ package net.minecraft.server;
@@ -257,7 +258,7 @@ index 4fafb4977a40176d88e790924afba8fa9e17867b..29bc48dc67030e7bb2f10f55f97bc5ac
  
 +                // Dionysus start
 +                if (DionysusConfig.saveBooksAsJson) {
-+                    System.out.println("EntityItem.java");
++                    System.out.println("EntityPickupItemEvent");
 +                    BookUtil.loadInventory((Player) entityhuman.getBukkitEntity(), entityhuman.getBukkitEntity().getInventory());
 +                }
 +                // Dionysus end
@@ -266,7 +267,7 @@ index 4fafb4977a40176d88e790924afba8fa9e17867b..29bc48dc67030e7bb2f10f55f97bc5ac
                  EntityPickupItemEvent entityEvent = new EntityPickupItemEvent((org.bukkit.entity.Player) entityhuman.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
                  entityEvent.setCancelled(!entityhuman.canPickUpLoot);
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 099b3ebb6a8be90e0cbf45b4a21be6f918153a54..703b4799bba3ddbd8978fa8f1d7ec420d60f06c5 100644
+index 099b3ebb6a8be90e0cbf45b4a21be6f918153a54..ca0672ce8cb77e1fb67a3f820bd96a678c2afb84 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -2,6 +2,8 @@ package net.minecraft.server;
@@ -286,19 +287,6 @@ index 099b3ebb6a8be90e0cbf45b4a21be6f918153a54..703b4799bba3ddbd8978fa8f1d7ec420
  import org.bukkit.event.inventory.InventoryType;
  import org.bukkit.event.player.PlayerChangedMainHandEvent;
  import org.bukkit.event.player.PlayerGameModeChangeEvent;
-@@ -1001,6 +1004,12 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
-         closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason.UNKNOWN);
-     }
-     public void closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason reason) {
-+        // Dionysus start - save books as json
-+        if (DionysusConfig.saveBooksAsJson) {
-+            System.out.println("EntityPlayer.java");
-+            BookUtil.loadInventory(getBukkitEntity(), getBukkitEntity().getInventory());
-+        }
-+        // Dionysus end
-         CraftEventFactory.handleInventoryCloseEvent(this, reason); // CraftBukkit
-         // Paper end
-         this.playerConnection.sendPacket(new PacketPlayOutCloseWindow(this.activeContainer.windowId));
 diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
 index a474d8af1670ca1619bc0043f2b4f912ea9a4844..968ce9bfcbd1757a5a5fb5964dc3dd2291a76030 100644
 --- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
@@ -367,7 +355,7 @@ index 897a49eda09df4654ea31808907cb60c8fa94f77..4dc8772b92c77f41867417692c883fc8
          PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(cserver.getPlayer(entityplayer), joinMessage);
          cserver.getPluginManager().callEvent(playerJoinEvent);
 diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
-index f1a3ca9509ebc50eaa67bf4dac2645f5ee37bbef..37171c58dd80ce6861d7196367e49d15d9564dad 100644
+index f1a3ca9509ebc50eaa67bf4dac2645f5ee37bbef..43d86347dc7226e9246eb983c28ab2c67ee6dc7e 100644
 --- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 +++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 @@ -10,6 +10,9 @@ import javax.annotation.Nullable;
@@ -429,3 +417,16 @@ index f1a3ca9509ebc50eaa67bf4dac2645f5ee37bbef..37171c58dd80ce6861d7196367e49d15
          InventoryOpenEvent event = new InventoryOpenEvent(container.getBukkitView());
          event.setCancelled(cancelled);
          server.getPluginManager().callEvent(event);
+@@ -977,6 +1001,12 @@ public class CraftEventFactory {
+         handleInventoryCloseEvent(human, org.bukkit.event.inventory.InventoryCloseEvent.Reason.UNKNOWN);
+     }
+     public static void handleInventoryCloseEvent(EntityHuman human, org.bukkit.event.inventory.InventoryCloseEvent.Reason reason) {
++        // Dionysus start - save books as json
++        if (DionysusConfig.saveBooksAsJson) {
++            System.out.println("InventoryCloseEvent");
++            BookUtil.loadInventory((Player) human.getBukkitEntity(), human.getBukkitEntity().getInventory());
++        }
++        // Dionysus end
+         InventoryCloseEvent event = new InventoryCloseEvent(human.activeContainer.getBukkitView(), reason);
+         // Paper end
+         human.world.getServer().getPluginManager().callEvent(event);
