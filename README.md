@@ -19,9 +19,8 @@
 *Anyone can contribute. Just follow the below steps!* 
 
 1. [Fork Dionysus](https://github.com/nopjmp/Dionysus/fork)
-2. [Build Dionysus]()
-3. [Commit Patches]()
-4. [Create Pull Request]()
+2. [Build Dionysus](https://github.com/nopjmp/Dionysus#building)
+3. [Create Pull Request](https://github.com/nopjmp/Dionysus/compare)
 
 Assistant will be given to get pull requests working correctly.
 
