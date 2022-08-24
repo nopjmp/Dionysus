@@ -20,7 +20,7 @@
 
 1. [Fork Dionysus](https://github.com/nopjmp/Dionysus/fork)
 2. [Build Dionysus](https://github.com/nopjmp/Dionysus#building)
-3. [Create Pull Request](https://github.com/nopjmp/Dionysus/compare)
+3. [Create Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork)
 
 Assistant will be given to get pull requests working correctly.
 
