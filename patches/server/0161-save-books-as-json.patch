@@ -86,10 +86,10 @@ index 0000000000000000000000000000000000000000..349376562ed8b91496496dbf2d9fea32
 +}
 diff --git a/src/main/java/dev/pomf/dionysus/util/BookUtil.java b/src/main/java/dev/pomf/dionysus/util/BookUtil.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..6812d75d3ed643a439e2a7364bb9bb585147e74b
+index 0000000000000000000000000000000000000000..b13e225760506d0de1d8dc5f65dff2e3440595e8
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/util/BookUtil.java
-@@ -0,0 +1,142 @@
+@@ -0,0 +1,143 @@
 +package dev.pomf.dionysus.util;
 +
 +import com.google.gson.Gson;
@@ -98,6 +98,7 @@ index 0000000000000000000000000000000000000000..6812d75d3ed643a439e2a7364bb9bb58
 +import net.minecraft.server.EntityPlayer;
 +import org.bukkit.Material;
 +import org.bukkit.block.ShulkerBox;
++import org.bukkit.entity.Player;
 +import org.bukkit.inventory.Inventory;
 +import org.bukkit.inventory.ItemStack;
 +import org.bukkit.inventory.meta.BlockStateMeta;
@@ -117,19 +118,19 @@ index 0000000000000000000000000000000000000000..6812d75d3ed643a439e2a7364bb9bb58
 +
 +public class BookUtil {
 +
-+    private static final String FILE_PATH = "/world/bookdata/%s.json";
++    private static final String FILE_PATH = System.getProperty("user.dir") + "/world/bookdata/%s.json";
 +    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 +
-+    public static void loadInventory(EntityPlayer player, Inventory inventory) {
++    public static void loadInventory(Player player, Inventory inventory) {
 +        for (ItemStack slot : inventory.getContents()) {
 +            if (slot == null) continue;
 +            loadItemStack(slot);
 +        }
 +
-+        player.updateInventory(player.activeContainer);
++        player.updateInventory();
 +    }
 +
-+    public static void unloadInventory(EntityPlayer player, Inventory inventory) {
++    public static void unloadInventory(Player player, Inventory inventory) {
 +        for (ItemStack slot : inventory.getContents()) {
 +            if (slot == null) continue;
 +            unloadItemStack(slot);
@@ -148,11 +149,10 @@ index 0000000000000000000000000000000000000000..6812d75d3ed643a439e2a7364bb9bb58
 +            }
 +        }
 +
-+        player.updateInventory(player.activeContainer);
++        player.updateInventory();
 +    }
 +
 +    private static void unloadItemStack(ItemStack itemStack) {
-+        System.out.println("unloadItemStack");
 +        if (itemStack.getType() == Material.BOOK_AND_QUILL || itemStack.getType() == Material.WRITTEN_BOOK) {
 +            NBTItem nbtItem = new NBTItem(itemStack);
 +            if (!(nbtItem.hasKey("key") && nbtItem.getBoolean("unloaded"))) {
@@ -162,7 +162,6 @@ index 0000000000000000000000000000000000000000..6812d75d3ed643a439e2a7364bb9bb58
 +    }
 +
 +    private static void loadItemStack(ItemStack itemStack) {
-+        System.out.println("loadItemStack");
 +        if (itemStack.getType() == Material.BOOK_AND_QUILL || itemStack.getType() == Material.WRITTEN_BOOK) {
 +            NBTItem nbtItem = new NBTItem(itemStack);
 +            if (nbtItem.getBoolean("unloaded")) {
@@ -181,8 +180,11 @@ index 0000000000000000000000000000000000000000..6812d75d3ed643a439e2a7364bb9bb58
 +                String utf8str = StandardCharsets.UTF_8.decode(buffer).toString();
 +                pages.add(utf8str);
 +            }
-+            File file = new File(FILE_PATH.formatted(hash(meta.getPages()+"")));
-+            Writer writer = Files.newBufferedWriter(Path.of(file.getPath()));
++            Path path = Paths.get(FILE_PATH.formatted(hash(meta.getPages()+"")));
++            if (!Files.exists(path.getParent())) {
++                Files.createDirectory(path.getParent());
++            }
++            Writer writer = Files.newBufferedWriter(path);
 +            GSON.toJson(new BookObject(meta.getAuthor(), pages), writer);
 +            writer.close();
 +        } catch (IOException e) {
@@ -202,8 +204,7 @@ index 0000000000000000000000000000000000000000..6812d75d3ed643a439e2a7364bb9bb58
 +        ItemStack clone = book;
 +        NBTItem nbtItem = new NBTItem(clone);
 +        try {
-+            File file = new File(FILE_PATH.formatted(nbtItem.getString("key")));
-+            Reader reader = Files.newBufferedReader(Path.of(file.getPath()));
++            Reader reader = Files.newBufferedReader(Paths.get(FILE_PATH.formatted(nbtItem.getString("key"))));
 +            BookObject bookObject = GSON.fromJson(reader, BookObject.class);
 +            System.out.printf("%s %s%n", bookObject.getAuthor(), bookObject.getPages());
 +            reader.close();
@@ -233,10 +234,10 @@ index 0000000000000000000000000000000000000000..6812d75d3ed643a439e2a7364bb9bb58
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
-index 4fafb4977a40176d88e790924afba8fa9e17867b..f1f534fee2b5a11e1e4ef9a85f15a766b5d155ae 100644
+index 4fafb4977a40176d88e790924afba8fa9e17867b..29bc48dc67030e7bb2f10f55f97bc5acca04c574 100644
 --- a/src/main/java/net/minecraft/server/EntityItem.java
 +++ b/src/main/java/net/minecraft/server/EntityItem.java
-@@ -2,6 +2,9 @@ package net.minecraft.server;
+@@ -2,9 +2,13 @@ package net.minecraft.server;
  
  import java.util.Iterator;
  import javax.annotation.Nullable;
@@ -246,13 +247,18 @@ index 4fafb4977a40176d88e790924afba8fa9e17867b..f1f534fee2b5a11e1e4ef9a85f15a766
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  // CraftBukkit start
-@@ -374,6 +377,12 @@ public class EntityItem extends Entity implements HopperPusher {
++import org.bukkit.entity.Player;
+ import org.bukkit.event.entity.EntityPickupItemEvent;
+ import org.bukkit.event.player.PlayerPickupItemEvent;
+ // CraftBukkit end
+@@ -374,6 +378,13 @@ public class EntityItem extends Entity implements HopperPusher {
                      return;
                  }
  
 +                // Dionysus start
-+                if (entityhuman instanceof EntityPlayer player && DionysusConfig.saveBooksAsJson) {
-+                    BookUtil.loadInventory(player, entityhuman.getBukkitEntity().getInventory());
++                if (DionysusConfig.saveBooksAsJson) {
++                    System.out.println("EntityItem.java");
++                    BookUtil.loadInventory((Player) entityhuman.getBukkitEntity(), entityhuman.getBukkitEntity().getInventory());
 +                }
 +                // Dionysus end
 +
@@ -260,7 +266,7 @@ index 4fafb4977a40176d88e790924afba8fa9e17867b..f1f534fee2b5a11e1e4ef9a85f15a766
                  EntityPickupItemEvent entityEvent = new EntityPickupItemEvent((org.bukkit.entity.Player) entityhuman.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
                  entityEvent.setCancelled(!entityhuman.canPickUpLoot);
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 099b3ebb6a8be90e0cbf45b4a21be6f918153a54..f474ea6d1fb75dd4c51c397f1ce6779c0e65933d 100644
+index 099b3ebb6a8be90e0cbf45b4a21be6f918153a54..703b4799bba3ddbd8978fa8f1d7ec420d60f06c5 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -2,6 +2,8 @@ package net.minecraft.server;
@@ -272,20 +278,62 @@ index 099b3ebb6a8be90e0cbf45b4a21be6f918153a54..f474ea6d1fb75dd4c51c397f1ce6779c
  import io.netty.buffer.Unpooled;
  import java.util.ArrayDeque; // Paper
  import java.util.ArrayList;
-@@ -1001,6 +1003,11 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -22,6 +24,7 @@ import org.bukkit.craftbukkit.CraftWorld;
+ import org.bukkit.craftbukkit.entity.CraftPlayer;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.entity.Player;
+ import org.bukkit.event.inventory.InventoryType;
+ import org.bukkit.event.player.PlayerChangedMainHandEvent;
+ import org.bukkit.event.player.PlayerGameModeChangeEvent;
+@@ -1001,6 +1004,12 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
          closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason.UNKNOWN);
      }
      public void closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason reason) {
 +        // Dionysus start - save books as json
 +        if (DionysusConfig.saveBooksAsJson) {
-+            BookUtil.loadInventory(this, getBukkitEntity().getInventory());
++            System.out.println("EntityPlayer.java");
++            BookUtil.loadInventory(getBukkitEntity(), getBukkitEntity().getInventory());
 +        }
 +        // Dionysus end
          CraftEventFactory.handleInventoryCloseEvent(this, reason); // CraftBukkit
          // Paper end
          this.playerConnection.sendPacket(new PacketPlayOutCloseWindow(this.activeContainer.windowId));
+diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+index a474d8af1670ca1619bc0043f2b4f912ea9a4844..968ce9bfcbd1757a5a5fb5964dc3dd2291a76030 100644
+--- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
++++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+@@ -2,6 +2,11 @@ package net.minecraft.server;
+ 
+ // CraftBukkit start
+ import java.util.ArrayList;
++
++import dev.pomf.dionysus.DionysusConfig;
++import dev.pomf.dionysus.util.BookUtil;
++import org.bukkit.block.BlockState;
++import org.bukkit.block.ShulkerBox;
+ import org.bukkit.event.block.BlockBreakEvent;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.event.Event;
+@@ -307,6 +312,16 @@ public class PlayerInteractManager {
+                 ((EntityPlayer) this.player).playerConnection.sendPacket(packet);
+             }
+ 
++            // Dionysus start - save books as jsons
++            if (DionysusConfig.saveBooksAsJson) {
++                BlockState state = block.getState();
++                if (state instanceof ShulkerBox shulker) {
++                    System.out.println("BlockBreakEvent");
++                    BookUtil.unloadInventory(player.getBukkitEntity(), shulker.getInventory());
++                }
++            }
++            // Dionysus end
++
+             event = new BlockBreakEvent(block, this.player.getBukkitEntity());
+ 
+             // Sword + Creative mode pre-cancel
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 897a49eda09df4654ea31808907cb60c8fa94f77..9d2a62f5745b0999df03a87efc7f1e48aa53a27a 100644
+index 897a49eda09df4654ea31808907cb60c8fa94f77..4dc8772b92c77f41867417692c883fc8e250c28b 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
@@ -296,13 +344,22 @@ index 897a49eda09df4654ea31808907cb60c8fa94f77..9d2a62f5745b0999df03a87efc7f1e48
  import io.netty.buffer.Unpooled;
  import java.io.File;
  import java.net.SocketAddress;
-@@ -435,6 +436,12 @@ public abstract class PlayerList {
+@@ -34,6 +35,7 @@ import org.bukkit.Location;
+ import org.bukkit.TravelAgent;
+ import org.bukkit.craftbukkit.util.CraftChatMessage;
+ import org.bukkit.entity.Player;
++import org.bukkit.event.block.BlockBreakEvent;
+ import org.bukkit.event.player.PlayerChangedWorldEvent;
+ import org.bukkit.event.player.PlayerPortalEvent;
+ import org.bukkit.event.player.PlayerJoinEvent;
+@@ -435,6 +437,13 @@ public abstract class PlayerList {
          // this.sendAll(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new EntityPlayer[] { entityplayer})); // CraftBukkit - replaced with loop below
          WorldServer worldserver = this.server.getWorldServer(entityplayer.dimension);
  
 +        // Dionysus start - save books as json
 +        if (DionysusConfig.saveBooksAsJson) {
-+            BookUtil.unloadInventory(entityplayer, entityplayer.getBukkitEntity().getInventory());
++            System.out.println("PlayerJoinEvent");
++            BookUtil.unloadInventory(entityplayer.getBukkitEntity(), entityplayer.getBukkitEntity().getInventory());
 +        }
 +        // Dionysus end
 +
@@ -310,7 +367,7 @@ index 897a49eda09df4654ea31808907cb60c8fa94f77..9d2a62f5745b0999df03a87efc7f1e48
          PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(cserver.getPlayer(entityplayer), joinMessage);
          cserver.getPluginManager().callEvent(playerJoinEvent);
 diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
-index f1a3ca9509ebc50eaa67bf4dac2645f5ee37bbef..a26ab4a206e8cf6c84bf1d7e0c0888b737c43616 100644
+index f1a3ca9509ebc50eaa67bf4dac2645f5ee37bbef..37171c58dd80ce6861d7196367e49d15d9564dad 100644
 --- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 +++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 @@ -10,6 +10,9 @@ import javax.annotation.Nullable;
@@ -323,7 +380,15 @@ index f1a3ca9509ebc50eaa67bf4dac2645f5ee37bbef..a26ab4a206e8cf6c84bf1d7e0c0888b7
  import net.minecraft.server.*;
  
  import org.bukkit.Bukkit;
-@@ -30,6 +33,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
+@@ -19,6 +22,7 @@ import org.bukkit.Statistic.Type;
+ import org.bukkit.block.Block;
+ import org.bukkit.block.BlockFace;
+ import org.bukkit.block.BlockState;
++import org.bukkit.block.ShulkerBox;
+ import org.bukkit.craftbukkit.CraftServer;
+ import org.bukkit.craftbukkit.CraftStatistic;
+ import org.bukkit.craftbukkit.CraftWorld;
+@@ -30,6 +34,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
  import org.bukkit.craftbukkit.inventory.CraftInventoryCrafting;
  import org.bukkit.craftbukkit.inventory.CraftItemStack;
  import org.bukkit.craftbukkit.inventory.CraftMetaBook;
@@ -331,15 +396,33 @@ index f1a3ca9509ebc50eaa67bf4dac2645f5ee37bbef..a26ab4a206e8cf6c84bf1d7e0c0888b7
  import org.bukkit.craftbukkit.util.CraftDamageSource;
  import org.bukkit.craftbukkit.util.CraftMagicNumbers;
  import org.bukkit.entity.AreaEffectCloud;
-@@ -820,6 +824,14 @@ public class CraftEventFactory {
+@@ -147,6 +152,16 @@ public class CraftEventFactory {
+             equipmentSlot = EquipmentSlot.OFF_HAND;
+         }
+ 
++        // Dionysus start - save books as jsons
++        if (DionysusConfig.saveBooksAsJson) {
++            BlockState state = placedBlock.getState();
++            if (state instanceof ShulkerBox shulker) {
++                System.out.println("BlockPlaceEvent");
++                BookUtil.unloadInventory(player, shulker.getInventory());
++            }
++        }
++        // Dionysus end
++
+         BlockPlaceEvent event = new BlockPlaceEvent(placedBlock, replacedBlockState, blockClicked, item, player, canBuild, equipmentSlot);
+         craftServer.getPluginManager().callEvent(event);
+ 
+@@ -820,6 +835,15 @@ public class CraftEventFactory {
          CraftPlayer craftPlayer = player.getBukkitEntity();
          player.activeContainer.transferTo(container, craftPlayer);
  
 +        // Dionysus start - save books as json
 +        if (DionysusConfig.saveBooksAsJson) {
++            System.out.println("InventoryOpenEvent");
 +            InventoryView inv = player.activeContainer.getBukkitView();
-+            BookUtil.unloadInventory(player, inv.getTopInventory());
-+            BookUtil.unloadInventory(player, craftPlayer.getInventory());
++            BookUtil.unloadInventory(player.getBukkitEntity(), inv.getTopInventory());
++            BookUtil.unloadInventory(player.getBukkitEntity(), craftPlayer.getInventory());
 +        }
 +        // Dionysus end
 +
