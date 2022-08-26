@@ -55,47 +55,17 @@ index 48319f349c63bf9d04197a48ef756b8c7fdd17a3..45b8bb37fb94b3a1993654d80a5e36ad
 +        );
 +    }
  }
-diff --git a/src/main/java/dev/pomf/dionysus/util/BookObject.java b/src/main/java/dev/pomf/dionysus/util/BookObject.java
-new file mode 100644
-index 0000000000000000000000000000000000000000..349376562ed8b91496496dbf2d9fea32642403ad
---- /dev/null
-+++ b/src/main/java/dev/pomf/dionysus/util/BookObject.java
-@@ -0,0 +1,23 @@
-+package dev.pomf.dionysus.util;
-+
-+import java.util.List;
-+
-+public class BookObject {
-+
-+    private String author;
-+
-+    private List<String> pages;
-+
-+    public BookObject(String author, List<String> pages) {
-+        this.author = author;
-+        this.pages = pages;
-+    }
-+
-+    public String getAuthor() {
-+        return author;
-+    }
-+
-+    public List<String> getPages() {
-+        return pages;
-+    }
-+}
 diff --git a/src/main/java/dev/pomf/dionysus/util/BookUtil.java b/src/main/java/dev/pomf/dionysus/util/BookUtil.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..b16023c81e33c3d5f51640fe2ffda12e9429727d
+index 0000000000000000000000000000000000000000..2581aac0d184403df2bffeca610d75b10af09ae6
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/util/BookUtil.java
-@@ -0,0 +1,142 @@
+@@ -0,0 +1,156 @@
 +package dev.pomf.dionysus.util;
 +
 +import com.google.gson.Gson;
 +import com.google.gson.GsonBuilder;
 +import de.tr7zw.changeme.nbtapi.NBTItem;
-+import net.minecraft.server.EntityPlayer;
 +import org.bukkit.Material;
 +import org.bukkit.block.ShulkerBox;
 +import org.bukkit.entity.Player;
@@ -104,7 +74,6 @@ index 0000000000000000000000000000000000000000..b16023c81e33c3d5f51640fe2ffda12e
 +import org.bukkit.inventory.meta.BlockStateMeta;
 +import org.bukkit.inventory.meta.BookMeta;
 +
-+import java.io.File;
 +import java.io.IOException;
 +import java.io.Reader;
 +import java.io.Writer;
@@ -152,8 +121,8 @@ index 0000000000000000000000000000000000000000..b16023c81e33c3d5f51640fe2ffda12e
 +        player.updateInventory();
 +    }
 +
-+    private static void unloadItemStack(ItemStack itemStack) {
-+        if (itemStack.getType() == Material.BOOK_AND_QUILL || itemStack.getType() == Material.WRITTEN_BOOK) {
++    public static void unloadItemStack(ItemStack itemStack) {
++        if (isBook(itemStack)) {
 +            NBTItem nbtItem = new NBTItem(itemStack);
 +            if (!(nbtItem.hasKey("key") && nbtItem.getBoolean("unloaded"))) {
 +                itemStack.setItemMeta(unloadBook(itemStack).getItemMeta());
@@ -161,13 +130,17 @@ index 0000000000000000000000000000000000000000..b16023c81e33c3d5f51640fe2ffda12e
 +        }
 +    }
 +
-+    private static void loadItemStack(ItemStack itemStack) {
-+        if (itemStack.getType() == Material.BOOK_AND_QUILL || itemStack.getType() == Material.WRITTEN_BOOK) {
++    public static void loadItemStack(ItemStack itemStack) {
++        if (isBook(itemStack)) {
 +            NBTItem nbtItem = new NBTItem(itemStack);
 +            if (nbtItem.getBoolean("unloaded")) {
 +                itemStack.setItemMeta(loadBook(itemStack).getItemMeta());
 +            }
 +        }
++    }
++
++    private static boolean isBook(ItemStack item) {
++        return item.getType() == Material.BOOK_AND_QUILL || item.getType() == Material.WRITTEN_BOOK;
 +    }
 +
 +    private static ItemStack unloadBook(ItemStack book) {
@@ -185,7 +158,7 @@ index 0000000000000000000000000000000000000000..b16023c81e33c3d5f51640fe2ffda12e
 +                Files.createDirectory(path.getParent());
 +            }
 +            Writer writer = Files.newBufferedWriter(path);
-+            GSON.toJson(new BookObject(meta.getAuthor(), pages), writer);
++            GSON.toJson(new Book(pages), writer);
 +            writer.close();
 +        } catch (IOException e) {
 +            e.printStackTrace();
@@ -205,10 +178,9 @@ index 0000000000000000000000000000000000000000..b16023c81e33c3d5f51640fe2ffda12e
 +        NBTItem nbtItem = new NBTItem(clone);
 +        try {
 +            Reader reader = Files.newBufferedReader(Paths.get(FILE_PATH.formatted(nbtItem.getString("key"))));
-+            BookObject bookObject = GSON.fromJson(reader, BookObject.class);
++            Book bookObject = GSON.fromJson(reader, Book.class);
 +            reader.close();
 +            BookMeta bookMeta = (BookMeta) clone.getItemMeta();
-+            bookMeta.setAuthor(bookObject.getAuthor());
 +            bookMeta.setPages(bookObject.getPages());
 +            clone.setItemMeta(bookMeta);
 +            nbtItem = new NBTItem(clone);
@@ -229,6 +201,19 @@ index 0000000000000000000000000000000000000000..b16023c81e33c3d5f51640fe2ffda12e
 +            return hash.toString();
 +        } catch (java.security.NoSuchAlgorithmException ignored) {}
 +        return null;
++    }
++
++    public static class Book {
++
++        private final List<String> pages;
++
++        public Book(List<String> pages) {
++            this.pages = pages;
++        }
++
++        public List<String> getPages() {
++            return pages;
++        }
 +    }
 +
 +}
@@ -317,7 +302,7 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..66373fe463cb70c75a536cbc38092fa7
  
              // Sword + Creative mode pre-cancel
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 897a49eda09df4654ea31808907cb60c8fa94f77..b54fc6324e569f6151545f82a631a2a55ba69663 100644
+index 897a49eda09df4654ea31808907cb60c8fa94f77..082d17e2fa69c669f076b37f809d272af57c4f55 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
@@ -328,21 +313,40 @@ index 897a49eda09df4654ea31808907cb60c8fa94f77..b54fc6324e569f6151545f82a631a2a5
  import io.netty.buffer.Unpooled;
  import java.io.File;
  import java.net.SocketAddress;
-@@ -34,6 +35,7 @@ import org.bukkit.Location;
+@@ -32,8 +33,10 @@ import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+ import org.bukkit.Bukkit;
+ import org.bukkit.Location;
  import org.bukkit.TravelAgent;
++import org.bukkit.craftbukkit.entity.CraftPlayer;
  import org.bukkit.craftbukkit.util.CraftChatMessage;
  import org.bukkit.entity.Player;
 +import org.bukkit.event.block.BlockBreakEvent;
  import org.bukkit.event.player.PlayerChangedWorldEvent;
  import org.bukkit.event.player.PlayerPortalEvent;
  import org.bukkit.event.player.PlayerJoinEvent;
-@@ -435,6 +437,12 @@ public abstract class PlayerList {
+@@ -41,6 +44,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
+ import org.bukkit.event.player.PlayerQuitEvent;
+ import org.bukkit.event.player.PlayerRespawnEvent;
+ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
++import org.bukkit.inventory.PlayerInventory;
+ import org.bukkit.util.Vector;
+ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
+ // CraftBukkit end
+@@ -435,6 +439,20 @@ public abstract class PlayerList {
          // this.sendAll(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new EntityPlayer[] { entityplayer})); // CraftBukkit - replaced with loop below
          WorldServer worldserver = this.server.getWorldServer(entityplayer.dimension);
  
 +        // Dionysus start - save books as json
 +        if (DionysusConfig.saveBooksAsJson) {
-+            BookUtil.unloadInventory(entityplayer.getBukkitEntity(), entityplayer.getBukkitEntity().getInventory());
++            final CraftPlayer p = entityplayer.getBukkitEntity();
++            final PlayerInventory i = p.getInventory();
++
++            // Unload all books on join
++            BookUtil.unloadInventory(p, i);
++
++            // Load books in hands
++            BookUtil.loadItemStack(i.getItemInMainHand());
++            BookUtil.loadItemStack(i.getItemInOffHand());
 +        }
 +        // Dionysus end
 +
