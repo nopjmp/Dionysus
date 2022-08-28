@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sun, 28 Aug 2022 13:08:31 +0200
+Subject: [PATCH] Optimize leashed entity tracking
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
+index 4822c22b3b1b57d0aa7555aad39a9b6521798448..6043c6b299ec668da75c163d7c8bf89f922b607a 100644
+--- a/src/main/java/net/minecraft/server/EntityTracker.java
++++ b/src/main/java/net/minecraft/server/EntityTracker.java
+@@ -254,11 +254,17 @@ public class EntityTracker {
+     public void a(EntityPlayer entityplayer, Chunk chunk) {
+         ArrayList arraylist = Lists.newArrayList();
+         ArrayList arraylist1 = Lists.newArrayList();
+-        Iterator iterator = this.c.iterator();
+ 
++        Iterator iterator; // Dionysus
++
++        /* // Dionysus start - optimize leashed entity tracking
+         while (iterator.hasNext()) {
+             EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
+-            Entity entity = entitytrackerentry.b();
++            Entity entity = entitytrackerentry.b();*/
++        chunk.forEachEntity(entity -> {
++            EntityTrackerEntry entitytrackerentry = entity.tracker;
++
++            if (entitytrackerentry == null) return; // Dionysus end
+ 
+             if (entity != entityplayer && entity.ab == chunk.locX && entity.ad == chunk.locZ) {
+                 entitytrackerentry.updatePlayer(entityplayer);
+@@ -270,7 +276,7 @@ public class EntityTracker {
+                     arraylist1.add(entity);
+                 }
+             }
+-        }
++        }); // Dionysus
+ 
+         Entity entity1;
+ 

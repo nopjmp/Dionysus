@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Sun, 21 Aug 2022 20:16:39 +0200
+Subject: [PATCH] Prevent being too far away from vehicle
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index b31176eed035fc9d6ccabaf446ca79f79df6e490..bdcf2321521804c984ca134a453186561e63f9ce 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -3000,10 +3000,23 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+ 
+     @Nullable Entity getVehicleDirect() { return this.bJ(); } // Paper - OBFHELPER
+     @Nullable
+-    public Entity bJ() {
++    public Entity bJ(boolean checkVehicle) {
++        if (this.au != null && checkVehicle) {
++            if (this.dimension != this.au.dimension) {
++                this.stopRiding();
++            } else if (this.getBukkitEntity().getLocation().distance(this.au.getBukkitEntity().getLocation()) > 500.D) {
++                this.stopRiding();
++            }
++        }
++
+         return this.au;
+     }
+ 
++    @Nullable
++    public Entity bJ() {
++        return bJ(false);
++    }
++
+     public EnumPistonReaction getPushReaction() {
+         return EnumPistonReaction.NORMAL;
+     }
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 6c30d30ff2d7c46aa9e3e32473efc94cb243defa..caac1a569fd6c00ab80e5c9f21f9ab44d388c5ef 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -386,7 +386,7 @@ public abstract class EntityHuman extends EntityLiving {
+         if (this.getHealth() > 0.0F && !this.isSpectator()) {
+             AxisAlignedBB axisalignedbb;
+ 
+-            if (this.isPassenger() && !this.bJ().dead) {
++            if (this.bJ(true) != null && !this.bJ().dead) {
+                 axisalignedbb = this.getBoundingBox().b(this.bJ().getBoundingBox()).grow(1.0D, 0.0D, 1.0D);
+             } else {
+                 axisalignedbb = this.getBoundingBox().grow(1.0D, 0.5D, 1.0D);
