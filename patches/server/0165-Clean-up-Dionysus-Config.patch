@@ -1,0 +1,350 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RemainingToast <Remainingtoast@gmail.com>
+Date: Thu, 1 Sep 2022 21:49:01 +1000
+Subject: [PATCH] Clean up Dionysus Config
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 76837460a0e03b70a3ee3c0ea9a64d013df309a8..baadaa251b94c4cb40d98d03825f2385e9a496d1 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -69,11 +69,13 @@ public class DionysusConfig {
+             }
+         }
+ 
+-        getString("config-version", "1");
+-        setComment("config-version",
+-                "This is the main configuration file for Dionysus.",
+-                "As you can see, there's tons to configure. Some options may impact gameplay, so use",
+-                "with caution, and make sure you know what each option does before configuring.");
++        getString("config-version", "1", """
++                This is the main configuration file for Dionysus.
++                As you can see, there's tons to configure. Some options may impact gameplay,
++                so use with caution, and make sure you know what each option does before configuring.
++                Github: https://github.com/RemainingToast/Dionysus"""
++        );
++
+         verbose = getBoolean("verbose", false);
+ 
+         for (Method method : DionysusConfig.class.getDeclaredMethods()) {
+@@ -120,7 +122,7 @@ public class DionysusConfig {
+     private static void ensureDefault(String key, Object defaultValue, String... comment) {
+         if (!config.contains(key)) {
+             config.set(key, defaultValue);
+-            config.setComment(key, String.join("\n", comment), CommentType.BLOCK);
++            setComment(key, comment);
+         }
+     }
+ 
+@@ -182,19 +184,19 @@ public class DionysusConfig {
+     public static double animalAiLimitTPS = 6;
+     public static int animalAiLimitPlayerCount = 120;
+     private static void aiLimit() {
+-        customNameAiLimitBypass = getBoolean("ai-limit.bypass.custom-name", true);
+-        tamableAiLimitBypass = getBoolean("ai-limit.bypass.tamable", true);
+-        spawnerAiLimitBypass = getBoolean("ai-limit.bypass.spawner", true);
+-        monsterAiLimitTPS = getDouble("ai-limit.monster.tps", 10);
+-        monsterAiLimitPlayerCount = getInt("ai-limit.monster.player-count", 90);
++        customNameAiLimitBypass = getBoolean("ai-limit.bypass.custom-name", customNameAiLimitBypass);
++        tamableAiLimitBypass = getBoolean("ai-limit.bypass.tamable", tamableAiLimitBypass);
++        spawnerAiLimitBypass = getBoolean("ai-limit.bypass.spawner", spawnerAiLimitBypass);
++        monsterAiLimitTPS = getDouble("ai-limit.monster.tps", monsterAiLimitTPS);
++        monsterAiLimitPlayerCount = getInt("ai-limit.monster.player-count", monsterAiLimitPlayerCount);
+ 
+-        animalAiLimitTPS = getDouble("ai-limit.animal.tps", 6);
+-        animalAiLimitPlayerCount = getInt("ai-limit.animal.player-count", 120);
++        animalAiLimitTPS = getDouble("ai-limit.animal.tps", animalAiLimitTPS);
++        animalAiLimitPlayerCount = getInt("ai-limit.animal.player-count", animalAiLimitPlayerCount);
+     }
+ 
+     public static int compressionLevel = -1;
+     private static void compressionLevel() {
+-        compressionLevel = getInt("compression-level", -1);
++        compressionLevel = getInt("compression-level", compressionLevel);
+         if (compressionLevel < -1 || compressionLevel > 9) {
+             logError("Compression level is invalid resetting to default. Valid compression levels are -1 (Default), 0 (None), 1 (Fast) through 9 (Best)");
+             compressionLevel = -1;
+@@ -208,39 +210,27 @@ public class DionysusConfig {
+ 
+     public static boolean fairNaturalSpawns = true;
+     private static void fairNaturalSpawns() {
+-        fairNaturalSpawns = getBoolean("fair-natural-spawns", fairNaturalSpawns);
+-        if (fairNaturalSpawns) {
+-            Bukkit.getLogger().info("Fair natural spawns enabled, using the Spigot world mob-spawn-range for search and Bukkit spawn-limits for the count");
+-        }
++        fairNaturalSpawns = getBoolean("fair-natural-spawns", fairNaturalSpawns, "Use Spigot world mob-spawn-range for search and Bukkit spawn-limits for the count");
+     }
+ 
+     public static boolean redactPlayerData = true;
+     private static void redactPlayerData() {
+-        redactPlayerData = getBoolean("redact-player-data", redactPlayerData);
+-        if (redactPlayerData) {
+-            Bukkit.getLogger().info("Redact player data enabled, IP Address and location data will be removed.");
+-        }
++        redactPlayerData = getBoolean("redact-player-data", redactPlayerData, "Redact player IP address and coordinates from console.");
+     }
+ 
+     public static boolean alternativeBedMechanics = true;
+     private static void alternativeBedMechanics() {
+-        alternativeBedMechanics = getBoolean("alternative-bed-mechanics", alternativeBedMechanics);
+-        if (alternativeBedMechanics) {
+-            Bukkit.getLogger().info("Alternative Bed Mechanics actived. Respawn is set when bed is clicked on.");
+-        }
++        alternativeBedMechanics = getBoolean("alternative-bed-mechanics", alternativeBedMechanics, "Respawn is always set when bed is clicked on.");
+     }
+ 
+     public static int maxProcessedNBTSize = 80000;
+     private static void maxProcessedNBTSize() {
+-        maxProcessedNBTSize = getInt("max-processed-nbt-size", 80000);
++        maxProcessedNBTSize = getInt("max-processed-nbt-size", maxProcessedNBTSize);
+     }
+ 
+     public static boolean alternativeBlockPlacement = true;
+     private static void alternativeBlockPlacement() {
+-        alternativeBlockPlacement = getBoolean("tickless-block-placement", alternativeBlockPlacement);
+-        if (alternativeBlockPlacement) {
+-            Bukkit.getLogger().info("Tickless Block Placement Mechanics activated. Block placement based on time instead of ticks.");
+-        }
++        alternativeBlockPlacement = getBoolean("tickless-block-placement", alternativeBlockPlacement, "Block placement based on time instead of ticks.");
+     }
+ 
+     public static int mapDecorationsLimit = 10;
+@@ -249,12 +239,10 @@ public class DionysusConfig {
+     }
+ 
+     public static boolean chunkOverloadDupe = false;
+-    public static boolean chunkOverloadDupeLog = false;
++    public static boolean chunkOverloadDupeLog = true;
+     private static void chunkOverloadDupe() {
+-        chunkOverloadDupe = getBoolean("chunk-overload-dupe.allow", chunkOverloadDupe);
+-        if (chunkOverloadDupe) Bukkit.getLogger().info("Chunk overload dupe activated.");
+-        chunkOverloadDupeLog = getBoolean("chunk-overload-dupe.log", chunkOverloadDupeLog);
+-        if (chunkOverloadDupeLog) Bukkit.getLogger().info("Chunk overload dupes will be logged.");
++        chunkOverloadDupe = getBoolean("chunk-overload-dupe.allow", chunkOverloadDupe, "Enable chunk overload dupe.");
++        chunkOverloadDupeLog = getBoolean("chunk-overload-dupe.log", chunkOverloadDupeLog, "Log overloaded chunks.");
+     }
+ 
+     public static int tileEntityDataLimit = 750;
+@@ -266,7 +254,7 @@ public class DionysusConfig {
+ 
+     public static boolean optimizeArmourStands = true;
+     private static void optimizeArmourStands() {
+-        optimizeArmourStands = getBoolean("optimize-armourstands", optimizeArmourStands);
++        optimizeArmourStands = getBoolean("optimize-armourstands", optimizeArmourStands, "Disable gravity on Armour Stands");
+     }
+ 
+     public static boolean improveMergeChecks = true;
+@@ -279,10 +267,10 @@ public class DionysusConfig {
+         noChunksPastWorldBorder = getBoolean("no-chunks-past-world-border", noChunksPastWorldBorder);
+     }
+ 
+-    public static String sentryDsn;
++    public static String sentryDsn = "";
+     private static void sentry() {
+         String sentryEnvironment = System.getenv("SENTRY_DSN");
+-        String sentryConfig = getString("sentry-dsn", "");
++        String sentryConfig = getString("sentry-dsn", sentryDsn);
+ 
+         sentryDsn = sentryEnvironment == null ? sentryConfig : sentryEnvironment;
+         if (sentryDsn != null && !sentryDsn.isBlank()) {
+@@ -290,29 +278,28 @@ public class DionysusConfig {
+         }
+     }
+ 
+-    public static boolean enableBooks;
++    public static boolean enableBooks = true;
+     private static void books() {
+-        enableBooks = getBoolean("enable-books", true,
+-                "Whether or not books should be writeable.",
+-                "Servers that anticipate being a target for duping may want to consider",
+-                "disabling this option.",
+-                "This can be overridden per-player with the permission dionysus.usebooks");
++        enableBooks = getBoolean("books.enabled", enableBooks, """
++                        Whether or not books should be writeable.
++                        Servers that anticipate being a target for duping may want to consider disabling this.
++                        This can be overridden per-player with the permission dionysus.usebooks"""
++        );
+     }
+ 
+-    public static boolean enableSuffocationOptimization;
++    public static boolean enableSuffocationOptimization = true;
+     private static void suffocationOptimization() {
+-        enableSuffocationOptimization = getBoolean("enable-suffocation-optimization", true,
+-                "Optimizes the suffocation check by selectively skipping",
+-                "the check in a way that still appears vanilla. This should",
+-                "be left enabled on most servers, but is provided as a",
+-                "configuration option if the vanilla deviation is undesirable.");
++        enableSuffocationOptimization = getBoolean("enable-suffocation-optimization", enableSuffocationOptimization, """
++                        Optimizes the suffocation check by selectively skipping the check in a way that still appears vanilla.
++                        This should be left enabled on most servers, but is provided as a configuration option if the vanilla deviation is undesirable."""
++        );
+     }
+ 
+-    public static int maxProjectileLoadsPerTick;
+-    public static int maxProjectileLoadsPerProjectile;
++    public static int maxProjectileLoadsPerTick = 10;
++    public static int maxProjectileLoadsPerProjectile = 10;
+     private static void projectileLoading() {
+-        maxProjectileLoadsPerTick = getInt("projectile.max-loads-per-tick", 10, "Controls how many chunks are allowed", "to be sync loaded by projectiles in a tick.");
+-        maxProjectileLoadsPerProjectile = getInt("projectile.max-loads-per-projectile", 10, "Controls how many chunks a projectile", "can load in its lifetime before it gets", "automatically removed.");
++        maxProjectileLoadsPerTick = getInt("projectile.max-loads-per-tick", maxProjectileLoadsPerTick, "Controls how many chunks are allowed", "to be sync loaded by projectiles in a tick.");
++        maxProjectileLoadsPerProjectile = getInt("projectile.max-loads-per-projectile", maxProjectileLoadsPerProjectile, "Controls how many chunks a projectile", "can load in its lifetime before it gets", "automatically removed.");
+ 
+         setComment("projectile", "Optimizes projectile settings");
+     }
+@@ -320,12 +307,11 @@ public class DionysusConfig {
+     public static Map<EntityType, Integer> projectileTimeouts = new EnumMap<>(EntityType.class);
+     private static void projectileTimeouts() {
+         // Set some defaults
+-        getInt("entity_timeouts.SNOWBALL", -1);
+-        setComment("entity_timeouts",
+-                "These values define a entity's maximum lifespan. If an",
+-                "entity is in this list and it has survived for longer than",
+-                "that number of ticks, then it will be removed. Setting a value to",
+-                "-1 disables this feature.");
++        getInt("entity_timeouts.SNOWBALL", -1, """
++                        These values define a entity's maximum lifespan.
++                        If an entity is in this list and it has survived for longer than that number of ticks, then it will be removed.
++                        Setting a value to -1 disables this feature."""
++        );
+ 
+         for (EntityType entityType : EntityType.values()) {
+             int value = config.getInt("entity_timeouts." + entityType.name(), -1);
+@@ -339,25 +325,21 @@ public class DionysusConfig {
+     public static boolean zstdCompression = false;
+     private static void zstdCompression() {
+         // Set some defaults
+-        zstdCompression = getBoolean("compression.zstd-compression", false);
+-        setComment("compression.zstd-compression",
+-                "ZSTD is a new compression algorithm that is designed to",
+-                "be faster and more efficient than GZIP and ZLIB. It is currently",
+-                "not backwards compatible with gzip, so if your server used gzip",
+-                "before, conversion will be required. This is a automatic one-time process per file that is being loaded.",
+-                "Once a file has been converted, there is no automatic way to revert to gzip.",
+-                "Newer Minecraft versions DO NOT support ZSTD. SO you may be locked forever to 1.12.2 unless you have special custom tools to convert your files."
++        zstdCompression = getBoolean("compression.zstd-compression", zstdCompression, """
++                        ## EXPERIMENTAL ##
++                        ZSTD is a new compression algorithm that is designed to
++                        be faster and more efficient than GZIP and ZLIB. It is currently
++                        not backwards compatible with gzip, so if your server used gzip
++                        before, conversion will be required. This is a automatic one-time process per file that is being loaded.
++                        Once a file has been converted, there is no automatic way to revert to gzip.
++                        Newer Minecraft versions DO NOT support ZSTD. SO you may be locked forever to 1.12.2 unless you have special custom tools to convert your files."""
+         );
+     }
+ 
+ 
+     public static int chunkCompressionLevel = -1;
+-
+     private static void chunkCompressionLevel() {
+-        chunkCompressionLevel = getInt("compression.chunk-compression-level", -1);
+-        setComment("compression.chunk-compression-level",
+-                "This sets the compression level for normal chunk data."
+-        );
++        chunkCompressionLevel = getInt("compression.chunk-compression-level", chunkCompressionLevel, "This sets the compression level for normal chunk data. -1 (Default), 0 (None), 1 (Fast) through 9 (Best)");
+ 
+         if (compressionLevel < -1 || compressionLevel > 9) {
+             logError("Compression level is invalid resetting to default. Valid compression levels are -1 (Default), 0 (None), 1 (Fast) through 9 (Best)");
+@@ -368,41 +350,32 @@ public class DionysusConfig {
+     }
+ 
+     public static boolean linearRegionFiles = false;
+-
+     private static void linearRegionFiles() {
+         // Set some defaults
+-        linearRegionFiles = getBoolean("compression.linear-region-files", linearRegionFiles);
+-        setComment("compression.linear-region-files", """
+-            Linear region format saves about 50% of disk space in OW and Nether and 95% in The End.
+-            For more information: https://github.com/xymb-endcrystalme/LinearRegionFileFormatTools"""
++        linearRegionFiles = getBoolean("compression.linear-region-files", linearRegionFiles, """
++                        Linear region format saves about 50% of disk space in OW and Nether and 95% in The End.
++                        For more information: https://github.com/xymb-endcrystalme/LinearRegionFileFormatTools"""
+         );
+     }
+     
+     public static int maxProcessedBookNBTSize = 8000;
+     private static void maxProcessedBookNBTSize() {
+-        maxProcessedBookNBTSize = getInt("max-processed-book-nbt-size", 8000);
++        maxProcessedBookNBTSize = getInt("books.max-processed-nbt-size", maxProcessedBookNBTSize);
+     }
+ 
+     public static boolean fixDonkeyDupe = true;
+     private static void fixDonkeyDupe() {
+-        fixDonkeyDupe = getBoolean("fix-donkey-dupe", fixDonkeyDupe);
+-        setComment("fix-donkey-dupe",
+-                "Fixes MC-161754"
+-        );
++        fixDonkeyDupe = getBoolean("fix-donkey-dupe", fixDonkeyDupe, "Fixes MC-161754");
+     }
+ 
+     public static boolean disableDuplicateLog = true;
+     private static void disableDuplicateLog() {
+-        disableDuplicateLog = getBoolean("disable-duplicate-log", disableDuplicateLog);
+-        setComment("disable-duplicate-log",
+-                "Disables the \"Keeping entity that already exists with UUID\"",
+-                "and \"Deleting duplicate entity\" log messages."
+-        );
++        disableDuplicateLog = getBoolean("disable-duplicate-log", disableDuplicateLog, "Disables the \"Keeping entity that already exists with UUID\" and \"Deleting duplicate entity\" log messages.");
+     }
+ 
+     public static boolean disableMojangServerCommunicationInOfflineMode = false;
+     private static void disableMojangServerCommunicationInOfflineMode() {
+-        disableMojangServerCommunicationInOfflineMode = getBoolean("disable-mojang-server-communication-in-offline-mode", false);
++        disableMojangServerCommunicationInOfflineMode = getBoolean("disable-mojang-server-communication-in-offline-mode", disableMojangServerCommunicationInOfflineMode);
+     }
+ 
+     public static boolean useAlternateKeepAlive = false;
+@@ -412,11 +385,10 @@ public class DionysusConfig {
+ 
+     public static boolean asyncWorldTick = false;
+     private static void asyncWorldTick() {
+-        asyncWorldTick = getBoolean("async-world-tick", asyncWorldTick);
+-        setComment("async-world-tick",
+-                "Async world ticking is a experimental feature that may cause",
+-                "issues with some plugins, world corruption, crashes or other issues, but",
+-                "it can improve server performance by a lot."
++        asyncWorldTick = getBoolean("async-world-tick", asyncWorldTick, """
++                        ## EXPERIMENTAL ##
++                        Async world ticking is a experimental feature that may cause issues with some plugins,
++                        world corruption, crashes or other issues, but it can improve server performance by a lot."""
+         );
+     }
+ 
+@@ -428,26 +400,22 @@ public class DionysusConfig {
+ 
+     public static NBTCompareMethod nbtCompareMethod = NBTCompareMethod.EQUAL;
+     private static void nbtCompareMethod() {
+-        nbtCompareMethod = NBTCompareMethod.valueOf(getString("nbt-compare-method", nbtCompareMethod.name()));
+-        setComment("nbt-compare-method",
+-                "Modifies the way NBT tags are compared. EQUAL is the default used by vanilla",
+-                "EQUAL - NBT tags are compared using equals(), usually slow but reliable",
+-                "HASHCODE - NBT tags are compared using hashCode(), fast but not reliable in extremely rare edge cases",
+-                "HASHCODE_EQUAL - NBT tags are compared using hashCode() and equals(), if hashCode() succeeds then equals() is checked as well, not as fast as HASHCODE but as reliable as EQUAL"
++        nbtCompareMethod = NBTCompareMethod.valueOf(getString("nbt-compare-method", nbtCompareMethod.name(), """
++                        Modifies the way NBT tags are compared. EQUAL is the default used by vanilla
++                        EQUAL - NBT tags are compared using equals(), usually slow but reliable
++                        HASHCODE - NBT tags are compared using hashCode(), fast but not reliable in extremely rare edge cases
++                        HASHCODE_EQUAL - NBT tags are compared using hashCode() and equals(), if hashCode() succeeds then equals() is checked as well, not as fast as HASHCODE but as reliable as EQUAL""")
+         );
+     }
+ 
+     public static boolean alternateCurrentRedstone = false;
+     private static void alternateCurrentRedstone() {
+-        alternateCurrentRedstone = getBoolean("alternate-current-redstone", false);
+-        setComment(
+-            "alternate-current-redstone",
+-            """
+-            Alternate Current is an efficient and non-locational redstone dust implementation.
+-            Its main focus lies in reducing the lag caused by redstone dust, by optimizing
+-            the power calculations and reducing the number of shape and block updates emitted.
+-            As a side effect of these changes the block update order of redstone dust
+-            networks is predictable and intuitive rather than locational and chaotic."""
++        alternateCurrentRedstone = getBoolean("alternate-current-redstone", alternateCurrentRedstone, """
++                        Alternate Current is an efficient and non-locational redstone dust implementation.
++                        Its main focus lies in reducing the lag caused by redstone dust, by optimizing
++                        the power calculations and reducing the number of shape and block updates emitted.
++                        As a side effect of these changes the block update order of redstone dust
++                        networks is predictable and intuitive rather than locational and chaotic."""
+         );
+     }
+ }
