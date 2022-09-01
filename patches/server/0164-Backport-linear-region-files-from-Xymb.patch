@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Xymb <xymb@endcrystal.me>
 Date: Thu, 1 Sep 2022 12:52:01 +1000
-Subject: [PATCH] linear region files
+Subject: [PATCH] Backport linear region files from Xymb
 
 
 diff --git a/pom.xml b/pom.xml
