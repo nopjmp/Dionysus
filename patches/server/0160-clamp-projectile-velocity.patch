@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RemainingToast <Remainingtoast@gmail.com>
+Date: Tue, 23 Aug 2022 23:56:52 +1000
+Subject: [PATCH] clamp projectile velocity
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..48319f349c63bf9d04197a48ef756b8c7fdd17a3 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -310,9 +310,13 @@ public class DionysusConfig {
+ 
+     public static int maxProjectileLoadsPerTick;
+     public static int maxProjectileLoadsPerProjectile;
++    public static double minProjectileVelocity;
++    public static double maxProjectileVelocity;
+     private static void projectileLoading() {
+         maxProjectileLoadsPerTick = getInt("projectile.max-loads-per-tick", 10, "Controls how many chunks are allowed", "to be sync loaded by projectiles in a tick.");
+         maxProjectileLoadsPerProjectile = getInt("projectile.max-loads-per-projectile", 10, "Controls how many chunks a projectile", "can load in its lifetime before it gets", "automatically removed.");
++        minProjectileVelocity = getDouble("projectile.min-velocity", -3.0D);
++        maxProjectileVelocity = getDouble("projectile.max-velocity", 3.0D);
+ 
+         setComment("projectile", "Optimizes projectile settings");
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+index 9c750efc74448fb7cf6faf3f36c3fb3b5e1588f5..366c959c57a1fb9215669ff45c48be73488d33cd 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+@@ -32,6 +32,9 @@ import net.minecraft.server.EntityWitherSkull;
+ import net.minecraft.server.GenericAttributes;
+ import net.minecraft.server.MobEffect;
+ import net.minecraft.server.MobEffectList;
++import net.minecraft.server.MathHelper;
++
++import dev.pomf.dionysus.DionysusConfig;
+ 
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.Location;
+@@ -382,6 +385,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+         Validate.notNull(launch, "Projectile not supported");
+ 
+         if (velocity != null) {
++            // Dionysus start - clamp projectile velocity
++            if (getHandle() instanceof EntityHuman) {
++                double min = DionysusConfig.minProjectileVelocity;
++                double max = DionysusConfig.maxProjectileVelocity;
++                velocity = velocity
++                        .setX(MathHelper.a(velocity.getX(), min, max))
++                        .setY(MathHelper.a(velocity.getY(), min, max))
++                        .setZ(MathHelper.a(velocity.getZ(), min, max));
++            }
++            // Dionysus end
+             ((T) launch.getBukkitEntity()).setVelocity(velocity);
+         }
+ 
