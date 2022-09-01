@@ -21,25 +21,16 @@ index 1f2fc8223808ce352267660ca9a11d7ffec94d70..37259967bb36d70159d8a4ceff1d671a
  
      <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..8bc6456210461f81c7c28e6a42d7a55938178177 100644
+index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..76837460a0e03b70a3ee3c0ea9a64d013df309a8 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -352,9 +352,8 @@ public class DionysusConfig {
- 
- 
-     public static int chunkCompressionLevel = -1;
--
-     private static void chunkCompressionLevel() {
--        chunkCompressionLevel = getInt("compression.chunk-compression-level", -1);
-+        chunkCompressionLevel = getInt("compression.chunk-compression-level", chunkCompressionLevel);
-         setComment("compression.chunk-compression-level",
-                 "This sets the compression level for normal chunk data."
-         );
-@@ -367,8 +366,17 @@ public class DionysusConfig {
+@@ -367,8 +367,18 @@ public class DionysusConfig {
          RegionFile.deflater.setLevel(chunkCompressionLevel);
      }
  
+-    public static int maxProcessedBookNBTSize = 8000;
 +    public static boolean linearRegionFiles = false;
+ 
 +    private static void linearRegionFiles() {
 +        // Set some defaults
 +        linearRegionFiles = getBoolean("compression.linear-region-files", linearRegionFiles);
@@ -49,8 +40,7 @@ index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..8bc6456210461f81c7c28e6a42d7a559
 +        );
 +    }
 +    
-     public static int maxProcessedBookNBTSize = 8000;
--
++    public static int maxProcessedBookNBTSize = 8000;
      private static void maxProcessedBookNBTSize() {
          maxProcessedBookNBTSize = getInt("max-processed-book-nbt-size", 8000);
      }
