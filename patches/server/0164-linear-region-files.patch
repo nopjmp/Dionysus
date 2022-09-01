@@ -1,0 +1,733 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xymb <xymb@endcrystal.me>
+Date: Thu, 1 Sep 2022 12:52:01 +1000
+Subject: [PATCH] linear region files
+
+
+diff --git a/pom.xml b/pom.xml
+index 1f2fc8223808ce352267660ca9a11d7ffec94d70..37259967bb36d70159d8a4ceff1d671aee0bda87 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -186,6 +186,11 @@
+             <artifactId>zstd-jni</artifactId>
+             <version>1.5.2-3</version>
+         </dependency>
++        <dependency>
++            <groupId>org.lz4</groupId>
++            <artifactId>lz4-java</artifactId>
++            <version>1.8.0</version>
++        </dependency>
+     </dependencies>
+ 
+     <repositories>
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..b74c06efb4dc82cfc08f9a2a763422f1e604a25b 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -354,7 +354,7 @@ public class DionysusConfig {
+     public static int chunkCompressionLevel = -1;
+ 
+     private static void chunkCompressionLevel() {
+-        chunkCompressionLevel = getInt("compression.chunk-compression-level", -1);
++        chunkCompressionLevel = getInt("compression.chunk-compression-level", chunkCompressionLevel);
+         setComment("compression.chunk-compression-level",
+                 "This sets the compression level for normal chunk data."
+         );
+@@ -367,6 +367,27 @@ public class DionysusConfig {
+         RegionFile.deflater.setLevel(chunkCompressionLevel);
+     }
+ 
++    public static boolean linearRegionFiles = false;
++    private static void linearRegionFiles() {
++        // Set some defaults
++        linearRegionFiles = getBoolean("compression.linear-region-files", linearRegionFiles);
++        setComment("compression.linear-region-files", """
++            Linear region format saves about 50% of disk space in OW and Nether and 95% in The End.
++            For more information: https://github.com/xymb-endcrystalme/LinearRegionFileFormatTools"""
++        );
++    }
++
++    public static int linearCompressionLevel = 1;
++
++    private static void linearCompressionLevel() {
++        linearCompressionLevel = getInt("compression.linear-compression-level", linearCompressionLevel, "This sets the compression level for linear chunk data.");
++
++        if (linearCompressionLevel < 1 || linearCompressionLevel > 9) {
++            logError("Compression level is invalid resetting to default. Valid compression levels are 1 (Default), 6 (Recommended) through 9 (Best)");
++            linearCompressionLevel = 1;
++        }
++    }
++
+     public static int maxProcessedBookNBTSize = 8000;
+ 
+     private static void maxProcessedBookNBTSize() {
+diff --git a/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFile.java b/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFile.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fccb93cf8d
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFile.java
+@@ -0,0 +1,360 @@
++package dev.pomf.dionysus.util.linear;
++
++
++import com.github.luben.zstd.ZstdInputStream;
++import com.github.luben.zstd.ZstdOutputStream;
++import dev.pomf.dionysus.DionysusConfig;
++import dev.pomf.dionysus.DionysusLogger;
++import net.jpountz.lz4.LZ4Compressor;
++import net.jpountz.lz4.LZ4Factory;
++import net.jpountz.lz4.LZ4FastDecompressor;
++import net.jpountz.xxhash.XXHashFactory;
++import net.minecraft.server.ChunkCoordIntPair;
++import net.minecraft.server.ChunkSection;
++import net.minecraft.server.NBTTagCompound;
++import org.jetbrains.annotations.Nullable;
++
++import java.io.*;
++import java.nio.ByteBuffer;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.nio.file.StandardCopyOption;
++import java.util.ArrayList;
++
++public class LinearRegionFile extends Thread {
++    private final byte[][] buffer = new byte[32*32][];
++    private final int[] bufferUncompressedSize = new int[32*32];
++
++    private final ChunkSection[] statuses = new ChunkSection[32 * 32];
++    private boolean markedToSave = false;
++    private Object markedToSaveLock = new Object();
++    private boolean close = false;
++    public Path regionFile;
++    public final java.util.concurrent.locks.ReentrantLock fileLock = new java.util.concurrent.locks.ReentrantLock(true); // Paper
++
++    final byte COMPRESSION_LEVEL = (byte) DionysusConfig.linearCompressionLevel;
++
++    public LinearRegionFile(Path file) throws IOException {
++        this.regionFile = file;
++        File regionFile = new File(this.regionFile.toString());
++
++        LZ4Compressor compressor = LZ4Factory.fastestInstance().fastCompressor();
++        LZ4FastDecompressor decompressor = LZ4Factory.fastestInstance().fastDecompressor();
++
++        for (int i = 0 ; i < 32 * 32 ; i++)
++            this.bufferUncompressedSize[i] = 0;
++
++        if (regionFile.canRead()) {
++            long start = System.nanoTime();
++
++            long fileLength = file.toFile().length();
++            FileInputStream fileStream = new FileInputStream(regionFile);
++            DataInputStream rawDataStream = new DataInputStream(fileStream);
++
++            long SUPERBLOCK = -4323716122432332390L;
++            byte VERSION = 1;
++            int HEADER_SIZE = 32;
++            int FOOTER_SIZE = 8;
++
++            long superBlock = rawDataStream.readLong();
++
++            if (superBlock != SUPERBLOCK) {
++                DionysusLogger.LOGGER.warning(file.toString());
++                DionysusLogger.LOGGER.warning("SUPERBLOCK INVALID!");
++                return;
++            }
++
++            byte version = rawDataStream.readByte();
++
++            if (version != VERSION) {
++                DionysusLogger.LOGGER.warning(file.toString());
++                DionysusLogger.LOGGER.warning("VERSION INVALID!");
++                return;
++            }
++
++            long newestTimestamp = rawDataStream.readLong();
++            byte compressionLevel = rawDataStream.readByte();
++            short chunkCount = rawDataStream.readShort();
++            int dataCount = rawDataStream.readInt();
++
++            if (fileLength != HEADER_SIZE + dataCount + FOOTER_SIZE) {
++                throw new IOException("File length invalid " + this.regionFile + " " + String.valueOf(fileLength) + " " + String.valueOf(HEADER_SIZE + dataCount + FOOTER_SIZE));
++            }
++
++            long dataHash = rawDataStream.readLong();
++            byte[] rawCompressed = new byte[dataCount];
++
++            rawDataStream.readFully(rawCompressed, 0, dataCount);
++
++            superBlock = rawDataStream.readLong();
++
++            if (superBlock != SUPERBLOCK) {
++                throw new IOException("Footer superblock invalid " + this.regionFile);
++            }
++
++            DataInputStream dataStream = new DataInputStream(new ZstdInputStream(new ByteArrayInputStream(rawCompressed)));
++
++            int completeDataCount = 0;
++            int total = 4096 * 2;
++            int[] starts = new int[32 * 32];
++            int[] timestamps = new int[32 * 32];
++            for(int i = 0 ; i < 32 * 32 ; i++) {
++                starts[i] = dataStream.readInt();
++                timestamps[i] = dataStream.readInt();
++            }
++
++            for(int i = 0 ; i < 32 * 32 ; i++) {
++                if (starts[i] > 0) {
++                    int size = starts[i];
++
++                    completeDataCount += size;
++
++                    byte[] b = new byte[size];
++
++                    dataStream.readFully(b, 0, size);
++
++                    int maxCompressedLength = compressor.maxCompressedLength(size);
++                    byte[] compressed = new byte[maxCompressedLength];
++                    int compressedLength = compressor.compress(b, 0, size, compressed, 0, maxCompressedLength);
++
++                    b = new byte[compressedLength];
++
++                    System.arraycopy(compressed, 0, b, 0, compressedLength);
++
++                    this.buffer[i] = b;
++                    this.bufferUncompressedSize[i] = size;
++                }
++            }
++        }
++
++        this.start();
++    }
++
++    private synchronized void markToSave() {
++        synchronized (markedToSaveLock) {
++            markedToSave = true;
++        }
++    }
++
++    private synchronized boolean isMarkedToSave() {
++        synchronized (markedToSaveLock) {
++            if (markedToSave) {
++                markedToSave = false;
++                return true;
++            }
++            return false;
++        }
++    }
++
++    public void run() {
++       try {
++           while (true) {
++               if (markedToSave) {
++                   try {
++                       flush();
++                   } catch(IOException ex) {
++                       DionysusLogger.LOGGER.severe("Region file " + this.regionFile.toAbsolutePath() + " flush failed");
++                   }
++               }
++
++               for(int i = 0 ; i < 100 ; i++) {
++                    Thread.sleep(100);
++                    if(close) {
++                        return;
++                    }
++               }
++           }
++       } catch(InterruptedException ignored) {}
++    }
++
++    public synchronized void flush() throws IOException {
++        if (!markedToSave)
++            return;
++
++        long SUPERBLOCK = -4323716122432332390L;
++        byte VERSION = 1;
++        long timestamp = System.currentTimeMillis() / 1000L;
++        short chunkCount = 0;
++
++        File tempFile = new File(regionFile.toString() + ".tmp");
++        FileOutputStream fileStream = new FileOutputStream(tempFile);
++
++        ByteArrayOutputStream zstdByteArray = new ByteArrayOutputStream();
++        ZstdOutputStream zstdStream = new ZstdOutputStream(zstdByteArray, COMPRESSION_LEVEL);
++        zstdStream.setChecksum(true);
++        DataOutputStream zstdDataStream = new DataOutputStream(zstdStream);
++        DataOutputStream dataStream = new DataOutputStream(fileStream);
++
++        dataStream.writeLong(SUPERBLOCK);
++        dataStream.writeByte(VERSION);
++        dataStream.writeLong(timestamp);
++        dataStream.writeByte(COMPRESSION_LEVEL);
++
++        int region_total = 0;
++        int region_raw = 0;
++
++        LZ4FastDecompressor decompressor = LZ4Factory.fastestInstance().fastDecompressor();
++
++        ArrayList<byte[]> byteBuffers = new ArrayList<>();
++
++        for(int i = 0 ; i < 32 * 32 ; i++) {
++            if(this.bufferUncompressedSize[i] != 0) {
++                chunkCount += 1;
++                long compStart = System.nanoTime();
++                byte[] content = new byte[bufferUncompressedSize[i]];
++                decompressor.decompress(buffer[i], 0, content, 0, bufferUncompressedSize[i]);
++
++                region_total += buffer[i].length;
++                region_raw += content.length;
++
++                byteBuffers.add(content);
++            } else byteBuffers.add(null);
++        }
++
++        for(int i = 0 ; i < 32 * 32 ; i++) {
++            zstdDataStream.writeInt(this.bufferUncompressedSize[i]);
++            zstdDataStream.writeInt(0);
++        }
++
++        for(int i = 0 ; i < 32 * 32 ; i++) {
++            if(byteBuffers.get(i) != null) {
++                zstdDataStream.write(byteBuffers.get(i), 0, byteBuffers.get(i).length);
++            }
++        }
++
++        zstdDataStream.close();
++
++        byte[] compressed = zstdByteArray.toByteArray();
++
++        dataStream.writeShort(chunkCount);
++
++        dataStream.writeInt(compressed.length);
++        dataStream.writeLong(XXHashFactory.fastestInstance().hash64().hash(compressed, 0, compressed.length, 0)); // TODO: Hash the contents, not the whole thing
++
++        dataStream.write(compressed, 0, compressed.length);
++        dataStream.writeLong(SUPERBLOCK);
++
++        dataStream.close();
++        fileStream.close();
++
++        Files.move(tempFile.toPath(), this.regionFile, StandardCopyOption.REPLACE_EXISTING);
++    }
++
++    public void setStatus(int x, int z, ChunkSection status) {
++        this.statuses[getChunkIndex(x, z)] = status;
++    }
++
++    public synchronized void write(ChunkCoordIntPair pos, ByteBuffer buffer) {
++        LZ4Compressor compressor = LZ4Factory.fastestInstance().fastCompressor();
++        try {
++            byte[] b = toByteArray(new ByteArrayInputStream(buffer.array()));
++
++            int uncompressedSize = b.length;
++            int maxCompressedLength = compressor.maxCompressedLength(b.length);
++
++            byte[] compressed = new byte[maxCompressedLength];
++            int compressedLength = compressor.compress(b, 0, b.length, compressed, 0, maxCompressedLength);
++
++            b = new byte[compressedLength];
++
++            System.arraycopy(compressed, 0, b, 0, compressedLength);
++
++            this.buffer[getChunkIndex(pos.x, pos.z)] = b;
++            this.bufferUncompressedSize[getChunkIndex(pos.x, pos.z)] = uncompressedSize;
++        } catch (IOException e) {
++            DionysusLogger.LOGGER.severe("Chunk write IOException " + e + " " + this.regionFile);
++        }
++
++        markToSave();
++    }
++
++    public DataOutputStream getChunkDataOutputStream(ChunkCoordIntPair pos) throws IOException {
++        return new DataOutputStream(new BufferedOutputStream(new LinearRegionFile.ChunkBuffer(pos)));
++    }
++
++    private class ChunkBuffer extends ByteArrayOutputStream {
++        private final ChunkCoordIntPair pos;
++
++        public ChunkBuffer(ChunkCoordIntPair pos) {
++            super();
++            this.pos = pos;
++        }
++
++        public void close() throws IOException {
++            ByteBuffer bytebuffer = ByteBuffer.wrap(this.buf, 0, this.count);
++            LinearRegionFile.this.write(this.pos, bytebuffer);
++        }
++    }
++    private byte[] toByteArray(InputStream in) throws IOException {
++        ByteArrayOutputStream out = new ByteArrayOutputStream();
++
++        byte[] tempBuffer = new byte[4096];
++
++        int length;
++
++        while ((length = in.read(tempBuffer)) >= 0) {
++            out.write(tempBuffer, 0, length);
++        }
++        return out.toByteArray();
++    }
++
++    @Nullable
++    public synchronized DataInputStream getChunkDataInputStream(ChunkCoordIntPair pos) throws IOException {
++        if(this.bufferUncompressedSize[getChunkIndex(pos.x, pos.z)] != 0) {
++            LZ4FastDecompressor decompressor = LZ4Factory.fastestInstance().fastDecompressor();
++            byte[] content = new byte[bufferUncompressedSize[getChunkIndex(pos.x, pos.z)]];
++            decompressor.decompress(this.buffer[getChunkIndex(pos.x, pos.z)], 0, content, 0, bufferUncompressedSize[getChunkIndex(pos.x, pos.z)]);
++            return new DataInputStream(new ByteArrayInputStream(content));
++        }
++        return null;
++    }
++
++    public ChunkSection getStatusIfCached(int x, int z) {
++        return this.statuses[getChunkIndex(x, z)];
++    }
++
++    public void clear(ChunkCoordIntPair pos) {
++        int i = getChunkIndex(pos.x, pos.z);
++        this.buffer[i] = null;
++        this.bufferUncompressedSize[i] = 0;
++        markToSave();
++    }
++
++    public boolean hasChunk(ChunkCoordIntPair pos) {
++        return this.bufferUncompressedSize[getChunkIndex(pos.x, pos.z)] > 0;
++    }
++
++    public void close() throws IOException {
++        close = true;
++
++        try {
++            flush();
++        } catch(IOException e) {
++            throw new IOException("Region flush IOException " + e + " " + this.regionFile);
++        }
++    }
++    private static int getChunkIndex(int x, int z) {
++        return (x & 31) + (z & 31) * 32;
++    }
++
++    public synchronized boolean doesChunkExist(ChunkCoordIntPair pos) throws Exception {
++        throw new Exception("doesChunkExist is a stub");
++    }
++
++
++    boolean recalculateHeader() throws IOException {
++        return false;
++    }
++
++    void setOversized(int x, int z, boolean something) {
++
++    }
++
++    NBTTagCompound getOversizedData(int x, int z) throws IOException {
++        throw new IOException("getOversizedData is a stub " + this.regionFile);
++    }
++
++    boolean isOversized(int x, int z) {
++        return false;
++    }
++}
+diff --git a/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFileCache.java b/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFileCache.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75f3850659
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFileCache.java
+@@ -0,0 +1,157 @@
++package dev.pomf.dionysus.util.linear;
++
++import com.destroystokyo.paper.PaperConfig;
++import com.destroystokyo.paper.exception.ServerInternalException;
++import net.minecraft.server.*;
++import org.apache.commons.io.output.NullOutputStream;
++
++import java.io.DataInputStream;
++import java.io.DataOutputStream;
++import java.io.File;
++import java.io.IOException;
++import java.util.Iterator;
++import java.util.LinkedHashMap;
++import java.util.Map;
++
++public class LinearRegionFileCache {
++
++    public static final Map<File, LinearRegionFile> a = new LinkedHashMap(PaperConfig.regionFileCacheSize, 0.75f, true); // Spigot - private -> public, Paper - HashMap -> LinkedHashMap
++    public static synchronized LinearRegionFile getRegionFile(File file, int i, int j) { return a(file, i, j); } // Paper - OBFHELPER
++    public static synchronized LinearRegionFile a(File file, int i, int j) {
++        File file1 = new File(file, "region");
++        File file2 = new File(file1, "r." + (i >> 5) + "." + (j >> 5) + ".linear");
++        LinearRegionFile regionfile = (LinearRegionFile) LinearRegionFileCache.a.get(file2);
++
++        if (regionfile != null) {
++            return regionfile;
++        } else {
++            if (!file1.exists()) {
++                file1.mkdirs();
++            }
++
++            if (LinearRegionFileCache.a.size() >= PaperConfig.regionFileCacheSize) { // Paper
++                trimCache(); // Paper
++            }
++
++            try {
++                LinearRegionFile regionfile1 = new LinearRegionFile(file2.toPath());
++                LinearRegionFileCache.a.put(file2, regionfile1);
++                return regionfile1;
++            } catch (IOException e) {
++                return null;
++            }
++        }
++    }
++
++    public static synchronized LinearRegionFile b(File file, int i, int j) {
++        File file1 = new File(file, "region");
++        File file2 = new File(file1, "r." + (i >> 5) + "." + (j >> 5) + ".linear");
++        LinearRegionFile regionfile = (LinearRegionFile) LinearRegionFileCache.a.get(file2);
++
++        if (regionfile != null) {
++            return regionfile;
++        } else if (file1.exists() && file2.exists()) {
++            if (LinearRegionFileCache.a.size() >= 256) {
++                a();
++            }
++
++            try {
++                LinearRegionFile regionfile1 = new LinearRegionFile(file2.toPath());
++
++                LinearRegionFileCache.a.put(file2, regionfile1);
++                return regionfile1;
++            } catch (IOException e) {
++                return null;
++            }
++        } else {
++            return null;
++        }
++    }
++
++    // Paper Start
++    private static synchronized void trimCache() {
++        Iterator<Map.Entry<File, LinearRegionFile>> itr = LinearRegionFileCache.a.entrySet().iterator();
++        int count = LinearRegionFileCache.a.size() - PaperConfig.regionFileCacheSize;
++        while (count-- >= 0 && itr.hasNext()) {
++            try {
++                itr.next().getValue().close();
++            } catch (IOException ioexception) {
++                ioexception.printStackTrace();
++                ServerInternalException.reportInternalException(ioexception);
++            }
++            itr.remove();
++        }
++    }
++    private static void printOversizedLog(String msg, File file, int x, int z) {
++        org.apache.logging.log4j.LogManager.getLogger().fatal(msg + " (" + file.toString().replaceAll(".+[\\\\/]", "") + " - " + x + "," + z + ") Go clean it up to remove this message. /minecraft:tp " + (x<<4)+" 128 "+(z<<4) + " - DO NOT REPORT THIS TO PAPER - You may ask for help on Discord, but do not file an issue. These error messages can not be removed.");
++    }
++    private static void writeRegion(File file, int x, int z, NBTTagCompound nbttagcompound) throws IOException {
++        LinearRegionFile regionfile = getRegionFile(file, x, z);
++
++        DataOutputStream out = regionfile.getChunkDataOutputStream(new ChunkCoordIntPair(x & 31, z & 31));
++        NBTCompressedStreamTools.writeNBT(nbttagcompound, out);
++        out.close();
++        regionfile.setOversized(x, z, false);
++    }
++
++    public static synchronized void a() {
++        for (LinearRegionFile regionfile : LinearRegionFileCache.a.values()) {
++            try {
++                if (regionfile != null) {
++                    regionfile.close();
++                }
++            } catch (IOException ioexception) {
++                ioexception.printStackTrace();
++                ServerInternalException.reportInternalException(ioexception); // Paper
++            }
++        }
++
++        LinearRegionFileCache.a.clear();
++    }
++
++    // CraftBukkit start - call sites hoisted for synchronization
++    public static NBTTagCompound d(File file, int i, int j) throws IOException { // Paper - remove synchronization
++        LinearRegionFile regionfile = a(file, i, j);
++
++        if (regionfile == null) {
++            return null;
++        }
++
++        DataInputStream datainputstream = regionfile.getChunkDataInputStream(new ChunkCoordIntPair(i & 31, j & 31));
++
++        if (datainputstream == null) {
++            return null;
++        }
++
++        // NeonPaper start - Handle bad chunks more gracefully
++        try {
++            return NBTCompressedStreamTools.a(datainputstream);
++        } catch (Exception ex) {
++            return null;
++        }
++        // NeonPaper end
++    }
++
++    public static void e(File file, int i, int j, NBTTagCompound nbttagcompound) throws IOException { // Paper - remove synchronization
++        writeRegion(file, i, j, nbttagcompound); // Paper - moved to own method
++        // Paper start
++//      RegionFile regionfile = a(file, i, j);
++//
++//      DataOutputStream dataoutputstream = regionfile.b(i & 31, j & 31);
++//      NBTCompressedStreamTools.a(nbttagcompound, (java.io.DataOutput) dataoutputstream);
++//      dataoutputstream.close();
++        // Paper end
++    }
++    // CraftBukkit end
++
++    public static boolean chunkExists(File file, int i, int j) { // Paper - remove synchronization
++        LinearRegionFile regionfile = b(file, i, j);
++
++        try {
++            return regionfile != null && regionfile.doesChunkExist(new ChunkCoordIntPair(i & 31, j & 31));
++        } catch (Exception e) {
++            return false;
++        }
++    }
++    
++}
+diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
+index ca2f4dcaac1646e05b10dee285967a17d4e9a25d..965253dca909618da481e8085f8c13104edb9c38 100644
+--- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
++++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
+@@ -13,6 +13,9 @@ import java.util.Map;
+ import java.util.Set;
+ import javax.annotation.Nullable;
+ import java.util.concurrent.ConcurrentLinkedQueue; // Paper
++
++import dev.pomf.dionysus.DionysusConfig;
++import dev.pomf.dionysus.util.linear.LinearRegionFileCache;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ // Spigot start
+@@ -70,7 +73,13 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
+ 
+         if (nbttagcompound == null) {
+             // CraftBukkit start
+-            nbttagcompound = RegionFileCache.d(this.d, i, j);
++            // Dionysus start - Linear Region File
++            if (DionysusConfig.linearRegionFiles) {
++                nbttagcompound = LinearRegionFileCache.d(this.d, i, j);
++            } else {
++                nbttagcompound = RegionFileCache.d(this.d, i, j);
++            }
++            // Dionysus start - Linear Region File
+ 
+             if (nbttagcompound == null) {
+                 return null;
+@@ -87,7 +96,13 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
+         ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(i, j);
+         Supplier<NBTTagCompound> nbttagcompound = this.b.get(chunkcoordintpair); // Spigot
+ 
+-        return nbttagcompound != null ? true : RegionFileCache.chunkExists(this.d, i, j);
++        // Dionysus start - Linear Region File
++        if (DionysusConfig.linearRegionFiles) {
++            return nbttagcompound != null || LinearRegionFileCache.chunkExists(this.d, i, j);
++        } else {
++            return nbttagcompound != null || RegionFileCache.chunkExists(this.d, i, j);
++        }
++        // Dionysus end
+     }
+ 
+     // Paper start
+@@ -242,7 +257,13 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
+ 
+     private void b(ChunkCoordIntPair chunkcoordintpair, NBTTagCompound nbttagcompound) throws IOException {
+         // CraftBukkit start
+-        RegionFileCache.e(this.d, chunkcoordintpair.x, chunkcoordintpair.z, nbttagcompound);
++        // Dionysus start - Linear Region File
++        if (DionysusConfig.linearRegionFiles) {
++            LinearRegionFileCache.e(this.d, chunkcoordintpair.x, chunkcoordintpair.z, nbttagcompound);
++        } else {
++            RegionFileCache.e(this.d, chunkcoordintpair.x, chunkcoordintpair.z, nbttagcompound);
++        }
++        // Dionysus end - Linear Region File
+ 
+         /*
+         NBTCompressedStreamTools.a(nbttagcompound, (DataOutput) dataoutputstream);
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 697fb7ea48c3b44173208750e9632973a736b446..897df74f5d3a4f56a1a075743bd7ce84566e81b1 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -23,6 +23,9 @@ import java.util.regex.Pattern;
+ 
+ import javax.imageio.ImageIO;
+ 
++import dev.pomf.dionysus.DionysusConfig;
++import dev.pomf.dionysus.util.linear.LinearRegionFile;
++import dev.pomf.dionysus.util.linear.LinearRegionFileCache;
+ import net.minecraft.server.*;
+ 
+ import org.bukkit.BanList;
+@@ -1090,24 +1093,51 @@ public final class CraftServer implements Server {
+ 
+         File parentFolder = world.getWorldFolder().getAbsoluteFile();
+ 
+-        // Synchronized because access to RegionFileCache.a is guarded by this lock.
+-        synchronized (RegionFileCache.class) {
+-            // RegionFileCache.a should be RegionFileCache.cache
+-            Iterator<Map.Entry<File, RegionFile>> i = RegionFileCache.a.entrySet().iterator();
+-            while(i.hasNext()) {
+-                Map.Entry<File, RegionFile> entry = i.next();
+-                File child = entry.getKey().getAbsoluteFile();
+-                while (child != null) {
+-                    if (child.equals(parentFolder)) {
+-                        i.remove();
+-                        try {
+-                            entry.getValue().c(); // Should be RegionFile.close();
+-                        } catch (IOException ex) {
+-                            getLogger().log(Level.SEVERE, null, ex);
++        // Dionysus start - Linear Region File // TODO BETTER WAY
++        if (DionysusConfig.linearRegionFiles) {
++            // Synchronized because access to RegionFileCache.a is guarded by this lock.
++            synchronized (LinearRegionFileCache.class) {
++                // RegionFileCache.a should be RegionFileCache.cache
++                Iterator<Map.Entry<File, LinearRegionFile>> i = LinearRegionFileCache.a.entrySet().iterator();
++                while(i.hasNext()) {
++                    Map.Entry<File, LinearRegionFile> entry = i.next();
++                    File child = entry.getKey().getAbsoluteFile();
++                    while (child != null) {
++                        if (child.equals(parentFolder)) {
++                            i.remove();
++                            try {
++                                entry.getValue().close(); // Should be RegionFile.close();
++                            } catch (IOException ex) {
++                                getLogger().log(Level.SEVERE, null, ex);
++                            }
++                            break;
++                        }
++                        child = child.getParentFile();
++                    }
++                }
++            }
++        }
++        // Dionysus end
++        else {
++            // Synchronized because access to RegionFileCache.a is guarded by this lock.
++            synchronized (RegionFileCache.class) {
++                // RegionFileCache.a should be RegionFileCache.cache
++                Iterator<Map.Entry<File, RegionFile>> i = RegionFileCache.a.entrySet().iterator();
++                while(i.hasNext()) {
++                    Map.Entry<File, RegionFile> entry = i.next();
++                    File child = entry.getKey().getAbsoluteFile();
++                    while (child != null) {
++                        if (child.equals(parentFolder)) {
++                            i.remove();
++                            try {
++                                entry.getValue().c(); // Should be RegionFile.close();
++                            } catch (IOException ex) {
++                                getLogger().log(Level.SEVERE, null, ex);
++                            }
++                            break;
+                         }
+-                        break;
++                        child = child.getParentFile();
+                     }
+-                    child = child.getParentFile();
+                 }
+             }
+         }
