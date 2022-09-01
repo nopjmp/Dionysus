@@ -21,19 +21,21 @@ index 1f2fc8223808ce352267660ca9a11d7ffec94d70..37259967bb36d70159d8a4ceff1d671a
  
      <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..b74c06efb4dc82cfc08f9a2a763422f1e604a25b 100644
+index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..8bc6456210461f81c7c28e6a42d7a55938178177 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -354,7 +354,7 @@ public class DionysusConfig {
-     public static int chunkCompressionLevel = -1;
+@@ -352,9 +352,8 @@ public class DionysusConfig {
  
+ 
+     public static int chunkCompressionLevel = -1;
+-
      private static void chunkCompressionLevel() {
 -        chunkCompressionLevel = getInt("compression.chunk-compression-level", -1);
 +        chunkCompressionLevel = getInt("compression.chunk-compression-level", chunkCompressionLevel);
          setComment("compression.chunk-compression-level",
                  "This sets the compression level for normal chunk data."
          );
-@@ -367,6 +367,27 @@ public class DionysusConfig {
+@@ -367,8 +366,17 @@ public class DionysusConfig {
          RegionFile.deflater.setLevel(chunkCompressionLevel);
      }
  
@@ -46,40 +48,27 @@ index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..b74c06efb4dc82cfc08f9a2a763422f1
 +            For more information: https://github.com/xymb-endcrystalme/LinearRegionFileFormatTools"""
 +        );
 +    }
-+
-+    public static int linearCompressionLevel = 1;
-+
-+    private static void linearCompressionLevel() {
-+        linearCompressionLevel = getInt("compression.linear-compression-level", linearCompressionLevel, "This sets the compression level for linear chunk data.");
-+
-+        if (linearCompressionLevel < 1 || linearCompressionLevel > 9) {
-+            logError("Compression level is invalid resetting to default. Valid compression levels are 1 (Default), 6 (Recommended) through 9 (Best)");
-+            linearCompressionLevel = 1;
-+        }
-+    }
-+
++    
      public static int maxProcessedBookNBTSize = 8000;
- 
+-
      private static void maxProcessedBookNBTSize() {
+         maxProcessedBookNBTSize = getInt("max-processed-book-nbt-size", 8000);
+     }
 diff --git a/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFile.java b/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFile.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fccb93cf8d
+index 0000000000000000000000000000000000000000..86098abd1de9cc536249e1101ac5783acba95144
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFile.java
-@@ -0,0 +1,360 @@
+@@ -0,0 +1,341 @@
 +package dev.pomf.dionysus.util.linear;
 +
 +
 +import com.github.luben.zstd.ZstdInputStream;
 +import com.github.luben.zstd.ZstdOutputStream;
-+import dev.pomf.dionysus.DionysusConfig;
-+import dev.pomf.dionysus.DionysusLogger;
 +import net.jpountz.lz4.LZ4Compressor;
 +import net.jpountz.lz4.LZ4Factory;
 +import net.jpountz.lz4.LZ4FastDecompressor;
 +import net.jpountz.xxhash.XXHashFactory;
-+import net.minecraft.server.ChunkCoordIntPair;
-+import net.minecraft.server.ChunkSection;
 +import net.minecraft.server.NBTTagCompound;
 +import org.jetbrains.annotations.Nullable;
 +
@@ -90,18 +79,18 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +import java.nio.file.StandardCopyOption;
 +import java.util.ArrayList;
 +
-+public class LinearRegionFile extends Thread {
++public class LinearRegionFile extends Thread implements AutoCloseable {
 +    private final byte[][] buffer = new byte[32*32][];
 +    private final int[] bufferUncompressedSize = new int[32*32];
-+
-+    private final ChunkSection[] statuses = new ChunkSection[32 * 32];
 +    private boolean markedToSave = false;
 +    private Object markedToSaveLock = new Object();
 +    private boolean close = false;
 +    public Path regionFile;
-+    public final java.util.concurrent.locks.ReentrantLock fileLock = new java.util.concurrent.locks.ReentrantLock(true); // Paper
++    final byte COMPRESSION_LEVEL = 1;
 +
-+    final byte COMPRESSION_LEVEL = (byte) DionysusConfig.linearCompressionLevel;
++    public LinearRegionFile(File file) throws IOException {
++        this(file.toPath());
++    }
 +
 +    public LinearRegionFile(Path file) throws IOException {
 +        this.regionFile = file;
@@ -113,7 +102,7 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +        for (int i = 0 ; i < 32 * 32 ; i++)
 +            this.bufferUncompressedSize[i] = 0;
 +
-+        if (regionFile.canRead()) {
++        if(regionFile.canRead()) {
 +            long start = System.nanoTime();
 +
 +            long fileLength = file.toFile().length();
@@ -128,16 +117,16 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +            long superBlock = rawDataStream.readLong();
 +
 +            if (superBlock != SUPERBLOCK) {
-+                DionysusLogger.LOGGER.warning(file.toString());
-+                DionysusLogger.LOGGER.warning("SUPERBLOCK INVALID!");
++                System.out.println(file);
++                System.out.println("SUPERBLOCK INVALID!");
 +                return;
 +            }
 +
 +            byte version = rawDataStream.readByte();
 +
 +            if (version != VERSION) {
-+                DionysusLogger.LOGGER.warning(file.toString());
-+                DionysusLogger.LOGGER.warning("VERSION INVALID!");
++                System.out.println(file);
++                System.out.println("VERSION INVALID!");
 +                return;
 +            }
 +
@@ -147,7 +136,9 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +            int dataCount = rawDataStream.readInt();
 +
 +            if (fileLength != HEADER_SIZE + dataCount + FOOTER_SIZE) {
-+                throw new IOException("File length invalid " + this.regionFile + " " + String.valueOf(fileLength) + " " + String.valueOf(HEADER_SIZE + dataCount + FOOTER_SIZE));
++                System.out.println(file);
++                System.out.println("FILE LENGTH INVALID! " + fileLength + " " + (HEADER_SIZE + dataCount + FOOTER_SIZE));
++                return;
 +            }
 +
 +            long dataHash = rawDataStream.readLong();
@@ -158,56 +149,53 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +            superBlock = rawDataStream.readLong();
 +
 +            if (superBlock != SUPERBLOCK) {
-+                throw new IOException("Footer superblock invalid " + this.regionFile);
++                System.out.println(file);
++                System.out.println("FOOTER SUPERBLOCK INVALID!");
++                return;
 +            }
 +
 +            DataInputStream dataStream = new DataInputStream(new ZstdInputStream(new ByteArrayInputStream(rawCompressed)));
 +
 +            int completeDataCount = 0;
 +            int total = 4096 * 2;
-+            int[] starts = new int[32 * 32];
-+            int[] timestamps = new int[32 * 32];
++            int starts[] = new int[32 * 32];
++            int timestamps[] = new int[32 * 32];
 +            for(int i = 0 ; i < 32 * 32 ; i++) {
 +                starts[i] = dataStream.readInt();
 +                timestamps[i] = dataStream.readInt();
 +            }
 +
 +            for(int i = 0 ; i < 32 * 32 ; i++) {
-+                if (starts[i] > 0) {
++                if(starts[i] > 0) {
 +                    int size = starts[i];
-+
 +                    completeDataCount += size;
-+
-+                    byte[] b = new byte[size];
-+
++                    byte b[] = new byte[size];
 +                    dataStream.readFully(b, 0, size);
 +
 +                    int maxCompressedLength = compressor.maxCompressedLength(size);
 +                    byte[] compressed = new byte[maxCompressedLength];
 +                    int compressedLength = compressor.compress(b, 0, size, compressed, 0, maxCompressedLength);
-+
 +                    b = new byte[compressedLength];
-+
-+                    System.arraycopy(compressed, 0, b, 0, compressedLength);
++                    for(int j = 0 ; j < compressedLength ; j++)
++                        b[j] = compressed[j];
 +
 +                    this.buffer[i] = b;
 +                    this.bufferUncompressedSize[i] = size;
 +                }
 +            }
 +        }
-+
 +        this.start();
 +    }
 +
 +    private synchronized void markToSave() {
-+        synchronized (markedToSaveLock) {
++        synchronized(markedToSaveLock) {
 +            markedToSave = true;
 +        }
 +    }
 +
 +    private synchronized boolean isMarkedToSave() {
-+        synchronized (markedToSaveLock) {
-+            if (markedToSave) {
++        synchronized(markedToSaveLock) {
++            if(markedToSave) {
 +                markedToSave = false;
 +                return true;
 +            }
@@ -215,29 +203,29 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +        }
 +    }
 +
++    @Override
 +    public void run() {
-+       try {
-+           while (true) {
-+               if (markedToSave) {
-+                   try {
-+                       flush();
-+                   } catch(IOException ex) {
-+                       DionysusLogger.LOGGER.severe("Region file " + this.regionFile.toAbsolutePath() + " flush failed");
-+                   }
-+               }
++        try {
++            while(true) {
++                if(markedToSave) {
++                    try {
++                        flush();
++                    } catch(IOException ex) {
 +
-+               for(int i = 0 ; i < 100 ; i++) {
++                    }
++                }
++                for(int i = 0 ; i < 100 ; i++) {
 +                    Thread.sleep(100);
 +                    if(close) {
 +                        return;
 +                    }
-+               }
-+           }
-+       } catch(InterruptedException ignored) {}
++                }
++            }
++        } catch(InterruptedException ex) {}
 +    }
 +
 +    public synchronized void flush() throws IOException {
-+        if (!markedToSave)
++        if(!isMarkedToSave())
 +            return;
 +
 +        long SUPERBLOCK = -4323716122432332390L;
@@ -265,11 +253,10 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +        LZ4FastDecompressor decompressor = LZ4Factory.fastestInstance().fastDecompressor();
 +
 +        ArrayList<byte[]> byteBuffers = new ArrayList<>();
-+
 +        for(int i = 0 ; i < 32 * 32 ; i++) {
 +            if(this.bufferUncompressedSize[i] != 0) {
 +                chunkCount += 1;
-+                long compStart = System.nanoTime();
++
 +                byte[] content = new byte[bufferUncompressedSize[i]];
 +                decompressor.decompress(buffer[i], 0, content, 0, bufferUncompressedSize[i]);
 +
@@ -279,23 +266,19 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +                byteBuffers.add(content);
 +            } else byteBuffers.add(null);
 +        }
-+
 +        for(int i = 0 ; i < 32 * 32 ; i++) {
 +            zstdDataStream.writeInt(this.bufferUncompressedSize[i]);
 +            zstdDataStream.writeInt(0);
 +        }
-+
 +        for(int i = 0 ; i < 32 * 32 ; i++) {
-+            if(byteBuffers.get(i) != null) {
++            if(byteBuffers.get(i) != null)
 +                zstdDataStream.write(byteBuffers.get(i), 0, byteBuffers.get(i).length);
-+            }
 +        }
-+
 +        zstdDataStream.close();
 +
-+        byte[] compressed = zstdByteArray.toByteArray();
-+
 +        dataStream.writeShort(chunkCount);
++
++        byte[] compressed = zstdByteArray.toByteArray();
 +
 +        dataStream.writeInt(compressed.length);
 +        dataStream.writeLong(XXHashFactory.fastestInstance().hash64().hash(compressed, 0, compressed.length, 0)); // TODO: Hash the contents, not the whole thing
@@ -304,135 +287,126 @@ index 0000000000000000000000000000000000000000..232c33bed1774ac4c37e76a3803201fc
 +        dataStream.writeLong(SUPERBLOCK);
 +
 +        dataStream.close();
-+        fileStream.close();
 +
++        fileStream.close();
 +        Files.move(tempFile.toPath(), this.regionFile, StandardCopyOption.REPLACE_EXISTING);
 +    }
 +
-+    public void setStatus(int x, int z, ChunkSection status) {
-+        this.statuses[getChunkIndex(x, z)] = status;
-+    }
-+
-+    public synchronized void write(ChunkCoordIntPair pos, ByteBuffer buffer) {
++    public synchronized void write(int x, int z, ByteBuffer buffer) {
 +        LZ4Compressor compressor = LZ4Factory.fastestInstance().fastCompressor();
 +        try {
 +            byte[] b = toByteArray(new ByteArrayInputStream(buffer.array()));
-+
 +            int uncompressedSize = b.length;
-+            int maxCompressedLength = compressor.maxCompressedLength(b.length);
 +
++            int maxCompressedLength = compressor.maxCompressedLength(b.length);
 +            byte[] compressed = new byte[maxCompressedLength];
 +            int compressedLength = compressor.compress(b, 0, b.length, compressed, 0, maxCompressedLength);
-+
 +            b = new byte[compressedLength];
++            for(int j = 0 ; j < compressedLength ; j++)
++                b[j] = compressed[j];
 +
-+            System.arraycopy(compressed, 0, b, 0, compressedLength);
-+
-+            this.buffer[getChunkIndex(pos.x, pos.z)] = b;
-+            this.bufferUncompressedSize[getChunkIndex(pos.x, pos.z)] = uncompressedSize;
++            this.buffer[getChunkIndex(x, z)] = b;
++            this.bufferUncompressedSize[getChunkIndex(x, z)] = uncompressedSize;
 +        } catch (IOException e) {
-+            DionysusLogger.LOGGER.severe("Chunk write IOException " + e + " " + this.regionFile);
++
 +        }
 +
 +        markToSave();
 +    }
 +
-+    public DataOutputStream getChunkDataOutputStream(ChunkCoordIntPair pos) throws IOException {
-+        return new DataOutputStream(new BufferedOutputStream(new LinearRegionFile.ChunkBuffer(pos)));
++    public DataOutputStream getChunkDataOutputStream(int x, int z) {
++        return new DataOutputStream(new BufferedOutputStream(new LinearRegionFile.ChunkBuffer(x, z)));
 +    }
 +
 +    private class ChunkBuffer extends ByteArrayOutputStream {
-+        private final ChunkCoordIntPair pos;
 +
-+        public ChunkBuffer(ChunkCoordIntPair pos) {
++        private final int x;
++        private final int z;
++
++        public ChunkBuffer(int x, int z) {
 +            super();
-+            this.pos = pos;
++            this.x = x;
++            this.z = z;
 +        }
 +
 +        public void close() throws IOException {
 +            ByteBuffer bytebuffer = ByteBuffer.wrap(this.buf, 0, this.count);
-+            LinearRegionFile.this.write(this.pos, bytebuffer);
++            LinearRegionFile.this.write(x, z, bytebuffer);
 +        }
 +    }
++
 +    private byte[] toByteArray(InputStream in) throws IOException {
 +        ByteArrayOutputStream out = new ByteArrayOutputStream();
-+
 +        byte[] tempBuffer = new byte[4096];
 +
 +        int length;
-+
 +        while ((length = in.read(tempBuffer)) >= 0) {
 +            out.write(tempBuffer, 0, length);
 +        }
++
 +        return out.toByteArray();
 +    }
 +
 +    @Nullable
-+    public synchronized DataInputStream getChunkDataInputStream(ChunkCoordIntPair pos) throws IOException {
-+        if(this.bufferUncompressedSize[getChunkIndex(pos.x, pos.z)] != 0) {
++    public synchronized DataInputStream getChunkDataInputStream(int x, int z) {
++        if(this.bufferUncompressedSize[getChunkIndex(x, z)] != 0) {
 +            LZ4FastDecompressor decompressor = LZ4Factory.fastestInstance().fastDecompressor();
-+            byte[] content = new byte[bufferUncompressedSize[getChunkIndex(pos.x, pos.z)]];
-+            decompressor.decompress(this.buffer[getChunkIndex(pos.x, pos.z)], 0, content, 0, bufferUncompressedSize[getChunkIndex(pos.x, pos.z)]);
++            byte[] content = new byte[bufferUncompressedSize[getChunkIndex(x, z)]];
++            decompressor.decompress(this.buffer[getChunkIndex(x, z)], 0, content, 0, bufferUncompressedSize[getChunkIndex(x, z)]);
 +            return new DataInputStream(new ByteArrayInputStream(content));
 +        }
 +        return null;
 +    }
 +
-+    public ChunkSection getStatusIfCached(int x, int z) {
-+        return this.statuses[getChunkIndex(x, z)];
-+    }
-+
-+    public void clear(ChunkCoordIntPair pos) {
-+        int i = getChunkIndex(pos.x, pos.z);
++    public void clear(int x, int z) {
++        int i = getChunkIndex(x, z);
 +        this.buffer[i] = null;
 +        this.bufferUncompressedSize[i] = 0;
 +        markToSave();
 +    }
 +
-+    public boolean hasChunk(ChunkCoordIntPair pos) {
-+        return this.bufferUncompressedSize[getChunkIndex(pos.x, pos.z)] > 0;
++    public boolean hasChunk(int x, int z) {
++        return this.bufferUncompressedSize[getChunkIndex(x, z)] > 0;
 +    }
 +
++    @Override
 +    public void close() throws IOException {
 +        close = true;
-+
 +        try {
 +            flush();
-+        } catch(IOException e) {
-+            throw new IOException("Region flush IOException " + e + " " + this.regionFile);
++        } catch(IOException ex) {
++
 +        }
 +    }
++
 +    private static int getChunkIndex(int x, int z) {
 +        return (x & 31) + (z & 31) * 32;
 +    }
 +
-+    public synchronized boolean doesChunkExist(ChunkCoordIntPair pos) throws Exception {
-+        throw new Exception("doesChunkExist is a stub");
-+    }
-+
-+
-+    boolean recalculateHeader() throws IOException {
++    public synchronized boolean doesChunkExist(int x, int z) { // STUB
 +        return false;
 +    }
 +
-+    void setOversized(int x, int z, boolean something) {
-+
++    boolean recalculateHeader() { // STUB
++        return false;
 +    }
 +
-+    NBTTagCompound getOversizedData(int x, int z) throws IOException {
-+        throw new IOException("getOversizedData is a stub " + this.regionFile);
++    void setOversized(int x, int z, boolean b) {} // STUB
++
++    NBTTagCompound getOversizedData(int x, int z) { // STUB
++        return null;
 +    }
 +
-+    boolean isOversized(int x, int z) {
++    boolean isOversized(int x, int z) { // STUB
 +        return false;
 +    }
 +}
 diff --git a/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFileCache.java b/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFileCache.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75f3850659
+index 0000000000000000000000000000000000000000..b782045a4581d9ffeb42139fcf7a7e3baabdffe7
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/util/linear/LinearRegionFileCache.java
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,155 @@
 +package dev.pomf.dionysus.util.linear;
 +
 +import com.destroystokyo.paper.PaperConfig;
@@ -450,12 +424,12 @@ index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75
 +
 +public class LinearRegionFileCache {
 +
-+    public static final Map<File, LinearRegionFile> a = new LinkedHashMap(PaperConfig.regionFileCacheSize, 0.75f, true); // Spigot - private -> public, Paper - HashMap -> LinkedHashMap
++    public static final Map<File, LinearRegionFile> a = new LinkedHashMap<>(PaperConfig.regionFileCacheSize, 0.75f, true); // Spigot - private -> public, Paper - HashMap -> LinkedHashMap
 +    public static synchronized LinearRegionFile getRegionFile(File file, int i, int j) { return a(file, i, j); } // Paper - OBFHELPER
 +    public static synchronized LinearRegionFile a(File file, int i, int j) {
 +        File file1 = new File(file, "region");
 +        File file2 = new File(file1, "r." + (i >> 5) + "." + (j >> 5) + ".linear");
-+        LinearRegionFile regionfile = (LinearRegionFile) LinearRegionFileCache.a.get(file2);
++        LinearRegionFile regionfile = LinearRegionFileCache.a.get(file2);
 +
 +        if (regionfile != null) {
 +            return regionfile;
@@ -469,7 +443,7 @@ index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75
 +            }
 +
 +            try {
-+                LinearRegionFile regionfile1 = new LinearRegionFile(file2.toPath());
++                LinearRegionFile regionfile1 = new LinearRegionFile(file2);
 +                LinearRegionFileCache.a.put(file2, regionfile1);
 +                return regionfile1;
 +            } catch (IOException e) {
@@ -481,7 +455,7 @@ index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75
 +    public static synchronized LinearRegionFile b(File file, int i, int j) {
 +        File file1 = new File(file, "region");
 +        File file2 = new File(file1, "r." + (i >> 5) + "." + (j >> 5) + ".linear");
-+        LinearRegionFile regionfile = (LinearRegionFile) LinearRegionFileCache.a.get(file2);
++        LinearRegionFile regionfile = LinearRegionFileCache.a.get(file2);
 +
 +        if (regionfile != null) {
 +            return regionfile;
@@ -491,7 +465,7 @@ index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75
 +            }
 +
 +            try {
-+                LinearRegionFile regionfile1 = new LinearRegionFile(file2.toPath());
++                LinearRegionFile regionfile1 = new LinearRegionFile(file2);
 +
 +                LinearRegionFileCache.a.put(file2, regionfile1);
 +                return regionfile1;
@@ -517,13 +491,11 @@ index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75
 +            itr.remove();
 +        }
 +    }
-+    private static void printOversizedLog(String msg, File file, int x, int z) {
-+        org.apache.logging.log4j.LogManager.getLogger().fatal(msg + " (" + file.toString().replaceAll(".+[\\\\/]", "") + " - " + x + "," + z + ") Go clean it up to remove this message. /minecraft:tp " + (x<<4)+" 128 "+(z<<4) + " - DO NOT REPORT THIS TO PAPER - You may ask for help on Discord, but do not file an issue. These error messages can not be removed.");
-+    }
++
 +    private static void writeRegion(File file, int x, int z, NBTTagCompound nbttagcompound) throws IOException {
 +        LinearRegionFile regionfile = getRegionFile(file, x, z);
 +
-+        DataOutputStream out = regionfile.getChunkDataOutputStream(new ChunkCoordIntPair(x & 31, z & 31));
++        DataOutputStream out = regionfile.getChunkDataOutputStream(x & 31, z & 31);
 +        NBTCompressedStreamTools.writeNBT(nbttagcompound, out);
 +        out.close();
 +        regionfile.setOversized(x, z, false);
@@ -552,7 +524,7 @@ index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75
 +            return null;
 +        }
 +
-+        DataInputStream datainputstream = regionfile.getChunkDataInputStream(new ChunkCoordIntPair(i & 31, j & 31));
++        DataInputStream datainputstream = regionfile.getChunkDataInputStream(i & 31, j & 31);
 +
 +        if (datainputstream == null) {
 +            return null;
@@ -583,7 +555,7 @@ index 0000000000000000000000000000000000000000..afa6749f9d4964f0b8dd92ce7a6dfd75
 +        LinearRegionFile regionfile = b(file, i, j);
 +
 +        try {
-+            return regionfile != null && regionfile.doesChunkExist(new ChunkCoordIntPair(i & 31, j & 31));
++            return regionfile != null && regionfile.doesChunkExist(i & 31, j & 31);
 +        } catch (Exception e) {
 +            return false;
 +        }
