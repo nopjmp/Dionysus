@@ -1,0 +1,65 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RemainingToast <Remainingtoast@gmail.com>
+Date: Tue, 6 Sep 2022 00:43:38 +1000
+Subject: [PATCH] PlayerItemHeldEvent Add Slot
+
+
+diff --git a/src/main/java/org/bukkit/event/player/PlayerItemHeldEvent.java b/src/main/java/org/bukkit/event/player/PlayerItemHeldEvent.java
+index f0d055a0e4466e9487c87b4d771fd2c892aa373c..68777b55fa0756777a563351a870cc90e198ceab 100644
+--- a/src/main/java/org/bukkit/event/player/PlayerItemHeldEvent.java
++++ b/src/main/java/org/bukkit/event/player/PlayerItemHeldEvent.java
+@@ -3,6 +3,7 @@ package org.bukkit.event.player;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.Cancellable;
+ import org.bukkit.event.HandlerList;
++import org.bukkit.inventory.ItemStack;
+ 
+ /**
+  * Fired when a player changes their currently held item
+@@ -10,13 +11,15 @@ import org.bukkit.event.HandlerList;
+ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
+     private static final HandlerList handlers = new HandlerList();
+     private boolean cancel = false;
+-    private final int previous;
+-    private final int current;
++    private final Slot previous; // Dionysus - Integer -> Slot
++    private final Slot current; // Dionysus - Integer -> Slot
+ 
+     public PlayerItemHeldEvent(final Player player, final int previous, final int current) {
+         super(player);
+-        this.previous = previous;
+-        this.current = current;
++        // Dionysus start - Integer -> Slot
++        this.previous = new Slot(this.player.getInventory().getItem(previous) , previous);
++        this.current = new Slot(this.player.getInventory().getItem(current), current);
++        // Dionysus end
+     }
+ 
+     /**
+@@ -24,7 +27,7 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
+      *
+      * @return Previous slot index
+      */
+-    public int getPreviousSlot() {
++    public Slot getPreviousSlot() { // Dionysus - Integer -> Slot
+         return previous;
+     }
+ 
+@@ -33,7 +36,7 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
+      *
+      * @return New slot index
+      */
+-    public int getNewSlot() {
++    public Slot getNewSlot() { // Dionysus - Integer -> Slot
+         return current;
+     }
+ 
+@@ -53,4 +56,8 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
+     public static HandlerList getHandlerList() {
+         return handlers;
+     }
++
++    public record Slot(ItemStack item, int index) { // Dionysus - Integer -> Slot
++        
++    }
+ }

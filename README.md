@@ -31,36 +31,43 @@ You can download the latest release of Dionysus [here](https://github.com/nopjmp
 You can also [build it yourself](https://github.com/nopjmp/Dionysus#building)
 
 ## Plugin Developers
+###### *With each Dionysus update you must update your dependency.*
 
-In order to use Dionysus as a dependency you must [build it yourself](https://github.com/nopjmp/Dionysus#building).
-Each time you want to update your dependency you must re-build dionysus.
+In order to use Dionysus as a dependency you must [build it yourself](https://github.com/nopjmp/Dionysus#building)      
+This will add it to your local maven repository folder. Then add the following to your `pom.xml`:
 
-Dionysus-API maven dependency:
-
+#### Dionysus-API Maven Dependency:
 ```xml
-
 <dependency>
-  <groupId>dev.pomf.dionysusdev.pomf.dionysus</groupId>
-  <artifactId>dionysus-api</artifactId>
-  <version>1.12.2-R0.1-SNAPSHOT</version>
-  <scope>provided</scope>
+    <groupId>dev.pomf.dionysus</groupId>
+    <artifactId>dionysus-api</artifactId>
+    <version>1.12.2-R0.1-SNAPSHOT</version>
+    <scope>provided</scope>
+</dependency>
+```
+#### Dionysus-Server Maven Dependency:
+```xml
+<dependency>
+    <groupId>dev.pomf.dionysus</groupId>
+    <artifactId>dionysus</artifactId>
+    <version>1.12.2-R0.1-SNAPSHOT</version>
+    <scope>provided</scope>
 </dependency>
 ```
 
-Dionysus-Server maven dependency:
+#### Local Maven Repository:
+
+Windows: `C:\Users\<UserName>\.m2`
+Linux: `/home/<UserName>/.m2`
+Mac: `/Users/<UserName>/.m2`
 
 ```xml
-
-<dependency>
-  <groupId>dev.pomf.dionysusdev.pomf.dionysus</groupId>
-  <artifactId>dionysus</artifactId>
-  <version>1.12.2-R0.1-SNAPSHOT</version>
-  <scope>provided</scope>
-</dependency>
+<repository>
+    <id>project.local</id>
+    <name>project</name>
+    <url>file:/Users/User/.m2/repository/</url>
+</repository>
 ```
-
-There is no repository required since the artifacts should be locally installed
-via building dionysus.
 
 ## Building
 
