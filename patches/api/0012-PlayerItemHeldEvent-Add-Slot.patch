@@ -5,7 +5,7 @@ Subject: [PATCH] PlayerItemHeldEvent Add Slot
 
 
 diff --git a/src/main/java/org/bukkit/event/player/PlayerItemHeldEvent.java b/src/main/java/org/bukkit/event/player/PlayerItemHeldEvent.java
-index f0d055a0e4466e9487c87b4d771fd2c892aa373c..68777b55fa0756777a563351a870cc90e198ceab 100644
+index f0d055a0e4466e9487c87b4d771fd2c892aa373c..9290bc48afc2b59c0c2f1ecb1b7ec58840686b5b 100644
 --- a/src/main/java/org/bukkit/event/player/PlayerItemHeldEvent.java
 +++ b/src/main/java/org/bukkit/event/player/PlayerItemHeldEvent.java
 @@ -3,6 +3,7 @@ package org.bukkit.event.player;
@@ -36,30 +36,40 @@ index f0d055a0e4466e9487c87b4d771fd2c892aa373c..68777b55fa0756777a563351a870cc90
      }
  
      /**
-@@ -24,7 +27,7 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
-      *
+@@ -25,7 +28,7 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
       * @return Previous slot index
       */
--    public int getPreviousSlot() {
-+    public Slot getPreviousSlot() { // Dionysus - Integer -> Slot
-         return previous;
+     public int getPreviousSlot() {
+-        return previous;
++        return previous.index; // Dionysus - Integer -> Slot
      }
  
-@@ -33,7 +36,7 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
-      *
+     /**
+@@ -34,7 +37,7 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
       * @return New slot index
       */
--    public int getNewSlot() {
-+    public Slot getNewSlot() { // Dionysus - Integer -> Slot
-         return current;
+     public int getNewSlot() {
+-        return current;
++        return current.index; // Dionysus - Integer -> Slot
      }
  
-@@ -53,4 +56,8 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
+     public boolean isCancelled() {
+@@ -53,4 +56,18 @@ public class PlayerItemHeldEvent extends PlayerEvent implements Cancellable {
      public static HandlerList getHandlerList() {
          return handlers;
      }
 +
-+    public record Slot(ItemStack item, int index) { // Dionysus - Integer -> Slot
++    // Dionysus start - Add PlayerItemHeldEvent Slot
++    public Slot getPrevious() {
++        return previous;
++    }
++
++    public Slot getCurrent() {
++        return current;
++    }
++
++    public record Slot(ItemStack item, int index) {
 +        
 +    }
++    // Dionysus end
  }
