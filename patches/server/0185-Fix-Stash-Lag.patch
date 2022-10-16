@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 22:11:29 +0500
+Subject: [PATCH] Fix-Stash-Lag
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityShulkerBox.java b/src/main/java/net/minecraft/server/TileEntityShulkerBox.java
+index 443fa5d63d254e785f3d80c5ba6cfda833107563..203e41e1293d5894932d3032b90f176fac496575 100644
+--- a/src/main/java/net/minecraft/server/TileEntityShulkerBox.java
++++ b/src/main/java/net/minecraft/server/TileEntityShulkerBox.java
+@@ -13,6 +13,7 @@ public class TileEntityShulkerBox extends TileEntityLootable implements ITickabl
+     private static final int[] a = new int[27];
+     private NonNullList<ItemStack> f;
+     private boolean g;
++    private boolean eblan = false;
+     private int h;
+     private TileEntityShulkerBox.AnimationPhase i;
+     private float j;
+@@ -198,7 +199,7 @@ public class TileEntityShulkerBox extends TileEntityLootable implements ITickabl
+             if (this.h < 0) {
+                 this.h = 0;
+             }
+-
++            eblan = true;
+             ++this.h;
+             this.world.playBlockAction(this.position, this.getBlock(), 1, this.h);
+             if (this.h == 1) {
+@@ -214,6 +215,7 @@ public class TileEntityShulkerBox extends TileEntityLootable implements ITickabl
+             this.world.playBlockAction(this.position, this.getBlock(), 1, this.h);
+             if (this.h <= 0) {
+                 this.world.a((EntityHuman) null, this.position, SoundEffects.gB, SoundCategory.BLOCKS, 0.5F, this.world.random.nextFloat() * 0.1F + 0.9F);
++                eblan = false;
+             }
+         }
+ 
+@@ -236,6 +238,7 @@ public class TileEntityShulkerBox extends TileEntityLootable implements ITickabl
+     }
+ 
+     public void load(NBTTagCompound nbttagcompound) {
++    if (eblan)
+         super.load(nbttagcompound);
+         this.e(nbttagcompound);
+     }
