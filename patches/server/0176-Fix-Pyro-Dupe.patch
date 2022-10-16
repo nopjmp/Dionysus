@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:08:27 +0500
+Subject: [PATCH] Fix-Pyro-Dupe
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index 099b3ebb6a8be90e0cbf45b4a21be6f918153a54..66b4114c2fcb536e2860fcd790276271234ac24b 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -719,6 +719,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+ 
+             this.x().getTracker().a((Entity) this, (Packet) packetplayoutbed);
+             this.playerConnection.a(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
++            x().getPlayerChunkMap().movePlayer(this); // Reaper - Fix PyroClient AutoDupe
+             this.playerConnection.sendPacket(packetplayoutbed);
+             CriterionTriggers.p.a(this);
+         }
