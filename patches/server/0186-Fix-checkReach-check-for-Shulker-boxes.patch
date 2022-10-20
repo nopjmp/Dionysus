@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Thu, 20 Oct 2022 20:27:28 +0500
+Subject: [PATCH] Fix-checkReach-check-for-Shulker-boxes
+
+
+diff --git a/src/main/java/net/minecraft/server/ContainerShulkerBox.java b/src/main/java/net/minecraft/server/ContainerShulkerBox.java
+index 5f217978312f3f1f1fc8d08dbabc6dfd651ae210..ae4d648fb800df848f49615fab0552bbae9ee652 100644
+--- a/src/main/java/net/minecraft/server/ContainerShulkerBox.java
++++ b/src/main/java/net/minecraft/server/ContainerShulkerBox.java
+@@ -52,6 +52,7 @@ public class ContainerShulkerBox extends Container {
+     }
+ 
+     public boolean canUse(EntityHuman entityhuman) {
++        if (!this.checkReachable) return true; // Paper - Add reachable override for ContainerShulkerBox
+         return this.a.a(entityhuman);
+     }
+ 
