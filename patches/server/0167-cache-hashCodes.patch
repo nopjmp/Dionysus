@@ -1,0 +1,175 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 12:51:23 +0500
+Subject: [PATCH] cache-hashCodes
+
+
+diff --git a/src/main/java/net/minecraft/server/BaseBlockPosition.java b/src/main/java/net/minecraft/server/BaseBlockPosition.java
+index 8e737718ee517d60b36ff0489d074c26c4ee67c4..0242a6647b3c6e2fbebb4d4bf9060a09d97c3233 100644
+--- a/src/main/java/net/minecraft/server/BaseBlockPosition.java
++++ b/src/main/java/net/minecraft/server/BaseBlockPosition.java
+@@ -11,6 +11,7 @@ public class BaseBlockPosition implements Comparable<BaseBlockPosition> {
+     protected int a;
+     protected int b;
+     protected int c;
++    private int hashCode = -1; // Reaper - Cache hash code
+ 
+     public final boolean isValidLocation() {
+         return a >= -30000000 && c >= -30000000 && a < 30000000 && c < 30000000 && b >= 0 && b < 256;
+@@ -43,7 +44,15 @@ public class BaseBlockPosition implements Comparable<BaseBlockPosition> {
+     }
+ 
+     public int hashCode() {
+-        return (this.getY() + this.getZ() * 31) * 31 + this.getX();
++        //return (this.getY() + this.getZ() * 31) * 31 + this.getX();
++        // Reaper start - Cache hash code
++        int hash = this.hashCode;
++        if (hash == -1) {
++            hash = (this.b + this.c * 31) * 31 + this.a; // Reaper - Optimize BlockPosition
++            hashCode = hash;
++        }
++        return hash;
++        // Reaper end
+     }
+ 
+     public int l(BaseBlockPosition baseblockposition) {
+diff --git a/src/main/java/net/minecraft/server/BlockPosition.java b/src/main/java/net/minecraft/server/BlockPosition.java
+index b39c5a3a3965f1d4b3e5da555d8e38ecb6298f74..6b54a77d240bc36353534df3620a4e2d9749c33a 100644
+--- a/src/main/java/net/minecraft/server/BlockPosition.java
++++ b/src/main/java/net/minecraft/server/BlockPosition.java
+@@ -381,6 +381,12 @@ public class BlockPosition extends BaseBlockPosition {
+         public BlockPosition.MutableBlockPosition c(int i, int j, int k) {
+             return this.f(i, j, k);
+         }
++        // Reaper start
++        @Override
++        public int hashCode() {
++            return (((BaseBlockPosition) this).b + ((BaseBlockPosition) this).c * 31) * 31 + super.a;
++        }
++        // Reaper end
+     }
+ 
+     public static class MutableBlockPosition extends BlockPosition {
+@@ -489,5 +495,11 @@ public class BlockPosition extends BaseBlockPosition {
+         public BaseBlockPosition d(BaseBlockPosition baseblockposition) {
+             return super.c(baseblockposition);
+         }
++        // Reaper start
++        @Override
++        public int hashCode() {
++            return (((BaseBlockPosition) this).b + ((BaseBlockPosition) this).c * 31) * 31 + super.a;
++        }
++        // Reaper end
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockState.java b/src/main/java/net/minecraft/server/BlockState.java
+index 1d626ce2fa8b5acaaaffc04844b4740cda52c529..36169b3179ad4fa7d17247dd2ed258649f990cd2 100644
+--- a/src/main/java/net/minecraft/server/BlockState.java
++++ b/src/main/java/net/minecraft/server/BlockState.java
+@@ -10,6 +10,7 @@ public abstract class BlockState<T extends Comparable<T>> implements IBlockState
+     protected BlockState(String s, Class<T> oclass) {
+         this.a = oclass;
+         this.b = s;
++        this.hashCode = 31 * this.a.hashCode() + this.b.hashCode(); // Reaper - Move hash calc to the constructor
+     }
+ 
+     public String a() {
+@@ -39,12 +40,7 @@ public abstract class BlockState<T extends Comparable<T>> implements IBlockState
+     // Spigot start
+     private int hashCode;
+     public int hashCode() {
+-        int hash = hashCode;
+-        if (hash == 0) {
+-            hash = 31 * this.a.hashCode() + this.b.hashCode();
+-            hashCode = hash;
+-        }
+-        return hash;
++        return hashCode; // Reaper - Move hash calc to the constructor
+     }
+     // Spigot end
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockStateBoolean.java b/src/main/java/net/minecraft/server/BlockStateBoolean.java
+index 02b4956ecd1ddf5887a4632025c3135cc29468ce..f42fd1acb03071be815e08a7cc6a093c7d6249e6 100644
+--- a/src/main/java/net/minecraft/server/BlockStateBoolean.java
++++ b/src/main/java/net/minecraft/server/BlockStateBoolean.java
+@@ -10,6 +10,7 @@ public class BlockStateBoolean extends BlockState<Boolean> {
+ 
+     protected BlockStateBoolean(String s) {
+         super(s, Boolean.class);
++        this.hashCode = 31 * super.hashCode() + this.a.hashCode(); // Reaper - Move hash calc to the constructor
+     }
+ 
+     public Collection<Boolean> c() {
+@@ -43,12 +44,7 @@ public class BlockStateBoolean extends BlockState<Boolean> {
+     // Spigot start
+     private int hashCode;
+     public int hashCode() {
+-        int hash = hashCode;
+-        if (hash == 0) {
+-            hash = 31 * super.hashCode() + this.a.hashCode();
+-            hashCode = hash;
+-        }
+-        return hash;
++        return hashCode; // Reaper - Move hash calc to the constructor
+     }
+     // Spigot end
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockStateInteger.java b/src/main/java/net/minecraft/server/BlockStateInteger.java
+index 403fa144accdee97f4001d9c45c81be9e135d8d9..96ea215749fab0142fb77295647b46353688c846 100644
+--- a/src/main/java/net/minecraft/server/BlockStateInteger.java
++++ b/src/main/java/net/minecraft/server/BlockStateInteger.java
+@@ -24,6 +24,7 @@ public class BlockStateInteger extends BlockState<Integer> {
+             }
+ 
+             this.a = ImmutableSet.copyOf(hashset);
++            this.hashCode = 31 * super.hashCode() + this.a.hashCode(); // Reaper - Move hash calc to the constructor
+         }
+     }
+ 
+@@ -46,12 +47,7 @@ public class BlockStateInteger extends BlockState<Integer> {
+     // Spigot start
+     private int hashCode;
+     public int hashCode() {
+-        int hash = hashCode;
+-        if (hash == 0) {
+-            hash = 31 * super.hashCode() + this.a.hashCode();
+-            hashCode = hash;
+-        }
+-        return hash;
++        return hashCode; // Reaper - Move hash calc to the constructor
+     }
+     // Spigot end
+ 
+diff --git a/src/main/java/net/minecraft/server/ChunkCoordIntPair.java b/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
+index aafd23bebc82ef77e3932399e5f7893537373b6c..d30a320ba76a37d497cc34acf559130d8cc51584 100644
+--- a/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
++++ b/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
+@@ -4,6 +4,7 @@ public class ChunkCoordIntPair {
+ 
+     public final int x;
+     public final int z;
++    private int hashCode = 0; // Reaper - Cache hash code
+ 
+     public ChunkCoordIntPair(int i, int j) {
+         this.x = i;
+@@ -22,10 +23,16 @@ public class ChunkCoordIntPair {
+     }
+ 
+     public int hashCode() {
+-        int i = 1664525 * this.x + 1013904223;
+-        int j = 1664525 * (this.z ^ -559038737) + 1013904223;
+-
+-        return i ^ j;
++        // Reaper start - Cache hash code
++        int hash = this.hashCode;
++        if (hash == 0) {
++            int a1 = 1664525 * this.x + 1013904223;
++            int a2 = 1664525 * (this.z ^ -559038737) + 1013904223;
++            hash = a1 ^ a2;
++            this.hashCode = hash;
++        }
++        return hash;
++        // Reaper end
+     }
+ 
+     public boolean equals(Object object) {

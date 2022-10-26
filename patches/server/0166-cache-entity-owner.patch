@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 12:45:07 +0500
+Subject: [PATCH] cache-entity-owner
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHorseAbstract.java b/src/main/java/net/minecraft/server/EntityHorseAbstract.java
+index 8b6b52711a937fdb9fbc33c97182e2328a8aa58f..245a1bc13e46a746d60ce5aeab1cac36281e3c9a 100644
+--- a/src/main/java/net/minecraft/server/EntityHorseAbstract.java
++++ b/src/main/java/net/minecraft/server/EntityHorseAbstract.java
+@@ -41,6 +41,7 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
+     protected boolean bF = true;
+     protected int bG;
+     public int maxDomestication = 100; // CraftBukkit - store max domestication value
++    private Optional<UUID> cachedOwnerId; // Reaper - Cache entity owner
+ 
+     public EntityHorseAbstract(World world) {
+         super(world);
+@@ -87,11 +88,19 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
+ 
+     @Nullable
+     public UUID getOwnerUUID() {
+-        return (UUID) ((Optional) this.datawatcher.get(EntityHorseAbstract.bJ)).orNull();
++       // return (UUID) ((Optional) this.datawatcher.get(EntityHorseAbstract.bJ)).orNull();
++        // Reaper start - Cache entity owner
++        if (cachedOwnerId == null) cachedOwnerId = this.datawatcher.get(EntityHorseAbstract.bJ);
++        return cachedOwnerId.orNull();
++        // Reaper end
+     }
+ 
+     public void setOwnerUUID(@Nullable UUID uuid) {
+-        this.datawatcher.set(EntityHorseAbstract.bJ, Optional.fromNullable(uuid));
++        //this.datawatcher.set(EntityHorseAbstract.bJ, Optional.fromNullable(uuid));
++        // Reaper start - Cache entity owner
++        this.cachedOwnerId = Optional.fromNullable(uuid);
++        this.datawatcher.set(EntityHorseAbstract.bJ, this.cachedOwnerId);
++        // Reaper end
+     }
+ 
+     public float dw() {
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 10e1bd9faba90b546a778fdcb8315a06a83bdca1..0942fb4a80bffd06a4e135cac335d794296eb5d3 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1461,7 +1461,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+         mojangstatisticsgenerator.b("server_brand", this.getServerModName());
+         mojangstatisticsgenerator.b("gui_supported", GraphicsEnvironment.isHeadless() ? "headless" : "supported");
+         mojangstatisticsgenerator.b("dedicated", Boolean.valueOf(this.aa()));
+-        
++
+          */
+     }
+ 

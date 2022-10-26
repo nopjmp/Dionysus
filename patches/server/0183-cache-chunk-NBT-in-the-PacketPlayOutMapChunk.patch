@@ -1,0 +1,60 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:30:37 +0500
+Subject: [PATCH] cache-chunk-NBT-in-the-PacketPlayOutMapChunk
+
+
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java b/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
+index 54042bee18a7369322e7c1122b5d6667eaf05378..57075854cbef0c8e5ba2dc7194a678ca0f78cd7a 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
+@@ -21,6 +21,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+     private byte[] d;
+     private List<NBTTagCompound> e; private List<NBTTagCompound> getTileDataEntityData() { return this.e; } // Dionysus - Tuinity - OBFHELPER
+     private boolean f;
++    private byte[] nbtData; // Reaper - Cache chunk NBT
+     private volatile boolean ready = false; // Paper - Async-Anti-Xray - Ready flag for the network manager
+ 
+     // Paper start - Async-Anti-Xray - Set the ready flag to true
+@@ -88,6 +89,21 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+                 this.e.add(nbttagcompound);
+             }
+         }
++        // Reaper start - Cache chunk NBT
++        if (!this.e.isEmpty()) {
++            try {
++                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
++                java.io.DataOutputStream dos = new java.io.DataOutputStream(baos);
++                List<NBTTagCompound> nbtTagCompounds = this.e;
++                for (int j = 0; j < nbtTagCompounds.size(); j++) {
++                    NBTCompressedStreamTools.writeNBT(nbtTagCompounds.get(j), dos);
++                }
++                this.nbtData = baos.toByteArray();
++            } catch (Exception e) {
++                e.printStackTrace();
++            }
++        }
++        // Reaper end
+ 
+         chunk.world.chunkPacketBlockController.modifyBlocks(this, packetPlayOutMapChunkInfo); // Paper - Anti-Xray - Modify blocks
+         // Dionysus - Tuinity start - improve oversized chunk data packet handling
+@@ -148,6 +164,7 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+         packetdataserializer.d(this.d.length);
+         packetdataserializer.writeBytes(this.d);
+         packetdataserializer.d(this.e.size());
++        /* // Reaper start - Cache chunk NBT
+         Iterator iterator = this.e.iterator();
+ 
+         while (iterator.hasNext()) {
+@@ -155,6 +172,11 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
+ 
+             packetdataserializer.a(nbttagcompound);
+         }
++        */
++        if (nbtData != null) {
++            packetdataserializer.writeBytes(this.nbtData);
++        }
++        // Reaper end
+ 
+     }
+ 

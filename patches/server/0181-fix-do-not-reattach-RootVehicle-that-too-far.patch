@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:22:15 +0500
+Subject: [PATCH] fix-do-not-reattach-RootVehicle-that-too-far
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index f5624e7dc1d071f21072ea3e100e44822d7e6b29..001773772e5b0189a6c75cbfebcf512a71ba11ba 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -270,7 +270,8 @@ public abstract class PlayerList {
+                 UUID uuid = nbttagcompound1.a("Attach");
+                 Iterator iterator1;
+                 Entity entity1;
+-
++                
++                if (entityplayer.h(entity) < 256.0D) // Reaper
+                 if (entity.getUniqueID().equals(uuid)) {
+                     entityplayer.a(entity, true);
+                 } else {
