@@ -1,14 +1,34 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Softik Lord <dimap9986@gmail.com>
+From: ruViolence <78062896+ruviolence@users.noreply.github.com>
 Date: Sat, 15 Oct 2022 18:02:18 +0500
 Subject: [PATCH] Implement-Lithium-ai-pathing-ChunkCache
 
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..57023855698f5a5ec629b3fe0c4836125d1207c0 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -440,4 +440,9 @@ public class DionysusConfig {
+             networks is predictable and intuitive rather than locational and chaotic."""
+         );
+     }
++
++    public static boolean lithiumAiPathingChunkCache = true;
++    private static void lithiumAiPathingChunkCache() {
++        lithiumAiPathingChunkCache = getBoolean("lithium-ai-pathing-chunk-cache", lithiumAiPathingChunkCache);
++    }
+ }
 diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
-index 786d1dd2269adbb6041257e0ae926a8fac4d717d..44a1efd3e8dc919c8e7a681eda337372e3460324 100644
+index 786d1dd2269adbb6041257e0ae926a8fac4d717d..f315b5961872cb4a9bec09d27a270cd3c15bd241 100644
 --- a/src/main/java/net/minecraft/server/ChunkCache.java
 +++ b/src/main/java/net/minecraft/server/ChunkCache.java
-@@ -4,12 +4,23 @@ import javax.annotation.Nullable;
+@@ -1,15 +1,28 @@
+ package net.minecraft.server;
+ 
++import dev.pomf.dionysus.DionysusConfig;
++
+ import javax.annotation.Nullable;
  
  public class ChunkCache implements IBlockAccess {
  
@@ -32,7 +52,7 @@ index 786d1dd2269adbb6041257e0ae926a8fac4d717d..44a1efd3e8dc919c8e7a681eda337372
      public ChunkCache(World world, BlockPosition blockposition, BlockPosition blockposition1, int i) {
          this.e = world;
          this.a = blockposition.getX() - i >> 4;
-@@ -29,6 +40,18 @@ public class ChunkCache implements IBlockAccess {
+@@ -29,6 +42,18 @@ public class ChunkCache implements IBlockAccess {
              }
          }
  
@@ -51,7 +71,7 @@ index 786d1dd2269adbb6041257e0ae926a8fac4d717d..44a1efd3e8dc919c8e7a681eda337372
          for (l = blockposition.getX() >> 4; l <= blockposition1.getX() >> 4; ++l) {
              for (i1 = blockposition.getZ() >> 4; i1 <= blockposition1.getZ() >> 4; ++i1) {
                  Chunk chunk = this.c[l - this.a][i1 - this.b];
-@@ -55,20 +78,33 @@ public class ChunkCache implements IBlockAccess {
+@@ -55,20 +80,33 @@ public class ChunkCache implements IBlockAccess {
      }
  
      public IBlockData getType(BlockPosition blockposition) {
@@ -71,17 +91,17 @@ index 786d1dd2269adbb6041257e0ae926a8fac4d717d..44a1efd3e8dc919c8e7a681eda337372
 -                Chunk chunk = this.c[i][j];
 +            if (chunkX >= 0 && chunkX < this.xLen && chunkZ >= 0 && chunkZ < this.zLen) {
 +                Chunk chunk = this.chunksFlat[(chunkX * this.zLen) + chunkZ];
-+
-+                // Avoid going through Chunk#getBlockState
  
                  if (chunk != null) {
 -                    return chunk.getBlockData(blockposition);
 +                    ChunkSection section = chunk.getSections()[y >> 4];
 +
-+                    if (section != null) {
-+                        return section.getType(x & 15, y & 15, z & 15);
++                    if (section != null && DionysusConfig.lithiumAiPathingChunkCache) { // Dionysus
++                        // Avoid going through Chunk#getBlockData
++                        return section.getType(x & 15, y & 15, z & 15); // Titanium - Lithium - Dionysus
++                    } else {
++                        return chunk.getBlockData(blockposition);
 +                    }
-+                //return chunk.getBlockData(blockposition); // Titanium - Lithium
                  }
              }
          }
