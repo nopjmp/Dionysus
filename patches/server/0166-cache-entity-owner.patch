@@ -39,10 +39,10 @@ index 8b6b52711a937fdb9fbc33c97182e2328a8aa58f..245a1bc13e46a746d60ce5aeab1cac36
  
      public float dw() {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 10e1bd9faba90b546a778fdcb8315a06a83bdca1..0942fb4a80bffd06a4e135cac335d794296eb5d3 100644
+index 535b80fc25b4a34e73f434bfe27b0a0e658b3e20..4a7095596609d7fd6644c3d4bcce444cc6c55e6e 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -1461,7 +1461,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -1460,7 +1460,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          mojangstatisticsgenerator.b("server_brand", this.getServerModName());
          mojangstatisticsgenerator.b("gui_supported", GraphicsEnvironment.isHeadless() ? "headless" : "supported");
          mojangstatisticsgenerator.b("dedicated", Boolean.valueOf(this.aa()));

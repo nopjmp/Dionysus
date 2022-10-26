@@ -5,7 +5,7 @@ Subject: [PATCH] Clean up Dionysus Config
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index d29bee6caa41d0963890502519871ec92339d5ce..3b286c1368c05f43dbeaa85c18afb1034812b012 100644
+index c03b3a66abcf478b8f9ddc140f5d522575d9496c..f45177e0edc499a6deb5ed23abe1a5367adbcf77 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -69,11 +69,13 @@ public class DionysusConfig {

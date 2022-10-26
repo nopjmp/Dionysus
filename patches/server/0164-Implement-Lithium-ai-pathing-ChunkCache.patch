@@ -6,17 +6,20 @@ Subject: [PATCH] Implement-Lithium-ai-pathing-ChunkCache
 Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..57023855698f5a5ec629b3fe0c4836125d1207c0 100644
+index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..63c4750a71818dc966b5d0e6e1cdb7ed063c1006 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -440,4 +440,9 @@ public class DionysusConfig {
+@@ -440,4 +440,12 @@ public class DionysusConfig {
              networks is predictable and intuitive rather than locational and chaotic."""
          );
      }
 +
 +    public static boolean lithiumAiPathingChunkCache = true;
 +    private static void lithiumAiPathingChunkCache() {
-+        lithiumAiPathingChunkCache = getBoolean("lithium-ai-pathing-chunk-cache", lithiumAiPathingChunkCache);
++        lithiumAiPathingChunkCache = getBoolean("lithium-ai-pathing-chunk-cache", lithiumAiPathingChunkCache, """
++                The hottest part of path-finding is reading blocks out from the world.
++                This patch makes a number of changes to avoid slow paths in the game and to better inline code.
++                In testing, it shows a small improvement in path-finding code.""");
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java

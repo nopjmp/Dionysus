@@ -1,32 +1,60 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Softik Lord <dimap9986@gmail.com>
+From: ruViolence <78062896+ruviolence@users.noreply.github.com>
 Date: Sun, 16 Oct 2022 12:25:08 +0500
 Subject: [PATCH] remove-snooper
 
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 63c4750a71818dc966b5d0e6e1cdb7ed063c1006..7cb24e8172f9eb9af1c2903592e21d546c3ebd14 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -448,4 +448,9 @@ public class DionysusConfig {
+                 This patch makes a number of changes to avoid slow paths in the game and to better inline code.
+                 In testing, it shows a small improvement in path-finding code.""");
+     }
++
++    public static boolean disableSnooper = true;
++    private static void disableSnooper() {
++        disableSnooper = getBoolean("disable-snooper", disableSnooper);
++    }
+ }
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index 0fed3a53188afabda87765a303dd7be4b0428cdd..cbd0725775cf64c58da9000a351d650079edf7b0 100644
+index 0fed3a53188afabda87765a303dd7be4b0428cdd..4c976cbd50aa88b77c29f2476b30f324ce36b101 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
-@@ -282,7 +282,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -16,6 +16,8 @@ import java.util.List;
+ import java.util.Random;
+ import java.util.concurrent.TimeUnit;
+ import java.util.regex.Pattern;
++
++import dev.pomf.dionysus.DionysusConfig;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -282,7 +284,9 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
  
                  this.getEnableCommandBlock();
                  this.q();
 -                this.getSnooperEnabled();
-+                //this.getSnooperEnabled();
++                if (!DionysusConfig.disableSnooper) {
++                    this.getSnooperEnabled();
++                }
                  this.aG();
                  this.c(this.propertyManager.getInt("max-build-height", 256));
                  this.c((this.getMaxBuildHeight() + 8) / 16 * 16);
-@@ -439,13 +439,15 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -439,13 +443,15 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
      }
  
      public void a(MojangStatisticsGenerator mojangstatisticsgenerator) {
 -        mojangstatisticsgenerator.a("whitelist_enabled", Boolean.valueOf(this.aQ().getHasWhitelist()));
-+        /*mojangstatisticsgenerator.a("whitelist_enabled", Boolean.valueOf(this.aQ().getHasWhitelist()));
-         mojangstatisticsgenerator.a("whitelist_count", Integer.valueOf(this.aQ().getWhitelisted().length));
-         super.a(mojangstatisticsgenerator);
-+
-+         */
+-        mojangstatisticsgenerator.a("whitelist_count", Integer.valueOf(this.aQ().getWhitelisted().length));
+-        super.a(mojangstatisticsgenerator);
++        if (!DionysusConfig.disableSnooper) {
++            mojangstatisticsgenerator.a("whitelist_enabled", Boolean.valueOf(this.aQ().getHasWhitelist()));
++            mojangstatisticsgenerator.a("whitelist_count", Integer.valueOf(this.aQ().getWhitelisted().length));
++            super.a(mojangstatisticsgenerator);
++        }
      }
  
      public boolean getSnooperEnabled() {
@@ -36,7 +64,7 @@ index 0fed3a53188afabda87765a303dd7be4b0428cdd..cbd0725775cf64c58da9000a351d6500
  
      public void issueCommand(String s, ICommandListener icommandlistener) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 7c5de5bbd4c11f67e7f6999dd63cd7a8d5df5b10..10e1bd9faba90b546a778fdcb8315a06a83bdca1 100644
+index 7c5de5bbd4c11f67e7f6999dd63cd7a8d5df5b10..535b80fc25b4a34e73f434bfe27b0a0e658b3e20 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -55,7 +55,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
@@ -44,43 +72,44 @@ index 7c5de5bbd4c11f67e7f6999dd63cd7a8d5df5b10..10e1bd9faba90b546a778fdcb8315a06
      public static final File a = new File("usercache.json");
      public Convertable convertable;
 -    private final MojangStatisticsGenerator m = new MojangStatisticsGenerator("server", this, aw());
-+    //private final MojangStatisticsGenerator m = new MojangStatisticsGenerator("server", this, aw());
++    private final MojangStatisticsGenerator m = !DionysusConfig.disableSnooper ? new MojangStatisticsGenerator("server", this, aw()) : null; // Dionysus - disable snooper
      public File universe;
      private final List<ITickable> o = Lists.newArrayList();
      public final ICommandHandler b;
-@@ -529,11 +529,13 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
-             }
+@@ -530,8 +530,10 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
              // CraftBukkit end */
          }
--
-+        /*
-         if (this.m.d()) {
-             this.m.e();
+ 
+-        if (this.m.d()) {
+-            this.m.e();
++        if (!DionysusConfig.disableSnooper) { // Dionysus - disable snooper
++            if (this.m.d()) {
++                this.m.e();
++            }
          }
  
-+         */
-+
          // Spigot start
-         if (org.spigotmc.SpigotConfig.saveUserCacheOnStopOnly) {
-             LOGGER.info("Saving usercache.json");
-@@ -837,6 +839,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -837,12 +839,14 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          // Spigot end
          this.methodProfiler.b();
          this.methodProfiler.a("snooper");
-+        /*
-         if (getSnooperEnabled() && !this.m.d() && this.ticks > 100) {  // Spigot
-             this.m.a();
-         }
-@@ -845,6 +848,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
-             this.m.b();
+-        if (getSnooperEnabled() && !this.m.d() && this.ticks > 100) {  // Spigot
+-            this.m.a();
+-        }
++        if (!DionysusConfig.disableSnooper) { // Dionysus - disable snooper
++            if (getSnooperEnabled() && !this.m.d() && this.ticks > 100) {  // Spigot
++                this.m.a();
++            }
+ 
+-        if (getSnooperEnabled() && this.ticks % 6000 == 0) { // Spigot
+-            this.m.b();
++            if (getSnooperEnabled() && this.ticks % 6000 == 0) { // Spigot
++                this.m.b();
++            }
          }
  
-+         */
-+
          this.methodProfiler.b();
-         this.methodProfiler.b();
- 
-@@ -1409,6 +1414,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -1409,6 +1413,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
      }
  
      public void a(MojangStatisticsGenerator mojangstatisticsgenerator) {
@@ -88,7 +117,7 @@ index 7c5de5bbd4c11f67e7f6999dd63cd7a8d5df5b10..10e1bd9faba90b546a778fdcb8315a06
          mojangstatisticsgenerator.a("whitelist_enabled", Boolean.valueOf(false));
          mojangstatisticsgenerator.a("whitelist_count", Integer.valueOf(0));
          if (this.v != null) {
-@@ -1445,13 +1451,18 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -1445,13 +1450,18 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          }
  
          mojangstatisticsgenerator.a("worlds", Integer.valueOf(i));
