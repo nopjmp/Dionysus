@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nopjmp <kthompson@hey.com>
+Date: Sat, 29 Oct 2022 02:19:13 -0500
+Subject: [PATCH] Trim map after clear test
+
+
+diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
+index fc23f0938b20548f9f1895b4894f7472b56efff2..eeff8ed58e1b294af48f7946537455f58e360782 100644
+--- a/src/main/java/net/minecraft/server/NBTTagCompound.java
++++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
+@@ -52,6 +52,7 @@ public class NBTTagCompound extends NBTBase {
+             throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
+         } else {
+             this.map.clear();
++            this.map.trim(8);
+ 
+             byte b0;
+ 
