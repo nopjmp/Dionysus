@@ -114,7 +114,7 @@ index 3ab6b7897f5d05049287cc0388e4621aff20b54d..18db4ca5cfc2827801443efe396d2474
  
      public void sendScoreboard(ScoreboardServer scoreboardserver, EntityPlayer entityplayer) {
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index efa0c8ec29e659ac8c9691939f0b4482e500e516..e68112d39b6fc38bfdbe6e503a7c9d1bd1bdfb31 100644
+index 00a44dce993ac6dc08a2df63a6d089ff29e59fdc..c4a2c8320f30121ffe34b4207a7e7eef2eb57d39 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -125,7 +125,7 @@ index efa0c8ec29e659ac8c9691939f0b4482e500e516..e68112d39b6fc38bfdbe6e503a7c9d1b
  import io.netty.bootstrap.ServerBootstrap;
  import io.netty.channel.Channel;
  import io.netty.channel.ChannelException;
-@@ -177,7 +178,11 @@ public class ServerConnection {
+@@ -178,7 +179,11 @@ public class ServerConnection {
                                  throw new ReportedException(crashreport);
                              }
  
