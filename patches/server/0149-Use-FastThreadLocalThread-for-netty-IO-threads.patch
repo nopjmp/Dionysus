@@ -5,7 +5,7 @@ Subject: [PATCH] Use FastThreadLocalThread for netty IO threads
 
 
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index c4a2c8320f30121ffe34b4207a7e7eef2eb57d39..c9cbee47bee82dd0f9f0171c2949fb470835051d 100644
+index 671e23deddc246dcfecf027b62806a18a126b16f..098c51675e8b0a0543676797d1abc4b6769c30d7 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -1,7 +1,12 @@

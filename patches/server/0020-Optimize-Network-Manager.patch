@@ -515,7 +515,7 @@ index efe2f6d7409fd54648d45560f3b93fdad0b41219..86a89926e7ecc69372608b5707cf87ca
          this.networkManager.stopReading();
          // CraftBukkit - Don't wait
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 48d281832664dde24522e83a53254176d3ccc6a3..4894213a583d3df7de48f2875f2982172bcd4265 100644
+index 48d281832664dde24522e83a53254176d3ccc6a3..1572354a509764017744b835d3b4be3b4052bf03 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -15,6 +15,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -535,20 +535,19 @@ index 48d281832664dde24522e83a53254176d3ccc6a3..4894213a583d3df7de48f2875f298217
  
  import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
  import org.apache.logging.log4j.LogManager;
-@@ -64,9 +67,12 @@ public class ServerConnection {
+@@ -64,9 +67,11 @@ public class ServerConnection {
      private final List<NetworkManager> h = Collections.synchronizedList(Lists.newArrayList());
      // Paper start - prevent blocking on adding a new network manager while the server is ticking
      private final List<NetworkManager> pending = Collections.synchronizedList(Lists.<NetworkManager>newArrayList());
 +    private static final boolean disableFlushConsolidation = Boolean.getBoolean("Paper.disableFlushConsolidate"); // Paper
      private void addPending() {
-+        NetworkManager manager = null;
          synchronized (pending) {
              this.h.addAll(pending); // Paper - OBFHELPER - List of network managers
 +            pending.forEach((p) -> p.isPending = false);
              pending.clear();
          }
      }
-@@ -101,7 +107,7 @@ public class ServerConnection {
+@@ -101,7 +106,7 @@ public class ServerConnection {
                      } catch (ChannelException channelexception) {
                          ;
                      }
@@ -557,7 +556,7 @@ index 48d281832664dde24522e83a53254176d3ccc6a3..4894213a583d3df7de48f2875f298217
                      channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("legacy_query", new LegacyPingHandler(ServerConnection.this)).addLast("splitter", new PacketSplitter()).addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND)).addLast("prepender", new PacketPrepender()).addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
                      NetworkManager networkmanager = new NetworkManager(EnumProtocolDirection.SERVERBOUND);
  
-@@ -174,7 +180,7 @@ public class ServerConnection {
+@@ -174,7 +179,7 @@ public class ServerConnection {
                                  public void operationComplete(Future future) throws Exception {
                                      networkmanager.close(chatcomponenttext);
                                  }
