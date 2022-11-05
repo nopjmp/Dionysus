@@ -1,14 +1,38 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Softik Lord <dimap9986@gmail.com>
+From: ruViolence <78062896+ruviolence@users.noreply.github.com>
 Date: Sun, 16 Oct 2022 12:51:23 +0500
 Subject: [PATCH] cache-hashCodes
 
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 0288cd0401c0da3ee003ea5638f1d23476d27089..4dfbc28241b233bd6a6368bd1aba92c72cb31ad6 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -455,7 +455,9 @@ public class DionysusConfig {
+     }
+     
+     public static boolean cacheEntityOwner = true;
++    public static boolean cacheHashCodes = true;
+     private static void cache() {
+         cacheEntityOwner = getBoolean("cache.entity-owner", cacheEntityOwner);
++        cacheHashCodes = getBoolean("cache.hash-codes", cacheHashCodes);
+     }
+ }
 diff --git a/src/main/java/net/minecraft/server/BaseBlockPosition.java b/src/main/java/net/minecraft/server/BaseBlockPosition.java
-index 8e737718ee517d60b36ff0489d074c26c4ee67c4..0242a6647b3c6e2fbebb4d4bf9060a09d97c3233 100644
+index 8e737718ee517d60b36ff0489d074c26c4ee67c4..696442843a982dccf5f4601c3e9c7bace4bdb201 100644
 --- a/src/main/java/net/minecraft/server/BaseBlockPosition.java
 +++ b/src/main/java/net/minecraft/server/BaseBlockPosition.java
-@@ -11,6 +11,7 @@ public class BaseBlockPosition implements Comparable<BaseBlockPosition> {
+@@ -1,6 +1,8 @@
+ package net.minecraft.server;
+ 
+ import com.google.common.base.MoreObjects;
++import dev.pomf.dionysus.DionysusConfig;
++
+ import javax.annotation.concurrent.Immutable;
+ 
+ @Immutable
+@@ -11,6 +13,7 @@ public class BaseBlockPosition implements Comparable<BaseBlockPosition> {
      protected int a;
      protected int b;
      protected int c;
@@ -16,23 +40,21 @@ index 8e737718ee517d60b36ff0489d074c26c4ee67c4..0242a6647b3c6e2fbebb4d4bf9060a09
  
      public final boolean isValidLocation() {
          return a >= -30000000 && c >= -30000000 && a < 30000000 && c < 30000000 && b >= 0 && b < 256;
-@@ -43,7 +44,15 @@ public class BaseBlockPosition implements Comparable<BaseBlockPosition> {
+@@ -43,6 +46,14 @@ public class BaseBlockPosition implements Comparable<BaseBlockPosition> {
      }
  
      public int hashCode() {
--        return (this.getY() + this.getZ() * 31) * 31 + this.getX();
-+        //return (this.getY() + this.getZ() * 31) * 31 + this.getX();
-+        // Reaper start - Cache hash code
-+        int hash = this.hashCode;
-+        if (hash == -1) {
-+            hash = (this.b + this.c * 31) * 31 + this.a; // Reaper - Optimize BlockPosition
-+            hashCode = hash;
-+        }
-+        return hash;
-+        // Reaper end
++        if (DionysusConfig.cacheHashCodes) { // Reaper start - Cache hash code
++            int hash = this.hashCode;
++            if (hash == -1) {
++                hash = (this.b + this.c * 31) * 31 + this.a; // Reaper - Optimize BlockPosition
++                hashCode = hash;
++            }
++            return hash;
++        } // Reaper end
+         return (this.getY() + this.getZ() * 31) * 31 + this.getX();
      }
  
-     public int l(BaseBlockPosition baseblockposition) {
 diff --git a/src/main/java/net/minecraft/server/BlockPosition.java b/src/main/java/net/minecraft/server/BlockPosition.java
 index b39c5a3a3965f1d4b3e5da555d8e38ecb6298f74..6b54a77d240bc36353534df3620a4e2d9749c33a 100644
 --- a/src/main/java/net/minecraft/server/BlockPosition.java
@@ -141,10 +163,15 @@ index 403fa144accdee97f4001d9c45c81be9e135d8d9..96ea215749fab0142fb77295647b4635
      // Spigot end
  
 diff --git a/src/main/java/net/minecraft/server/ChunkCoordIntPair.java b/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
-index aafd23bebc82ef77e3932399e5f7893537373b6c..d30a320ba76a37d497cc34acf559130d8cc51584 100644
+index aafd23bebc82ef77e3932399e5f7893537373b6c..be08fffa6a6fae3091590f62a1b55806a9fad4ee 100644
 --- a/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
 +++ b/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
-@@ -4,6 +4,7 @@ public class ChunkCoordIntPair {
+@@ -1,9 +1,12 @@
+ package net.minecraft.server;
+ 
++import dev.pomf.dionysus.DionysusConfig;
++
+ public class ChunkCoordIntPair {
  
      public final int x;
      public final int z;
@@ -152,24 +179,24 @@ index aafd23bebc82ef77e3932399e5f7893537373b6c..d30a320ba76a37d497cc34acf559130d
  
      public ChunkCoordIntPair(int i, int j) {
          this.x = i;
-@@ -22,10 +23,16 @@ public class ChunkCoordIntPair {
+@@ -22,9 +25,19 @@ public class ChunkCoordIntPair {
      }
  
      public int hashCode() {
--        int i = 1664525 * this.x + 1013904223;
--        int j = 1664525 * (this.z ^ -559038737) + 1013904223;
++        if (DionysusConfig.cacheHashCodes) { // Reaper start - Cache hash code
++            int hash = this.hashCode;
++            if (hash == 0) {
++                int a1 = 1664525 * this.x + 1013904223;
++                int a2 = 1664525 * (this.z ^ -559038737) + 1013904223;
++                hash = a1 ^ a2;
++                this.hashCode = hash;
++            }
++            return hash;
++        } // Reaper end
++
+         int i = 1664525 * this.x + 1013904223;
+         int j = 1664525 * (this.z ^ -559038737) + 1013904223;
 -
--        return i ^ j;
-+        // Reaper start - Cache hash code
-+        int hash = this.hashCode;
-+        if (hash == 0) {
-+            int a1 = 1664525 * this.x + 1013904223;
-+            int a2 = 1664525 * (this.z ^ -559038737) + 1013904223;
-+            hash = a1 ^ a2;
-+            this.hashCode = hash;
-+        }
-+        return hash;
-+        // Reaper end
+         return i ^ j;
      }
  
-     public boolean equals(Object object) {

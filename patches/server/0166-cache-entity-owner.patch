@@ -1,14 +1,38 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Softik Lord <dimap9986@gmail.com>
+From: ruViolence <78062896+ruviolence@users.noreply.github.com>
 Date: Sun, 16 Oct 2022 12:45:07 +0500
 Subject: [PATCH] cache-entity-owner
 
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 7cb24e8172f9eb9af1c2903592e21d546c3ebd14..0288cd0401c0da3ee003ea5638f1d23476d27089 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -453,4 +453,9 @@ public class DionysusConfig {
+     private static void disableSnooper() {
+         disableSnooper = getBoolean("disable-snooper", disableSnooper);
+     }
++    
++    public static boolean cacheEntityOwner = true;
++    private static void cache() {
++        cacheEntityOwner = getBoolean("cache.entity-owner", cacheEntityOwner);
++    }
+ }
 diff --git a/src/main/java/net/minecraft/server/EntityHorseAbstract.java b/src/main/java/net/minecraft/server/EntityHorseAbstract.java
-index 8b6b52711a937fdb9fbc33c97182e2328a8aa58f..245a1bc13e46a746d60ce5aeab1cac36281e3c9a 100644
+index 8b6b52711a937fdb9fbc33c97182e2328a8aa58f..566d4bf7b45f4c6ddff14f8a66dfb6b2b49d4d6a 100644
 --- a/src/main/java/net/minecraft/server/EntityHorseAbstract.java
 +++ b/src/main/java/net/minecraft/server/EntityHorseAbstract.java
-@@ -41,6 +41,7 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
+@@ -6,6 +6,8 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.UUID;
+ import javax.annotation.Nullable;
++
++import dev.pomf.dionysus.DionysusConfig;
+ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason; // CraftBukkit
+ 
+ public abstract class EntityHorseAbstract extends EntityAnimal implements IInventoryListener, IJumpable {
+@@ -41,6 +43,7 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
      protected boolean bF = true;
      protected int bG;
      public int maxDomestication = 100; // CraftBukkit - store max domestication value
@@ -16,38 +40,37 @@ index 8b6b52711a937fdb9fbc33c97182e2328a8aa58f..245a1bc13e46a746d60ce5aeab1cac36
  
      public EntityHorseAbstract(World world) {
          super(world);
-@@ -87,11 +88,19 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
+@@ -87,11 +90,20 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
  
      @Nullable
      public UUID getOwnerUUID() {
--        return (UUID) ((Optional) this.datawatcher.get(EntityHorseAbstract.bJ)).orNull();
-+       // return (UUID) ((Optional) this.datawatcher.get(EntityHorseAbstract.bJ)).orNull();
-+        // Reaper start - Cache entity owner
-+        if (cachedOwnerId == null) cachedOwnerId = this.datawatcher.get(EntityHorseAbstract.bJ);
-+        return cachedOwnerId.orNull();
-+        // Reaper end
++        if (DionysusConfig.cacheEntityOwner) { // Reaper start - Cache entity owner
++            if (cachedOwnerId == null) cachedOwnerId = this.datawatcher.get(EntityHorseAbstract.bJ);
++            return cachedOwnerId.orNull();
++        } // Reaper end
+         return (UUID) ((Optional) this.datawatcher.get(EntityHorseAbstract.bJ)).orNull();
      }
  
      public void setOwnerUUID(@Nullable UUID uuid) {
 -        this.datawatcher.set(EntityHorseAbstract.bJ, Optional.fromNullable(uuid));
-+        //this.datawatcher.set(EntityHorseAbstract.bJ, Optional.fromNullable(uuid));
-+        // Reaper start - Cache entity owner
-+        this.cachedOwnerId = Optional.fromNullable(uuid);
-+        this.datawatcher.set(EntityHorseAbstract.bJ, this.cachedOwnerId);
-+        // Reaper end
++        if (DionysusConfig.cacheEntityOwner) { // Reaper start - Cache entity owner
++            this.cachedOwnerId = Optional.fromNullable(uuid);
++            this.datawatcher.set(EntityHorseAbstract.bJ, this.cachedOwnerId);
++        } else { // Reaper end
++            this.datawatcher.set(EntityHorseAbstract.bJ, Optional.fromNullable(uuid));
++        }
      }
  
      public float dw() {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 535b80fc25b4a34e73f434bfe27b0a0e658b3e20..4a7095596609d7fd6644c3d4bcce444cc6c55e6e 100644
+index 535b80fc25b4a34e73f434bfe27b0a0e658b3e20..5ae360976ff81bf0cb0cb3776247e35dc0234688 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -1460,7 +1460,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+@@ -1460,7 +1460,6 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
          mojangstatisticsgenerator.b("server_brand", this.getServerModName());
          mojangstatisticsgenerator.b("gui_supported", GraphicsEnvironment.isHeadless() ? "headless" : "supported");
          mojangstatisticsgenerator.b("dedicated", Boolean.valueOf(this.aa()));
 -        
-+
           */
      }
  
