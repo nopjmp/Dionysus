@@ -333,7 +333,7 @@ index 87e73ead65e023d4c75a36def83d9f27ce7b6ab1..8e64fda1cf35ff94f287babac083be10
  }
 +// Tuinity end
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index db9c96c733da547afb7a786fc8fd36e22178d3a2..efa0c8ec29e659ac8c9691939f0b4482e500e516 100644
+index 1572354a509764017744b835d3b4be3b4052bf03..9188fc84d1aca420856fad5142b55cd1fd2b56f6 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -99,7 +99,12 @@ public class ServerConnection {
