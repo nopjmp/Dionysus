@@ -21,16 +21,22 @@ index 1f2fc8223808ce352267660ca9a11d7ffec94d70..37259967bb36d70159d8a4ceff1d671a
  
      <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..76837460a0e03b70a3ee3c0ea9a64d013df309a8 100644
+index 869b710fed7f006d60b7f52690bb9255a96d4ac5..e7a37ab9e6d83562236c63991d98186f49ef9bae 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -367,8 +367,18 @@ public class DionysusConfig {
+@@ -366,7 +366,6 @@ public class DionysusConfig {
+ 
          RegionFile.deflater.setLevel(chunkCompressionLevel);
      }
+-
+     public static boolean fixWitherHostility = false;
+     private static void fixWitherHostility() {
+         fixWitherHostility = getBoolean("fix-wither-hostility", fixWitherHostility, """
+@@ -375,8 +374,17 @@ public class DionysusConfig {
+                 """);
+     }
  
--    public static int maxProcessedBookNBTSize = 8000;
 +    public static boolean linearRegionFiles = false;
- 
 +    private static void linearRegionFiles() {
 +        // Set some defaults
 +        linearRegionFiles = getBoolean("compression.linear-region-files", linearRegionFiles);
@@ -40,7 +46,8 @@ index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..76837460a0e03b70a3ee3c0ea9a64d01
 +        );
 +    }
 +    
-+    public static int maxProcessedBookNBTSize = 8000;
+     public static int maxProcessedBookNBTSize = 8000;
+-
      private static void maxProcessedBookNBTSize() {
          maxProcessedBookNBTSize = getInt("max-processed-book-nbt-size", 8000);
      }

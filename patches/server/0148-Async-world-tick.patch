@@ -5,10 +5,10 @@ Subject: [PATCH] Async world tick
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7..302358c002a9611b1ece57d0854ba872433db1ff 100644
+index 314f09e1c108035b7bbcbd048e5690b630027ef5..daeeb3a66e0cd5d8ec1ad0b5ba5013b61a61534c 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -399,4 +399,14 @@ public class DionysusConfig {
+@@ -407,4 +407,14 @@ public class DionysusConfig {
      private static void useAlternateKeepAlive() {
          useAlternateKeepAlive = getBoolean("use-alternate-keepalive", useAlternateKeepAlive);
      }

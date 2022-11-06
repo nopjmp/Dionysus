@@ -2012,10 +2012,10 @@ index 0000000000000000000000000000000000000000..2444e794c5bfb777aec3fa4ff99a336d
 +	}
 +}
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 80f7510422412e009f02650c5c6f49614d40ae12..4af57cf5694ea4217be8fd70c00e5ad6e7aaa219 100644
+index 72de793d806374ff00f41cdc60ccac7b1adf11b1..869b710fed7f006d60b7f52690bb9255a96d4ac5 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -426,4 +426,18 @@ public class DionysusConfig {
+@@ -434,4 +434,18 @@ public class DionysusConfig {
                  "HASHCODE_EQUAL - NBT tags are compared using hashCode() and equals(), if hashCode() succeeds then equals() is checked as well, not as fast as HASHCODE but as reliable as EQUAL"
          );
      }
