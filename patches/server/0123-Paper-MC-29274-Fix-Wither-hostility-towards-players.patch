@@ -3,16 +3,46 @@ From: Softik Lord <dimap9986@gmail.com>
 Date: Mon, 18 Jul 2022 15:49:35 +0500
 Subject: [PATCH] Paper-MC-29274-Fix-Wither-hostility-towards-players
 
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 22488895599141ce0f8d0cadca48d49973e67416..9c41fd700ae9297ca7638df921c658eeb6229b18 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -367,6 +367,14 @@ public class DionysusConfig {
+         RegionFile.deflater.setLevel(chunkCompressionLevel);
+     }
+ 
++    public static boolean fixWitherHostility = false;
++    private static void fixWitherHostility() {
++        fixWitherHostility = getBoolean("fix-wither-hostility", fixWitherHostility, """
++                Fixes MC-29274
++                Makes withers much more aggressive towards players.
++                """);
++    }
++
+     public static int maxProcessedBookNBTSize = 8000;
+ 
+     private static void maxProcessedBookNBTSize() {
 diff --git a/src/main/java/net/minecraft/server/EntityWither.java b/src/main/java/net/minecraft/server/EntityWither.java
-index 9678526059621cd31a9a0dccc8ff803d80e9082a..1b2f4fff7f4bf99c79444069517467052334dd0d 100644
+index 9678526059621cd31a9a0dccc8ff803d80e9082a..416fa8253d593a52b02255226a6364d6c7bac1e9 100644
 --- a/src/main/java/net/minecraft/server/EntityWither.java
 +++ b/src/main/java/net/minecraft/server/EntityWither.java
-@@ -55,6 +55,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+@@ -6,6 +6,7 @@ import java.util.List;
+ import javax.annotation.Nullable;
+ 
+ // CraftBukkit start
++import dev.pomf.dionysus.DionysusConfig;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.event.entity.EntityRegainHealthEvent;
+ import org.bukkit.event.entity.ExplosionPrimeEvent;
+@@ -55,6 +56,9 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
          this.goalSelector.a(7, new PathfinderGoalRandomLookaround(this));
          this.targetSelector.a(1, new PathfinderGoalHurtByTarget(this, false, new Class[0]));
          this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget(this, EntityInsentient.class, 0, false, false, EntityWither.bH));
-+        this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget<>(this, EntityHuman.class, 0, false, false, null)); // Paper - Fix MC-29274
++        if (DionysusConfig.fixWitherHostility) { // Dionysus - Paper - Fix MC-29274
++            this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget<>(this, EntityHuman.class, 0, false, false, null));
++        }
      }
  
      protected void i() {

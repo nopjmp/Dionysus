@@ -5,10 +5,10 @@ Subject: [PATCH] Add option to disable duplicate log
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 448aeed01b5604bf2f129bf31ba0b8c28b4e64fe..dba95376bf4385e1bd0a3eb33c731496f52fc0a4 100644
+index dd371d4cd3ec8442958920eecd5f32f69c00263a..fc27044e8643afb828a71fd7178f865760d96528 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -380,4 +380,13 @@ public class DionysusConfig {
+@@ -388,4 +388,13 @@ public class DionysusConfig {
                  "Fixes MC-161754"
          );
      }

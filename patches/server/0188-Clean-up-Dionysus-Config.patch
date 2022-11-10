@@ -5,7 +5,11 @@ Subject: [PATCH] Clean up Dionysus Config
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+<<<<<<< HEAD:patches/server/0165-Clean-up-Dionysus-Config.patch
+index e7a37ab9e6d83562236c63991d98186f49ef9bae..d2fb540fe11d4488fa0daffd918a5c15b97a3fac 100644
+=======
 index 547018629f9f6f6585e08019b7aabb65e8fdda1f..ac76b0671ca70ee34a049614e31af3cf450c4842 100644
+>>>>>>> 6988149e9c4d8e886e3ac01503a0ec02efe12e97:patches/server/0188-Clean-up-Dionysus-Config.patch
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -69,11 +69,13 @@ public class DionysusConfig {
@@ -245,11 +249,8 @@ index 547018629f9f6f6585e08019b7aabb65e8fdda1f..ac76b0671ca70ee34a049614e31af3cf
  
          if (compressionLevel < -1 || compressionLevel > 9) {
              logError("Compression level is invalid resetting to default. Valid compression levels are -1 (Default), 0 (None), 1 (Fast) through 9 (Best)");
-@@ -368,41 +350,32 @@ public class DionysusConfig {
-     }
- 
+@@ -377,38 +359,30 @@ public class DionysusConfig {
      public static boolean linearRegionFiles = false;
--
      private static void linearRegionFiles() {
          // Set some defaults
 -        linearRegionFiles = getBoolean("compression.linear-region-files", linearRegionFiles);
@@ -294,7 +295,7 @@ index 547018629f9f6f6585e08019b7aabb65e8fdda1f..ac76b0671ca70ee34a049614e31af3cf
      }
  
      public static boolean useAlternateKeepAlive = false;
-@@ -412,11 +385,10 @@ public class DionysusConfig {
+@@ -418,11 +392,10 @@ public class DionysusConfig {
  
      public static boolean asyncWorldTick = false;
      private static void asyncWorldTick() {
@@ -310,7 +311,7 @@ index 547018629f9f6f6585e08019b7aabb65e8fdda1f..ac76b0671ca70ee34a049614e31af3cf
          );
      }
  
-@@ -428,26 +400,22 @@ public class DionysusConfig {
+@@ -434,26 +407,22 @@ public class DionysusConfig {
  
      public static NBTCompareMethod nbtCompareMethod = NBTCompareMethod.EQUAL;
      private static void nbtCompareMethod() {

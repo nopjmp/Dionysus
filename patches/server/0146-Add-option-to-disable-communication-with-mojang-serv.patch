@@ -31,10 +31,10 @@ index 61cfdf73c8a5b0dcf2f9903ebbb2f4132ba1f0dd..8f20768564a972df7b30282684412d85
      }
  }
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index dba95376bf4385e1bd0a3eb33c731496f52fc0a4..e74a8b2fe6ce80d4bb27a4226184f2c4f105f177 100644
+index fc27044e8643afb828a71fd7178f865760d96528..86d3ff8e04b9e410d6c3de09786f685d2a1e5412 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -389,4 +389,9 @@ public class DionysusConfig {
+@@ -397,4 +397,9 @@ public class DionysusConfig {
                  "and \"Deleting duplicate entity\" log messages."
          );
      }
