@@ -21,7 +21,11 @@ index 1f2fc8223808ce352267660ca9a11d7ffec94d70..37259967bb36d70159d8a4ceff1d671a
  
      <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+<<<<<<< HEAD:patches/server/0164-Backport-linear-region-files-from-Xymb.patch
 index 869b710fed7f006d60b7f52690bb9255a96d4ac5..e7a37ab9e6d83562236c63991d98186f49ef9bae 100644
+=======
+index 4dfbc28241b233bd6a6368bd1aba92c72cb31ad6..547018629f9f6f6585e08019b7aabb65e8fdda1f 100644
+>>>>>>> 6988149e9c4d8e886e3ac01503a0ec02efe12e97:patches/server/0187-Backport-linear-region-files-from-Xymb.patch
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -366,7 +366,6 @@ public class DionysusConfig {
@@ -560,7 +564,7 @@ index 0000000000000000000000000000000000000000..b782045a4581d9ffeb42139fcf7a7e3b
 +    
 +}
 diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
-index ca2f4dcaac1646e05b10dee285967a17d4e9a25d..965253dca909618da481e8085f8c13104edb9c38 100644
+index f3e1182ac4b953a17209b6edb05cb7a0c3aa3164..56ad82118497acef788a841f16826ef64fc0c53c 100644
 --- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 +++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 @@ -13,6 +13,9 @@ import java.util.Map;

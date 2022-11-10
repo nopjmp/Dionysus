@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:23:16 +0500
+Subject: [PATCH] fix-attempt-to-reduce-EntityTracker-memory-leakage
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
+index 6043c6b299ec668da75c163d7c8bf89f922b607a..aace8c285844ffa953e336793dac0e21b2a0c1d1 100644
+--- a/src/main/java/net/minecraft/server/EntityTracker.java
++++ b/src/main/java/net/minecraft/server/EntityTracker.java
+@@ -168,6 +168,7 @@ public class EntityTracker {
+         if (entitytrackerentry1 != null) {
+             this.c.remove(entitytrackerentry1);
+             entitytrackerentry1.a();
++            entitytrackerentry1.trackedPlayers.clear(); // Reaper - Attempt to reduce memory leakage
+         }
+ 
+     }
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 001773772e5b0189a6c75cbfebcf512a71ba11ba..1b423bd9107467f7f63f05fcc71633d2878f8581 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -270,7 +270,7 @@ public abstract class PlayerList {
+                 UUID uuid = nbttagcompound1.a("Attach");
+                 Iterator iterator1;
+                 Entity entity1;
+-                
++
+                 if (entityplayer.h(entity) < 256.0D) // Reaper
+                 if (entity.getUniqueID().equals(uuid)) {
+                     entityplayer.a(entity, true);
+@@ -575,6 +575,7 @@ public abstract class PlayerList {
+         // CraftBukkit end
+ 
+         ChunkIOExecutor.adjustPoolSize(this.getPlayerCount()); // CraftBukkit
++        worldserver.getTracker().untrackPlayer(entityplayer); // Reaper - Attempt to reduce memory leakage
+ 
+         return entityplayer.didPlayerJoinEvent ? playerQuitEvent.getQuitMessage() : null; // CraftBukkit // Paper - don't print quit if we never printed join
+     }

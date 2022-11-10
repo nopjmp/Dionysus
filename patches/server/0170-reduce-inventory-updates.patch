@@ -1,0 +1,346 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 13:46:44 +0500
+Subject: [PATCH] reduce-inventory-updates
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/util/InventoryUpdateHelper.java b/src/main/java/dev/pomf/dionysus/util/InventoryUpdateHelper.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..5317c2f53c250517a7d77ab9e373676c94219243
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/util/InventoryUpdateHelper.java
+@@ -0,0 +1,127 @@
++package dev.pomf.dionysus.util;
++
++import net.minecraft.server.EntityPlayer;
++import net.minecraft.server.EnumHand;
++import net.minecraft.server.EnumItemSlot;
++import net.minecraft.server.Item;
++import net.minecraft.server.ItemArmor;
++import net.minecraft.server.ItemArrow;
++import net.minecraft.server.ItemStack;
++import net.minecraft.server.ItemSword;
++import net.minecraft.server.ItemTool;
++import net.minecraft.server.Items;
++import net.minecraft.server.PacketPlayOutSetSlot;
++import net.minecraft.server.PlayerInventory;
++
++public class InventoryUpdateHelper {
++    public static void onLeftClick(EntityPlayer player, EnumHand hand, ItemStack itemInHand) {
++        if (itemInHand.isEmpty()) return;
++        if (shouldBeIgnored(itemInHand)) return;
++
++        Item item = itemInHand.getItem();
++
++        // Update if the item may be damaged on the clientside
++        if (item instanceof ItemSword || item instanceof ItemTool) {
++            player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, hand), itemInHand));
++        }
++    }
++
++    public static void onRightClick(EntityPlayer player, EnumHand hand, ItemStack itemInHand) {
++        if (shouldBeIgnored(itemInHand)) return;
++        // Update held item
++        player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, hand), itemInHand));
++
++        Item item = itemInHand.getItem();
++
++        // Update armor slot on equip
++        if (item instanceof ItemArmor) {
++            EnumItemSlot armorSlotType = ((ItemArmor) item).c;
++            // If the armor slot is empty
++            if (player.getEquipment(armorSlotType).isEmpty()) {
++                player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getArmorPacketSlot(armorSlotType), player.getEquipment(armorSlotType)));
++            }
++        }
++
++        if (item == Items.BOW) {
++            updateArrow(player);
++        }
++    }
++
++    public static void onBlockBreak(EntityPlayer player, ItemStack itemInMainHand) {
++        if (!(itemInMainHand.getItem() instanceof ItemSword)) return;
++        // Update held item
++        player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, EnumHand.MAIN_HAND), itemInMainHand));
++    }
++
++    public static void onBowShoot(EntityPlayer player) {
++        bow_update:
++        {
++            ItemStack itemInMainHand = player.b(EnumHand.MAIN_HAND);
++            if (itemInMainHand.getItem() == Items.BOW) {
++                player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, EnumHand.MAIN_HAND), itemInMainHand));
++                break bow_update;
++            }
++
++            ItemStack itemInOffHand = player.b(EnumHand.OFF_HAND);
++            if (itemInOffHand.getItem() == Items.BOW) {
++                player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, EnumHand.OFF_HAND), itemInOffHand));
++            }
++        }
++
++        updateArrow(player);
++    }
++
++    public static void updateHeld(EntityPlayer player) {
++        player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, EnumHand.MAIN_HAND), player.b(EnumHand.MAIN_HAND)));
++        player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, EnumHand.OFF_HAND), player.b(EnumHand.OFF_HAND)));
++    }
++
++    public static void updateHeld(EntityPlayer player, EnumHand hand) {
++        player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, hand), player.b(hand)));
++    }
++
++    private static int getHeldItemPacketSlot(EntityPlayer player, EnumHand hand) {
++        return (hand == EnumHand.MAIN_HAND) ? (player.inventory.itemInHandIndex + 36) : 45;
++    }
++
++    private static int getArmorPacketSlot(EnumItemSlot slot) {
++        switch (slot) {
++            case HEAD: return 5;
++            case CHEST: return 6;
++            case LEGS: return 7;
++            case FEET: return 8;
++            default: throw new IllegalStateException("Unexpected value: " + slot);
++        }
++    }
++
++    private static void updateArrow(EntityPlayer player) {
++        ItemStack offHand = player.b(EnumHand.OFF_HAND);
++        if (offHand.getItem() instanceof ItemArrow) {
++            player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, EnumHand.OFF_HAND), offHand));
++            return;
++        }
++
++        ItemStack mainHand = player.b(EnumHand.MAIN_HAND);
++        if (mainHand.getItem() instanceof ItemArrow) {
++            player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, getHeldItemPacketSlot(player, EnumHand.MAIN_HAND), mainHand));
++            return;
++        }
++
++        PlayerInventory inventory = player.inventory;
++        for (int i = 0; i < inventory.getSize(); ++i) {
++            ItemStack itemstack = inventory.getItem(i);
++
++            if (itemstack.getItem() instanceof ItemArrow) {
++                player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, i, itemstack));
++                return;
++            }
++        }
++    }
++
++    private static boolean shouldBeIgnored(ItemStack stack) {
++        Item item = stack.getItem();
++        if (item == Items.WRITABLE_BOOK) return true;
++        if (item == Items.WRITTEN_BOOK) return true;
++        return false;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/BlockCauldron.java b/src/main/java/net/minecraft/server/BlockCauldron.java
+index 57638ffc991afe7307265ec1d66ea28efd78b6d3..8908422c25920c63097f1fe072fdda8fc1789e67 100644
+--- a/src/main/java/net/minecraft/server/BlockCauldron.java
++++ b/src/main/java/net/minecraft/server/BlockCauldron.java
+@@ -120,8 +120,11 @@ public class BlockCauldron extends Block {
+                                 entityhuman.a(enumhand, itemstack1);
+                             } else if (!entityhuman.inventory.pickup(itemstack1)) {
+                                 entityhuman.drop(itemstack1, false);
++                                /*
+                             } else if (entityhuman instanceof EntityPlayer) {
+                                 ((EntityPlayer) entityhuman).updateInventory(entityhuman.defaultContainer);
++
++                                 */
+                             }
+                         }
+ 
+@@ -141,9 +144,12 @@ public class BlockCauldron extends Block {
+                             itemstack1 = new ItemStack(Items.GLASS_BOTTLE);
+                             entityhuman.b(StatisticList.J);
+                             entityhuman.a(enumhand, itemstack1);
++                            /*
+                             if (entityhuman instanceof EntityPlayer) {
+                                 ((EntityPlayer) entityhuman).updateInventory(entityhuman.defaultContainer);
+                             }
++
++                             */
+                         }
+ 
+                         world.a((EntityHuman) null, blockposition, SoundEffects.M, SoundCategory.BLOCKS, 1.0F, 1.0F);
+@@ -189,8 +195,11 @@ public class BlockCauldron extends Block {
+                                 entityhuman.a(enumhand, itemstack1);
+                             } else if (!entityhuman.inventory.pickup(itemstack1)) {
+                                 entityhuman.drop(itemstack1, false);
++                                /*
+                             } else if (entityhuman instanceof EntityPlayer) {
+                                 ((EntityPlayer) entityhuman).updateInventory(entityhuman.defaultContainer);
++
++                                 */
+                             }
+                         }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 6a10b3870480de5686cebfa81003ff163cf881da..b420d4928934b370e8b2971a60ef0f61d017eb4c 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -1162,6 +1162,7 @@ public abstract class EntityHuman extends EntityLiving {
+                         // CraftBukkit start - resync on cancelled event
+                         if (this instanceof EntityPlayer) {
+                             ((EntityPlayer) this).getBukkitEntity().updateInventory();
++                            dev.pomf.dionysus.util.InventoryUpdateHelper.onLeftClick((EntityPlayer) this, EnumHand.MAIN_HAND, this.b(EnumHand.MAIN_HAND)); // Reaper - Reduce inventory updates
+                         }
+                         // CraftBukkit end
+                     }
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 13776a48b74389801151ef3290ac127c68ef07fa..3793f62c7ce99d87f17f2fdd4eebf4980ac090d2 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -2506,7 +2506,7 @@ public abstract class EntityLiving extends Entity {
+ 
+                 if (event.isCancelled()) {
+                     // Update client
+-                    ((EntityPlayer) this).getBukkitEntity().updateInventory();
++                    dev.pomf.dionysus.util.InventoryUpdateHelper.updateHeld((EntityPlayer) this, this.cH()); // Reaper - Reduce inventory updates
+                     ((EntityPlayer) this).getBukkitEntity().updateScaledHealth();
+                     return;
+                 }
+@@ -2529,7 +2529,7 @@ public abstract class EntityLiving extends Entity {
+ 
+             // Paper start - if the replacement is anything but the default, update the client inventory
+             if (this instanceof EntityPlayer && !com.google.common.base.Objects.equal(defaultReplacement, itemstack)) {
+-                ((EntityPlayer) this).getBukkitEntity().updateInventory();
++                dev.pomf.dionysus.util.InventoryUpdateHelper.updateHeld((EntityPlayer) this, this.cH()); // Reaper - Reduce inventory updates
+             }
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/ItemBow.java b/src/main/java/net/minecraft/server/ItemBow.java
+index 44e7be58e134a6d66c464010c13d4e73b548c160..d24a9204d046b6f01ad91824074383666e0f4e2e 100644
+--- a/src/main/java/net/minecraft/server/ItemBow.java
++++ b/src/main/java/net/minecraft/server/ItemBow.java
+@@ -110,7 +110,7 @@ public class ItemBow extends Item {
+                         if (event.getProjectile() == entityarrow.getBukkitEntity()) {
+                             if (!world.addEntity(entityarrow)) {
+                                 if (entityhuman instanceof EntityPlayer) {
+-                                    ((EntityPlayer) entityhuman).getBukkitEntity().updateInventory();
++                                    dev.pomf.dionysus.util.InventoryUpdateHelper.onBowShoot((EntityPlayer) entityhuman); // Reaper - Reduce inventory updates
+                                 }
+                                 return;
+                             }
+diff --git a/src/main/java/net/minecraft/server/ItemEnderPearl.java b/src/main/java/net/minecraft/server/ItemEnderPearl.java
+index a0bf985da7d27089047f9073f8364947cd4f09d9..94ce44a0fe60b542ec28ed414643c1caccdb1d41 100644
+--- a/src/main/java/net/minecraft/server/ItemEnderPearl.java
++++ b/src/main/java/net/minecraft/server/ItemEnderPearl.java
+@@ -17,7 +17,7 @@ public class ItemEnderPearl extends Item {
+             entityenderpearl.a(entityhuman, entityhuman.pitch, entityhuman.yaw, 0.0F, 1.5F, 1.0F);
+             if (!world.addEntity(entityenderpearl)) {
+                 if (entityhuman instanceof EntityPlayer) {
+-                    ((EntityPlayer) entityhuman).getBukkitEntity().updateInventory();
++                    dev.pomf.dionysus.util.InventoryUpdateHelper.updateHeld((EntityPlayer) entityhuman, enumhand); // Reaper - Reduce inventory updates
+                 }
+                 return new InteractionResultWrapper(EnumInteractionResult.FAIL, itemstack);
+             }
+diff --git a/src/main/java/net/minecraft/server/ItemSnowball.java b/src/main/java/net/minecraft/server/ItemSnowball.java
+index 2e73c93aa0091d91c148efd1f034421d21730855..9dbf39213c0c3d8d5cffca5b448e9c1a817dce8d 100644
+--- a/src/main/java/net/minecraft/server/ItemSnowball.java
++++ b/src/main/java/net/minecraft/server/ItemSnowball.java
+@@ -29,7 +29,7 @@ public class ItemSnowball extends Item {
+ 
+                 world.a((EntityHuman) null, entityhuman.locX, entityhuman.locY, entityhuman.locZ, SoundEffects.hp, SoundCategory.NEUTRAL, 0.5F, 0.4F / (ItemSnowball.j.nextFloat() * 0.4F + 0.8F));
+             } else if (entityhuman instanceof EntityPlayer) {
+-                ((EntityPlayer) entityhuman).getBukkitEntity().updateInventory();
++                dev.pomf.dionysus.util.InventoryUpdateHelper.updateHeld((EntityPlayer) entityhuman, enumhand); // Reaper - Reduce inventory updates
+             }
+         }
+         // CraftBukkit end
+diff --git a/src/main/java/net/minecraft/server/ItemStack.java b/src/main/java/net/minecraft/server/ItemStack.java
+index c5f5fa4e74fb1564c638f8d586f15d9606ae372c..1754c336a98dc9b641260690db7fec98a0a77b1d 100644
+--- a/src/main/java/net/minecraft/server/ItemStack.java
++++ b/src/main/java/net/minecraft/server/ItemStack.java
+@@ -237,7 +237,7 @@ public final class ItemStack {
+             if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild())) {
+                 enuminteractionresult = EnumInteractionResult.FAIL; // cancel placement
+                 // PAIL: Remove this when MC-99075 fixed
+-                placeEvent.getPlayer().updateInventory();
++                dev.pomf.dionysus.util.InventoryUpdateHelper.updateHeld((EntityPlayer) entityhuman, enumhand); // Reaper - Reduce inventory updates
+ 
+                 // Paper start
+                 for (Map.Entry<BlockPosition, TileEntity> e : world.capturedTileEntities.entrySet()) {
+@@ -429,7 +429,7 @@ public final class ItemStack {
+                     org.bukkit.event.player.PlayerItemDamageEvent event = new org.bukkit.event.player.PlayerItemDamageEvent(entityplayer.getBukkitEntity(), item, i);
+                     org.bukkit.Bukkit.getServer().getPluginManager().callEvent(event);
+                     if (i != event.getDamage() || event.isCancelled()) {
+-                        event.getPlayer().updateInventory();
++                        dev.pomf.dionysus.util.InventoryUpdateHelper.updateHeld(entityplayer); // Reaper - Reduce inventory updates
+                     }
+                     if (event.isCancelled()) return false;
+                     i = event.getDamage();
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index be05fdb4af0474a5be00e99c8428ee71a6e5303f..ef5b56cf5515dfd54db6429b06af1c10eecd6106 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1132,7 +1132,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+             }
+ 
+             if (cancelled) {
+-                this.player.getBukkitEntity().updateInventory(); // SPIGOT-2524
++                dev.pomf.dionysus.util.InventoryUpdateHelper.onRightClick(this.player, enumhand, itemstack); // SPIGOT-2524 // Reaper - Reduce inventory updates
+                 return;
+             }
+             // Paper start
+@@ -1768,7 +1768,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                     }
+ 
+                     if (event.isCancelled()) {
+-                        this.player.updateInventory(this.player.activeContainer); // Paper - Refresh player inventory
++                        dev.pomf.dionysus.util.InventoryUpdateHelper.onRightClick(this.player, packetplayinuseentity.b(), itemInHand); // Reaper - Reduce inventory updates // Paper - Refresh player inventory
+                         return;
+                     }
+                     // CraftBukkit end
+@@ -1779,7 +1779,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                     this.player.a(entity, enumhand);
+                     // CraftBukkit start
+                     if (!itemInHand.isEmpty() && itemInHand.getCount() <= -1) {
+-                        this.player.updateInventory(this.player.activeContainer);
++                        dev.pomf.dionysus.util.InventoryUpdateHelper.onRightClick(this.player, enumhand, itemInHand); // Reaper - Reduce inventory updates
+                     }
+                     // CraftBukkit end
+                 } else if (packetplayinuseentity.a() == PacketPlayInUseEntity.EnumEntityUseAction.INTERACT_AT) {
+@@ -1787,7 +1787,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                     entity.a(this.player, packetplayinuseentity.c(), enumhand);
+                     // CraftBukkit start
+                     if (!itemInHand.isEmpty() && itemInHand.getCount() <= -1) {
+-                        this.player.updateInventory(this.player.activeContainer);
++                        dev.pomf.dionysus.util.InventoryUpdateHelper.onRightClick(this.player, enumhand, itemInHand); // Reaper - Reduce inventory updates
+                     }
+                     // CraftBukkit end
+                 } else if (packetplayinuseentity.a() == PacketPlayInUseEntity.EnumEntityUseAction.ATTACK) {
+@@ -1801,7 +1801,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+ 
+                     // CraftBukkit start
+                     if (!itemInHand.isEmpty() && itemInHand.getCount() <= -1) {
+-                        this.player.updateInventory(this.player.activeContainer);
++                        dev.pomf.dionysus.util.InventoryUpdateHelper.onRightClick(this.player, packetplayinuseentity.b(), itemInHand); // Reaper - Reduce inventory updates
+                     }
+                     // CraftBukkit end
+                 }
+diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+index a474d8af1670ca1619bc0043f2b4f912ea9a4844..8748a5138804aa201129fb0af05c1119bb241334 100644
+--- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
++++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+@@ -459,7 +459,7 @@ public class PlayerInteractManager {
+                 }
+ 
+                 if (!entityhuman.isHandRaised()) {
+-                    ((EntityPlayer) entityhuman).updateInventory(entityhuman.defaultContainer);
++                    dev.pomf.dionysus.util.InventoryUpdateHelper.onRightClick((EntityPlayer) entityhuman, enumhand, itemstack1); // Reaper - Reduce inventory updates
+                 }
+ 
+                 return interactionresultwrapper.a();
+@@ -522,7 +522,7 @@ public class PlayerInteractManager {
+                     }
+                 // Paper end - extend Player Interact cancellation
+                 }
+-                ((EntityPlayer) entityhuman).getBukkitEntity().updateInventory(); // SPIGOT-2867
++                dev.pomf.dionysus.util.InventoryUpdateHelper.updateHeld((EntityPlayer) entityhuman, enumhand); // Reaper - Reduce inventory updates // SPIGOT-2867
+                 enuminteractionresult = (event.useItemInHand() != Event.Result.ALLOW) ? EnumInteractionResult.SUCCESS : EnumInteractionResult.PASS;
+             } else if (this.gamemode == EnumGamemode.SPECTATOR) {
+                 TileEntity tileentity = world.getTileEntity(blockposition);

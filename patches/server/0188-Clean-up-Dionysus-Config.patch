@@ -5,7 +5,11 @@ Subject: [PATCH] Clean up Dionysus Config
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+<<<<<<< HEAD:patches/server/0165-Clean-up-Dionysus-Config.patch
 index e7a37ab9e6d83562236c63991d98186f49ef9bae..d2fb540fe11d4488fa0daffd918a5c15b97a3fac 100644
+=======
+index 547018629f9f6f6585e08019b7aabb65e8fdda1f..ac76b0671ca70ee34a049614e31af3cf450c4842 100644
+>>>>>>> 6988149e9c4d8e886e3ac01503a0ec02efe12e97:patches/server/0188-Clean-up-Dionysus-Config.patch
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -69,11 +69,13 @@ public class DionysusConfig {
@@ -344,4 +348,4 @@ index e7a37ab9e6d83562236c63991d98186f49ef9bae..d2fb540fe11d4488fa0daffd918a5c15
 +                        networks is predictable and intuitive rather than locational and chaotic."""
          );
      }
- }
+ 

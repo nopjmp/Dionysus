@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:14:16 +0500
+Subject: [PATCH] fix-stackoverflow-while-loading-chunk-entities
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
+index ca2f4dcaac1646e05b10dee285967a17d4e9a25d..f3e1182ac4b953a17209b6edb05cb7a0c3aa3164 100644
+--- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
++++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
+@@ -473,6 +473,7 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
+     public void loadEntities(Chunk chunk, NBTTagCompound nbttagcompound, World world) {
+         // CraftBukkit end
+         world.timings.syncChunkLoadNBTTimer.startTiming(); // Spigot
++        try {
+         NBTTagList nbttaglist1 = nbttagcompound.getList("Entities", 10);
+ 
+         for (int l = 0; l < nbttaglist1.size(); ++l) {
+@@ -508,6 +509,10 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
+                 world.b(new BlockPosition(nbttagcompound4.getInt("x"), nbttagcompound4.getInt("y"), nbttagcompound4.getInt("z")), block, nbttagcompound4.getInt("t"), nbttagcompound4.getInt("p"));
+             }
+         }
++    } catch (StackOverflowError e) {
++        LogManager.getLogger().warn("StackOverflow while loading chunk entities: " + chunk.locX + " " + chunk.locZ + " - " + world.worldData.getName());
++        e.printStackTrace();
++    }
+         world.timings.syncChunkLoadNBTTimer.stopTiming(); // Spigot
+ 
+         // return chunk; // CraftBukkit
