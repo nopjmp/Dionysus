@@ -6,10 +6,10 @@ Subject: [PATCH] cache-entity-owner
 Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 7cb24e8172f9eb9af1c2903592e21d546c3ebd14..0288cd0401c0da3ee003ea5638f1d23476d27089 100644
+index 7e3e5bbc3032aee6f08738b878307386b8f79200..b3c881ce1def477029f68a293766ab4bbaf64e4a 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -453,4 +453,9 @@ public class DionysusConfig {
+@@ -461,4 +461,9 @@ public class DionysusConfig {
      private static void disableSnooper() {
          disableSnooper = getBoolean("disable-snooper", disableSnooper);
      }

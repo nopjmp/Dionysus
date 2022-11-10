@@ -6,10 +6,10 @@ Subject: [PATCH] cache-hashCodes
 Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 0288cd0401c0da3ee003ea5638f1d23476d27089..4dfbc28241b233bd6a6368bd1aba92c72cb31ad6 100644
+index b3c881ce1def477029f68a293766ab4bbaf64e4a..cfcfe66679a7ab0c4301a31e482ae67fcb5d3f10 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -455,7 +455,9 @@ public class DionysusConfig {
+@@ -463,7 +463,9 @@ public class DionysusConfig {
      }
      
      public static boolean cacheEntityOwner = true;

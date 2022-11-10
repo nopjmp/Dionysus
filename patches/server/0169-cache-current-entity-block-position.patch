@@ -647,10 +647,10 @@ index a9c4ab10df7113754230b20473f24acfe092c358..d3377a9b56d554e661ee9fe7548a25f3
              if (this.hasCustomName()) {
                  entitywitch.setCustomName(this.getCustomName());
 diff --git a/src/main/java/net/minecraft/server/EntityWither.java b/src/main/java/net/minecraft/server/EntityWither.java
-index 1b2f4fff7f4bf99c79444069517467052334dd0d..2d0c2975e035eabf9cc999b15275c09fa28d6407 100644
+index 416fa8253d593a52b02255226a6364d6c7bac1e9..f6ef19f2a10f04f2a7e468ca942e2e4f66b46601 100644
 --- a/src/main/java/net/minecraft/server/EntityWither.java
 +++ b/src/main/java/net/minecraft/server/EntityWither.java
-@@ -338,7 +338,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+@@ -341,7 +341,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
                      }
  
                      if (flag) {
@@ -659,7 +659,7 @@ index 1b2f4fff7f4bf99c79444069517467052334dd0d..2d0c2975e035eabf9cc999b15275c09f
                      }
                  }
              }
-@@ -417,7 +417,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+@@ -420,7 +420,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
      }
  
      private void a(int i, double d0, double d1, double d2, boolean flag) {
@@ -668,7 +668,7 @@ index 1b2f4fff7f4bf99c79444069517467052334dd0d..2d0c2975e035eabf9cc999b15275c09f
          double d3 = this.n(i);
          double d4 = this.o(i);
          double d5 = this.p(i);
-@@ -433,6 +433,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+@@ -436,6 +436,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
          entitywitherskull.locY = d4;
          entitywitherskull.locX = d3;
          entitywitherskull.locZ = d5;

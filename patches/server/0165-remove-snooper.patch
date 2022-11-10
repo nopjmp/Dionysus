@@ -6,10 +6,10 @@ Subject: [PATCH] remove-snooper
 Co-authored-by: RemainingToast <remainingtoast@gmail.com>
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 63c4750a71818dc966b5d0e6e1cdb7ed063c1006..7cb24e8172f9eb9af1c2903592e21d546c3ebd14 100644
+index ae1439776f43093b5a7bfd7e4edabb3b8221ee09..7e3e5bbc3032aee6f08738b878307386b8f79200 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -448,4 +448,9 @@ public class DionysusConfig {
+@@ -456,4 +456,9 @@ public class DionysusConfig {
                  This patch makes a number of changes to avoid slow paths in the game and to better inline code.
                  In testing, it shows a small improvement in path-finding code.""");
      }
