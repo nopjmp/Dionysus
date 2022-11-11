@@ -20,6 +20,22 @@ if [[ "$1" == up* ]]; then
 fi
 
 paperVer=$(gethead Paper)
+
+minecraftserverurl=$(cat "$basedir"/Paper/work/BuildData/info.json | grep serverUrl | cut -d '"' -f 4)
+minecraftversion=$(cat "$basedir"/Paper/work/BuildData/info.json | grep minecraftVersion | cut -d '"' -f 4)
+decompiledir="$basedir/Paper/work/Minecraft/$minecraftversion"
+jarpath="$decompiledir/$minecraftversion"
+
+if [ ! -f  "$jarpath.jar" ]; then
+    echo "Downloading unmapped vanilla jar..."
+    mkdir -p "$decompiledir"
+    curl -s -o "$jarpath.jar" "$minecraftserverurl"
+    if [ "$?" != "0" ]; then
+        echo "Failed to download the vanilla server jar. Check connectivity or try again later."
+        exit 1
+    fi
+fi
+
 cd "$basedir/Paper/"
 
 ./paper patch
@@ -30,7 +46,6 @@ mcVer=$(mvn -o org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpre
 basedir
 . $basedir/scripts/importmcdev.sh
 
-minecraftversion=$(cat "$basedir"/Paper/work/BuildData/info.json | grep minecraftVersion | cut -d '"' -f 4)
 version=$(echo -e "Paper: $paperVer\nmc-dev:$importedmcdev")
 tag="${minecraftversion}-${mcVer}-$(echo -e $version | shasum | awk '{print $1}')"
 echo "$tag" > "$basedir"/current-paper
