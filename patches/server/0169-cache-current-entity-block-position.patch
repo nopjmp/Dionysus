@@ -272,7 +272,7 @@ index 806497813262decb6e7eea715b2ef73284816699..c8f35b567395dc5bb3cafa1217e85217
  
                  if (!material.equals(Material.AIR)) {
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index caac1a569fd6c00ab80e5c9f21f9ab44d388c5ef..6a10b3870480de5686cebfa81003ff163cf881da 100644
+index 953d88aec19c4c314d87a4bd66f729739cf6365c..0d6cf51c4e9b6fb96cbb2b69c67575e23e43e83c 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -673,7 +673,7 @@ public abstract class EntityHuman extends EntityLiving {

@@ -5,10 +5,10 @@ Subject: [PATCH] fix-tile-entity-crash
 
 
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index aacb4fc6ff021618bd24ad30adc4060770d22b0e..fb1d6492510a777e2486b356ec6001f37e6d8b1d 100644
+index d8c3697c59ef8df664e12769581700b164ebfdee..6e3942ec2d80a1ed8dbdfad0bae415c78da5355a 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -748,7 +748,15 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -767,7 +767,15 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  NextTickListEntry nextticklistentry;
  
                  for (int j = 0; j < i; ++j) {

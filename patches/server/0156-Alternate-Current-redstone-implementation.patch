@@ -2107,10 +2107,10 @@ index 73ca9631a71046e9802eb76c9d460c599be8db3c..527143ac119022273f3613d5f91b0a1b
 +    // Dionysus end
  }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 3198552078e4e4ae984e26a456060308990634f3..aacb4fc6ff021618bd24ad30adc4060770d22b0e 100644
+index 6a9fb30d09c114a3856363c1b6ab008a8797bdc9..d8c3697c59ef8df664e12769581700b164ebfdee 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -1494,4 +1494,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -1513,4 +1513,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              this();
          }
      }

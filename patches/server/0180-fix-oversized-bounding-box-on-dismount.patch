@@ -5,7 +5,7 @@ Subject: [PATCH] fix-oversized-bounding-box-on-dismount
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index b420d4928934b370e8b2971a60ef0f61d017eb4c..8eebf903675bd0e08494c19d623eeca0506ac084 100644
+index 080ca7cb800612ab996b998e7cd27b228bb7121e..b128b87c98c47d583e88a868b4cfd19054ef5eac 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -388,6 +388,11 @@ public abstract class EntityHuman extends EntityLiving {

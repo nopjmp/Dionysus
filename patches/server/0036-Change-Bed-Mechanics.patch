@@ -38,7 +38,7 @@ index f1a1079918ae37672b2c5978b82f6392801859d0..d01ab2998eda93808e2dc6e492d2ab86
                  } else {
                      if (entityhuman_enumbedresult == EntityHuman.EnumBedResult.NOT_POSSIBLE_NOW) {
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index aa0b27f0e1c6cd5168af02157ce8ce495afc6373..6c30d30ff2d7c46aa9e3e32473efc94cb243defa 100644
+index c2c2f86b4f3ed375cd6fe75eafce8af19da8f029..1413e9c94c4994de12a8ceba46781cd62ee7cc52 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -1233,7 +1233,8 @@ public abstract class EntityHuman extends EntityLiving {

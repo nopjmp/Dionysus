@@ -144,7 +144,7 @@ index 2b82bace2a06e2eb22bebe1de92732cfeea05118..7c5de5bbd4c11f67e7f6999dd63cd7a8
 +    // Dionysus end
  }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 1f2ab25e92160f6fbca1cd11a1d933c96541c1cf..3198552078e4e4ae984e26a456060308990634f3 100644
+index b0abe3420883143209dbb39859fe33e59fc89cd7..6a9fb30d09c114a3856363c1b6ab008a8797bdc9 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -15,6 +15,7 @@ import java.util.Random;

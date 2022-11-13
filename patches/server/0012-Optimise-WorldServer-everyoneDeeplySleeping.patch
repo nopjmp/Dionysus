@@ -1,0 +1,88 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 5 Feb 2021 00:08:31 -0600
+Subject: [PATCH] Optimise WorldServer#everyoneDeeplySleeping
+
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
+Co-authored-by: x4e <x4e_x4e@protonmail.com>
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index aa0b27f0e1c6cd5168af02157ce8ce495afc6373..c2c2f86b4f3ed375cd6fe75eafce8af19da8f029 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -1972,6 +1972,16 @@ public abstract class EntityHuman extends EntityLiving {
+         return this.abilities.canInstantlyBuild && this.a(2, "");
+     }
+ 
++    // Titanium start
++    public boolean isNether() {
++        return this.world.getBiome(new BlockPosition(this.locX, this.locY, this.locZ)) == BiomeBase.getBiome(8);
++    }
++
++    public boolean isEnd() {
++        return this.world.getBiome(new BlockPosition(this.locX, this.locY, this.locZ)) == BiomeBase.getBiome(9);
++    }
++    // Titanium end
++
+     static class c implements Predicate<EntityMonster> {
+ 
+         private final EntityHuman a;
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index af2a0a4ef03d09ae3fe41f2451117318b240339a..514afbf7be287a9429756586bbca5d8c92755ae3 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -422,33 +422,33 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+         // CraftBukkit end
+     }
+ 
++    // Dionysus
++    // Fixes MC-47080 and simplifies the logic
+     public boolean everyoneDeeplySleeping() {
+-        if (this.Q && !this.isClientSide) {
+-            Iterator iterator = this.players.iterator();
+-
+-            // CraftBukkit - This allows us to assume that some people are in bed but not really, allowing time to pass in spite of AFKers
+-            boolean foundActualSleepers = false;
+-
+-            EntityHuman entityhuman;
+-
+-            do {
+-                if (!iterator.hasNext()) {
+-                    return foundActualSleepers;
+-                }
++        // PaperBin start - WorldServer#everyoneDeeplySleeping optimization
++        if (this.players.isEmpty() || this.isClientSide || !this.Q) {
++            return false;
++        }
+ 
+-                entityhuman = (EntityHuman) iterator.next();
++        for (EntityHuman human : this.players) {
++            if (!human.isSpectator() && !human.isDeeplySleeping() && !human.fauxSleeping) {
++                return false;
++            }
+ 
+-                // CraftBukkit start
+-                if (entityhuman.isDeeplySleeping()) {
+-                    foundActualSleepers = true;
+-                }
+-            } while (!entityhuman.isSpectator() || entityhuman.isDeeplySleeping() || entityhuman.fauxSleeping);
+-            // CraftBukkit end
++            // Titanium start - ignore players who are not in overworld
++            if (!human.isNether() && !human.isEnd()) {
++                return false;
++            }
++            // Titanium end
++        }
+ 
++        return true;
++        /*if (this.players.size() == 0 || this.isClientSide || !this.Q) {
+             return false;
+         } else {
+-            return false;
+-        }
++            return this.players.stream().allMatch(p -> p.isSpectator() || p.isDeeplySleeping() || p.fauxSleeping);
++        }*/
++        // PaperBin end
+     }
+ 
+     protected boolean isChunkLoaded(int i, int j, boolean flag) {

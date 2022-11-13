@@ -34,7 +34,7 @@ index b31176eed035fc9d6ccabaf446ca79f79df6e490..bdcf2321521804c984ca134a45318656
          return EnumPistonReaction.NORMAL;
      }
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 6c30d30ff2d7c46aa9e3e32473efc94cb243defa..caac1a569fd6c00ab80e5c9f21f9ab44d388c5ef 100644
+index 1413e9c94c4994de12a8ceba46781cd62ee7cc52..953d88aec19c4c314d87a4bd66f729739cf6365c 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -386,7 +386,7 @@ public abstract class EntityHuman extends EntityLiving {

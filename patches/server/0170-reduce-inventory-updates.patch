@@ -179,7 +179,7 @@ index 57638ffc991afe7307265ec1d66ea28efd78b6d3..8908422c25920c63097f1fe072fdda8f
                          }
  
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 6a10b3870480de5686cebfa81003ff163cf881da..b420d4928934b370e8b2971a60ef0f61d017eb4c 100644
+index 0d6cf51c4e9b6fb96cbb2b69c67575e23e43e83c..080ca7cb800612ab996b998e7cd27b228bb7121e 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -1162,6 +1162,7 @@ public abstract class EntityHuman extends EntityLiving {
