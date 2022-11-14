@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: tr7zw <tr7zw@live.de>
+Date: Tue, 15 Nov 2022 00:02:11 +1000
+Subject: [PATCH] [Yatopia-0030] Don't save Fireworks and Arrow
+
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 00bbacb0ebfd03955cbf51135b66db719948431a..a72084f3ab19ba739dd0fac8a66889e8aaf5c98d 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -445,4 +445,9 @@ public class DionysusConfig {
+         cacheEntityOwner = getBoolean("cache.entity-owner", cacheEntityOwner);
+         cacheHashCodes = getBoolean("cache.hash-codes", cacheHashCodes);
+     }
++
++    public static boolean disableSavingFireworksArrows = true;
++    private static void disableSavingFireworksArrows() {
++        disableSavingFireworksArrows = getBoolean("disable-saving-fireworks-arrows", disableSavingFireworksArrows, "Whether saving of fireworks and arrows should be disabled.");
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 89ff8dc7d9959a15481dda45b111b034233aafc9..8dccb7045534cc8db6be83267a83bac2eb8feca7 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -14,6 +14,7 @@ import java.util.Set;
+ import java.util.UUID;
+ import javax.annotation.Nullable;
+ 
++import dev.pomf.dionysus.DionysusConfig;
+ import it.unimi.dsi.util.XoShiRo256PlusPlusRandom;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+@@ -1535,6 +1536,12 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     }
+ 
+     public boolean c(NBTTagCompound nbttagcompound) {
++        // YAPFA start - Don't save Fireworks and Arrows // Titanium - configuration for this
++        if(DionysusConfig.disableSavingFireworksArrows && (this instanceof EntityFireworks || this instanceof EntityArrow)) {
++            return false;
++        }
++        // YAPFA end
++
+         String s = this.getSaveID();
+ 
+         if (!this.dead && s != null) {
