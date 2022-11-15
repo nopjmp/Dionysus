@@ -14,6 +14,11 @@
 
 ----
 
+#### Used and trusted by:
+- [2b2t.au](https://2b2t.au)
+- [6b6t.org](https://6b6t.org)
+- [oldfrog.org](https://oldfrog.org)
+
 ## Contributing
 
 *Anyone can contribute. Just follow the below steps!* 
