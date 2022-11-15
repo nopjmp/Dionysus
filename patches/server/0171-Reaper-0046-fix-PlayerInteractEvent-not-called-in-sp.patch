@@ -1,7 +1,8 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Softik Lord <dimap9986@gmail.com>
 Date: Sun, 16 Oct 2022 13:59:34 +0500
-Subject: [PATCH] fix-PlayerInteractEvent-not-called-in-specific-situations
+Subject: [PATCH] [Reaper 0046]
+ fix-PlayerInteractEvent-not-called-in-specific-situations
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java

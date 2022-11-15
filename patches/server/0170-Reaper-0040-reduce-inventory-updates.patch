@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Softik Lord <dimap9986@gmail.com>
 Date: Sun, 16 Oct 2022 13:46:44 +0500
-Subject: [PATCH] reduce-inventory-updates
+Subject: [PATCH] [Reaper 0040] reduce-inventory-updates
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/util/InventoryUpdateHelper.java b/src/main/java/dev/pomf/dionysus/util/InventoryUpdateHelper.java
