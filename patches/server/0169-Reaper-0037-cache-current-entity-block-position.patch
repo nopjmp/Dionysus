@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Softik Lord <dimap9986@gmail.com>
 Date: Sun, 16 Oct 2022 13:24:54 +0500
-Subject: [PATCH] [Reaper 0037] cache-current-entity-block-position
+Subject: [PATCH] (Reaper 0037) Cache-current-entity-block-position
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java

@@ -1,8 +1,8 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Softik Lord <dimap9986@gmail.com>
 Date: Sun, 16 Oct 2022 14:23:16 +0500
-Subject: [PATCH] [Reaper 0066]
- fix-attempt-to-reduce-EntityTracker-memory-leakage
+Subject: [PATCH] (Reaper 0066)
+ Fix-attempt-to-reduce-EntityTracker-memory-leakage
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java

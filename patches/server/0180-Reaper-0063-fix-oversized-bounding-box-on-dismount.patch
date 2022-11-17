@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Softik Lord <dimap9986@gmail.com>
 Date: Sun, 16 Oct 2022 14:16:37 +0500
-Subject: [PATCH] [Reaper 0063] fix-oversized-bounding-box-on-dismount
+Subject: [PATCH] (Reaper 0063) Fix-oversized-bounding-box-on-dismount
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java

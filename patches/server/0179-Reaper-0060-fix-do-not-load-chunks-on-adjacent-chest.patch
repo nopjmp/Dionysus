@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Softik Lord <dimap9986@gmail.com>
 Date: Sun, 16 Oct 2022 14:15:20 +0500
-Subject: [PATCH] [Reaper 0060] fix-do-not-load-chunks-on-adjacent-chest-check
+Subject: [PATCH] (Reaper 0060) Fix-do-not-load-chunks-on-adjacent-chest-check
 
 
 diff --git a/src/main/java/net/minecraft/server/TileEntityChest.java b/src/main/java/net/minecraft/server/TileEntityChest.java

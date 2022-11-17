@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Softik Lord <dimap9986@gmail.com>
 Date: Thu, 20 Oct 2022 20:02:04 +0500
-Subject: [PATCH] limit-the-range-at-which-well-consider-an-attackable-target
+Subject: [PATCH] Limit-the-range-at-which-well-consider-an-attackable-target
 
 This patch aims to ensure that MCP World#getNearestAttackablePlayer
 will not trigger chunk loads due to PathfinderGoalNearestAttackableTarget
