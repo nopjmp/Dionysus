@@ -133,11 +133,7 @@ index db3f7e5219ae625011d27c421375cb0c93912140..c68e09781f4bbdb799bf345775c186ce
          this.c.seek((long) (i * 4096));
 -        this.c.writeInt(j + 1);
 -        this.c.writeByte(DionysusConfig.zstdCompression ? 6 : 2);
-+        if (DionysusConfig.zstdCompression) {
-+            this.c.writeInt(j + 1);
-+            this.c.writeByte(DionysusConfig.zstdCompression ? 6 : 2);
-+        } else
-+        this.writeIntAndByte(j + 1, (byte)2); // Paper - Avoid 4 io write calls
++        this.writeIntAndByte(j + 1, (byte)(DionysusConfig.zstdCompression ? 6 : 2)); // Paper - Avoid 4 io write calls
          this.c.write(abyte, 0, j);
      }
  
