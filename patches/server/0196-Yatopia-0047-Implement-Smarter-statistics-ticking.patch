@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SoftikLord <dimap9986@gmail.com>
+Date: Thu, 24 Nov 2022 00:34:21 +0500
+Subject: [PATCH] Implement-Yatopia-0047-Smarter-statistics-ticking
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 84434c4cbbc6d42f04ba299e70d17b832d4369dd..c4b44d06f7ea5ac55ba36afa0d37822cd4b3d50f 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -303,6 +303,8 @@ public class DionysusConfig {
+         );
+     }
+ 
++    public static int playerTimeStatisticsInterval = 20;
++
+     public static int maxProjectileLoadsPerTick = 10;
+     public static int maxProjectileLoadsPerProjectile = 10;
+     private static void projectileLoading() {
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index b128b87c98c47d583e88a868b4cfd19054ef5eac..0ee06bdc3ca51ad70d30ae806968361d41ab8c65 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -10,6 +10,7 @@ import java.util.UUID;
+ import javax.annotation.Nullable;
+ 
+ // CraftBukkit start
++import dev.pomf.dionysus.DionysusConfig;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+ import org.bukkit.entity.Player;
+@@ -1411,9 +1412,9 @@ public abstract class EntityHuman extends EntityLiving {
+         }
+ 
+     }
+-
++    private final int interval = DionysusConfig.playerTimeStatisticsInterval;
+     public void b(Statistic statistic) {
+-        this.a(statistic, 1);
++        this.a(statistic, interval);
+     }
+ 
+     public void a(Statistic statistic, int i) {}
