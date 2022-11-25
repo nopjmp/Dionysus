@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SoftikLord <dimap9986@gmail.com>
+Date: Thu, 24 Nov 2022 16:11:07 +0500
+Subject: [PATCH] Fix-IonSpigot-Movement-Cache-patch
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 5ae360976ff81bf0cb0cb3776247e35dc0234688..470656ef37bf04e0ff01ca3f2ad1b14f1b7acfd0 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -998,6 +998,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+                 this.methodProfiler.b();
+                 this.methodProfiler.b();
+                 worldserver.explosionDensityCache.clear(); // Paper - Optimize explosions
++                worldserver.movementCache.clear(); // IonSpigot - Movement Cache
+             // } // CraftBukkit
+ 
+             // this.i[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 92190bc79d79660a7103ad6f02cf5a230966814a..ea72e268f6446ca9211e7ab3db5dbc064870a731 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -419,7 +419,7 @@ public abstract class World implements IBlockAccess {
+                     chunk.runOrQueueLightUpdate(blockposition); // Paper - Queue light update
+                     this.methodProfiler.b();
+                 }
+-
++                movementCache.clear(); // IonSpigot - Movement Cache
+                 /*
+                 if ((i & 2) != 0 && (!this.isClientSide || (i & 4) == 0) && chunk.isReady()) {
+                     this.notify(blockposition, iblockdata1, iblockdata, i);
