@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SoftikLord <dimap9986@gmail.com>
+Date: Thu, 24 Nov 2022 16:14:28 +0500
+Subject: [PATCH] Fix-killing-at-the-same-time
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 0ee06bdc3ca51ad70d30ae806968361d41ab8c65..3bc2675ff8db5dd806317df89c8c1123e2390099 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -962,6 +962,11 @@ public abstract class EntityHuman extends EntityLiving {
+     // Paper end
+ 
+     public void attack(Entity entity) {
++        // Titanium start - Fix killing at the same time
++        if (!this.isAlive()) {
++            return;
++        }
++        // Titanium end
+         if (entity.bd()) {
+             if (!entity.t(this)) {
+                 float f = (float) this.getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue();
