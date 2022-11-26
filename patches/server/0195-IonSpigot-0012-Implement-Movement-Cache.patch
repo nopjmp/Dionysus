@@ -1,0 +1,174 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SoftikLord <dimap9986@gmail.com>
+Date: Thu, 24 Nov 2022 00:30:22 +0500
+Subject: [PATCH] Implement-IonSpigot-0012-Movement-Cache
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 944e7b1a1e6855a07aa223af2dc16d789b0ff55f..84434c4cbbc6d42f04ba299e70d17b832d4369dd 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -295,6 +295,14 @@ public class DionysusConfig {
+         );
+     }
+ 
++    public static boolean movementCache = true;
++    private static void movementCache() {
++        movementCache = getBoolean("movementCache", movementCache, """
++                        Does entities movements should be cached.
++                        Enabled by default because shouldn't cause any bugs."""
++        );
++    }
++
+     public static int maxProjectileLoadsPerTick = 10;
+     public static int maxProjectileLoadsPerProjectile = 10;
+     private static void projectileLoading() {
+diff --git a/src/main/java/dev/pomf/dionysus/util/MovementCache.java b/src/main/java/dev/pomf/dionysus/util/MovementCache.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..5ba08ef1c0012f76177515ace086bce075e78880
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/util/MovementCache.java
+@@ -0,0 +1,65 @@
++package dev.pomf.dionysus.util;
++
++import dev.pomf.dionysus.DionysusConfig;
++import net.minecraft.server.AxisAlignedBB;
++import net.minecraft.server.Entity;
++
++public class MovementCache {
++
++    private final boolean enabled;
++    private AxisAlignedBB bb;
++    private double locX, locY, locZ, lastX, lastY, lastZ;
++    private double motX, motY, motZ, lastMotX, lastMotY, lastMotZ;
++    private boolean onGround;
++
++    public MovementCache() {
++        this.enabled = DionysusConfig.movementCache;
++    }
++
++    public boolean move(Entity entity) {
++        if (!enabled) {
++            return false;
++        }
++
++        if (entity.locX == lastX    && entity.locY == lastY    && entity.locZ == lastZ    &&
++                entity.motX == lastMotX && entity.motY == lastMotY && entity.motZ == lastMotZ) {
++            entity.boundingBox = bb;
++            entity.onGround = onGround;
++            entity.locX = locX;
++            entity.locY = locY;
++            entity.locZ = locZ;
++            entity.motX = motX;
++            entity.motY = motY;
++            entity.motZ = motZ;
++            return true;
++        }
++
++        return false;
++    }
++
++    public void cache(Entity entity) {
++        if (!enabled) {
++            return;
++        }
++
++        onGround = entity.onGround;
++        bb = entity.boundingBox;
++        lastX = entity.lastX;
++        lastY = entity.lastY;
++        lastZ = entity.lastZ;
++        lastMotX = entity.lastMotX;
++        lastMotY = entity.lastMotY;
++        lastMotZ = entity.lastMotZ;
++        locX = entity.locX;
++        locY = entity.locY;
++        locZ = entity.locZ;
++        motX = entity.motX;
++        motY = entity.motY;
++        motZ = entity.motZ;
++    }
++
++    public void clear() {
++        lastX = Double.MAX_VALUE;
++    }
++
++}
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 8dccb7045534cc8db6be83267a83bac2eb8feca7..60485923d4ee7174976537d73aa160b1ef55a936 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -126,11 +126,16 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     public double motX;
+     public double motY;
+     public double motZ;
++    // IonSpigot start - Movement Cache
++    public double lastMotX;
++    public double lastMotY;
++    public double lastMotZ;
++    // IonSpigot end
+     public float yaw;
+     public float pitch;
+     public float lastYaw;
+     public float lastPitch;
+-    private AxisAlignedBB boundingBox;
++    public AxisAlignedBB boundingBox; // IonSpigot - private -> public
+     public BlockPosition blockPos; // Reaper - Cache current block pos
+     public boolean onGround;
+     public boolean positionChanged;
+@@ -638,6 +643,15 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+             this.a(this.getBoundingBox().d(d0, d1, d2));
+             this.recalcPosition();
+         } else {
++            // IonSpigot start - Movement Cache
++            this.lastMotX = this.motX;
++            this.lastMotY = this.motY;
++            this.lastMotZ = this.motZ;
++
++            if (world.movementCache.move(this)) {
++                return;
++            }
++            // IonSpigot end
+             // CraftBukkit start - Don't do anything if we aren't moving
+             // We need to do this regardless of whether or not we are moving thanks to portals
+             try {
+@@ -927,6 +941,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+             if (d8 != d1) {
+                 block1.a(this.world, this);
+             }
++            world.movementCache.cache(this); // IonSpigot - Movement Cache
+ 
+             // CraftBukkit start
+             if (positionChanged && getBukkitEntity() instanceof Vehicle) {
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 7987cd796efb403547d99b52d3021f19b54ad3a3..c36974d614caa525cda348d83630336f03a3436e 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -703,6 +703,7 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                                 return; // ... thanks Mojang for letting move calls teleport across dimensions.
+                             }
+                             // Paper end - prevent position desync
++                            this.player.world.movementCache.clear(); // IonSpigot - Movement Cache
+                             this.player.onGround = packetplayinflying.a();
+                             double d12 = d8;
+ 
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index b58daa6db068cdb4da7f2fab53df3f3947323461..92190bc79d79660a7103ad6f02cf5a230966814a 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
+ import java.util.HashMap; // Paper
+ import java.util.Map;
+ 
++import dev.pomf.dionysus.util.MovementCache;
+ import org.bukkit.Bukkit;
+ import org.bukkit.block.BlockState;
+ import org.bukkit.craftbukkit.CraftServer;
+@@ -151,6 +152,7 @@ public abstract class World implements IBlockAccess {
+     private org.spigotmc.TickLimiter tileLimiter;
+     private int tileTickPosition;
+     public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<>(); // Paper - Optimize explosions
++    public final MovementCache movementCache = new MovementCache(); // IonSpigot - Movement Cache
+     public java.util.ArrayDeque<BlockRedstoneTorch.RedstoneUpdateInfo> redstoneUpdateInfos; // Paper - Move from Map in BlockRedstoneTorch to here
+ 
+     public CraftWorld getWorld() {
