@@ -6,6 +6,8 @@ on:
       - 'v*'
     branches:
       - 'dev'
+    paths:
+      - '**.patch'
 
 jobs:
   build-release:
