@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: SoftikLord <dimap9986@gmail.com>
 Date: Thu, 24 Nov 2022 00:30:22 +0500
-Subject: [PATCH] Implement-IonSpigot-0012-Movement-Cache
+Subject: [PATCH] (IonSpigot 0012) Implement-Movement-Cache
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
@@ -140,6 +140,18 @@ index 8dccb7045534cc8db6be83267a83bac2eb8feca7..60485923d4ee7174976537d73aa160b1
  
              // CraftBukkit start
              if (positionChanged && getBukkitEntity() instanceof Vehicle) {
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 5ae360976ff81bf0cb0cb3776247e35dc0234688..0a85802e6a23d071118f16cab0bc66202fafc51e 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -998,6 +998,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IAs
+                 this.methodProfiler.b();
+                 this.methodProfiler.b();
+                 worldserver.explosionDensityCache.clear(); // Paper - Optimize explosions
++                worldserver.movementCache.clear(); // IonSpigot - Movement cache
+             // } // CraftBukkit
+ 
+             // this.i[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
 index 7987cd796efb403547d99b52d3021f19b54ad3a3..c36974d614caa525cda348d83630336f03a3436e 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
@@ -153,7 +165,7 @@ index 7987cd796efb403547d99b52d3021f19b54ad3a3..c36974d614caa525cda348d83630336f
                              double d12 = d8;
  
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index b58daa6db068cdb4da7f2fab53df3f3947323461..92190bc79d79660a7103ad6f02cf5a230966814a 100644
+index b58daa6db068cdb4da7f2fab53df3f3947323461..ba8d5ed08b19d5d8852f828382eb7ae6aa0e3a91 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
@@ -172,3 +184,12 @@ index b58daa6db068cdb4da7f2fab53df3f3947323461..92190bc79d79660a7103ad6f02cf5a23
      public java.util.ArrayDeque<BlockRedstoneTorch.RedstoneUpdateInfo> redstoneUpdateInfos; // Paper - Move from Map in BlockRedstoneTorch to here
  
      public CraftWorld getWorld() {
+@@ -418,6 +420,8 @@ public abstract class World implements IBlockAccess {
+                     this.methodProfiler.b();
+                 }
+ 
++                movementCache.clear(); // IonSpigot - Movement cache
++
+                 /*
+                 if ((i & 2) != 0 && (!this.isClientSide || (i & 4) == 0) && chunk.isReady()) {
+                     this.notify(blockposition, iblockdata1, iblockdata, i);
