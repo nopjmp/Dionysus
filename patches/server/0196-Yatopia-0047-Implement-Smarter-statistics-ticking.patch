@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: SoftikLord <dimap9986@gmail.com>
 Date: Thu, 24 Nov 2022 00:34:21 +0500
-Subject: [PATCH] Implement-Yatopia-0047-Smarter-statistics-ticking
+Subject: [PATCH] (Yatopia 0047) Implement-Smarter-statistics-ticking
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
