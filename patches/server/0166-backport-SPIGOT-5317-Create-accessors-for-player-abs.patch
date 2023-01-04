@@ -1,0 +1,54 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aviana Cruz <gwencroft@proton.me>
+Date: Wed, 4 Jan 2023 15:54:08 +0800
+Subject: [PATCH] backport SPIGOT-5317: Create accessors for player absorption
+ hearts
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftEnderDragonPart.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftEnderDragonPart.java
+index c3338710bc4d2592476aef232025a574b8a48d86..a6e61adb45a8b1994805f2c18b17f0629eab3df8 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftEnderDragonPart.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftEnderDragonPart.java
+@@ -42,6 +42,14 @@ public class CraftEnderDragonPart extends CraftComplexPart implements EnderDrago
+         getParent().setHealth(health);
+     }
+ 
++    public double getAbsorptionAmount() {
++        return getParent().getAbsorptionAmount();
++    }
++
++    public void setAbsorptionAmount(double amount) {
++        getParent().setAbsorptionAmount(amount);
++    }
++
+     public double getMaxHealth() {
+         return getParent().getMaxHealth();
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+index 9c750efc74448fb7cf6faf3f36c3fb3b5e1588f5..33437249949fdb79a24032cc6bea4863de60f30d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.craftbukkit.entity;
+ 
++import com.google.common.base.Preconditions;
+ import java.util.ArrayList;
+ import java.util.Collection;
+ import java.util.Iterator;
+@@ -107,6 +108,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+         }
+     }
+ 
++    public double getAbsorptionAmount() {
++        return getHandle().getAbsorptionHearts();
++    }
++
++    public void setAbsorptionAmount(double amount) {
++        Preconditions.checkArgument(amount >= 0 && Double.isFinite(amount), "amount < 0 or non-finite");
++
++        getHandle().setAbsorptionHearts((float) amount);
++    }
++
+     public double getMaxHealth() {
+         return getHandle().getMaxHealth();
+     }
