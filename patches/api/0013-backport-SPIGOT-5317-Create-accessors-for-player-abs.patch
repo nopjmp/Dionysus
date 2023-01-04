@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aviana Cruz <gwencroft@proton.me>
+Date: Wed, 4 Jan 2023 16:05:25 +0800
+Subject: [PATCH] backport SPIGOT-5317: Create accessors for player absorption
+ hearts
+
+
+diff --git a/src/main/java/org/bukkit/entity/Damageable.java b/src/main/java/org/bukkit/entity/Damageable.java
+index e173cf01144c82a2231ee8c822ef5d547cc21ec1..d08b4c31f81d174e204dcf4969fe8b14b7411ec8 100644
+--- a/src/main/java/org/bukkit/entity/Damageable.java
++++ b/src/main/java/org/bukkit/entity/Damageable.java
+@@ -39,6 +39,22 @@ public interface Damageable extends Entity {
+      */
+     void setHealth(double health);
+ 
++    /**
++     * Sets the entity's absorption amount.
++     *
++     * @return absorption amount from 0
++     */
++    double getAbsorptionAmount();
++
++    /**
++     * Sets the entity's absorption amount.
++     *
++     * @param amount new absorption amount from 0
++     * @throws IllegalArgumentException thrown if health is {@literal < 0} or
++     * non-finite.
++     */
++    void setAbsorptionAmount(double amount);
++
+     /**
+      * Gets the maximum health this entity has.
+      *
