@@ -1,0 +1,761 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Raymano <raymanowy@gmail.com>
+Date: Tue, 17 Jan 2023 00:19:52 +0100
+Subject: [PATCH] Add-Sendable-Interface
+
+
+diff --git a/src/main/java/dev/pomf/dionysus/enums/ExtendedEnumInteractionResult.java b/src/main/java/dev/pomf/dionysus/enums/ExtendedEnumInteractionResult.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..311a2f1fe37b43e14fa1e87e2121d3a90084d978
+--- /dev/null
++++ b/src/main/java/dev/pomf/dionysus/enums/ExtendedEnumInteractionResult.java
+@@ -0,0 +1,32 @@
++package dev.pomf.dionysus.enums;
++
++import net.minecraft.server.EnumInteractionResult;
++
++public class ExtendedEnumInteractionResult {
++
++    private boolean sendable;
++    private EnumInteractionResult result;
++
++    public ExtendedEnumInteractionResult(boolean sendable, EnumInteractionResult result) {
++        this.sendable = sendable;
++        this.result = result;
++    }
++
++    public boolean isSendable() {
++        return sendable;
++    }
++
++    public ExtendedEnumInteractionResult setSendable(boolean sendable) {
++        this.sendable = sendable;
++        return this;
++    }
++
++    public EnumInteractionResult getResult() {
++        return result;
++    }
++
++    public ExtendedEnumInteractionResult setResult(EnumInteractionResult result) {
++        this.result = result;
++        return this;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/ItemStack.java b/src/main/java/net/minecraft/server/ItemStack.java
+index c5f5fa4e74fb1564c638f8d586f15d9606ae372c..47d330b0c458714cd0bd72296f6ad86e90ac1f23 100644
+--- a/src/main/java/net/minecraft/server/ItemStack.java
++++ b/src/main/java/net/minecraft/server/ItemStack.java
+@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
+ import java.util.List;
+ import java.util.Map;
+ 
++import dev.pomf.dionysus.enums.ExtendedEnumInteractionResult;
+ import org.bukkit.Location;
+ import org.bukkit.TreeType;
+ import org.bukkit.block.BlockState;
+@@ -172,7 +173,11 @@ public final class ItemStack {
+         return this.g ? Item.getItemOf(Blocks.AIR) : this.item;
+     }
+ 
+-    public EnumInteractionResult placeItem(EntityHuman entityhuman, World world, BlockPosition blockposition, EnumHand enumhand, EnumDirection enumdirection, float f, float f1, float f2) {
++    public ExtendedEnumInteractionResult placeItem(EntityHuman entityhuman, World world, BlockPosition blockposition, EnumHand enumhand, EnumDirection enumdirection, float f, float f1, float f2) {
++        return placeItem(entityhuman, world, blockposition, enumhand, enumdirection, f, f1, f2,true);
++    }
++
++    public ExtendedEnumInteractionResult placeItem(EntityHuman entityhuman, World world, BlockPosition blockposition, EnumHand enumhand, EnumDirection enumdirection, float f, float f1, float f2, boolean sendable) {
+         // CraftBukkit start - handle all block place event logic here
+         int oldData = this.getData();
+         int oldCount = this.getCount();
+@@ -188,7 +193,7 @@ public final class ItemStack {
+             }
+         }
+         world.captureDrops = new java.util.ArrayList<>(); // Paper - Don't drop items if block place is cancelled
+-        EnumInteractionResult enuminteractionresult = this.getItem().a(entityhuman, world, blockposition, enumhand, enumdirection, f, f1, f2);
++        ExtendedEnumInteractionResult extendedEnumInteractionResult = new ExtendedEnumInteractionResult(sendable, this.getItem().a(entityhuman, world, blockposition, enumhand, enumdirection, f, f1, f2));
+         int newData = this.getData();
+         int newCount = this.getCount();
+         this.setCount(oldCount);
+@@ -196,7 +201,7 @@ public final class ItemStack {
+         world.captureBlockStates = false;
+         List<EntityItem> drops = world.captureDrops; // Paper - Don't drop items if block place is cancelled
+         world.captureDrops = null; // Paper - Don't drop items if block place is cancelled
+-        if (enuminteractionresult == EnumInteractionResult.SUCCESS && world.captureTreeGeneration && world.capturedBlockStates.size() > 0) {
++        if (extendedEnumInteractionResult.getResult() == EnumInteractionResult.SUCCESS && world.captureTreeGeneration && world.capturedBlockStates.size() > 0) {
+             world.captureTreeGeneration = false;
+             Location location = new Location(world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ());
+             TreeType treeType = BlockSapling.treeType;
+@@ -220,11 +225,11 @@ public final class ItemStack {
+                 }
+             }
+ 
+-            return enuminteractionresult;
++            return extendedEnumInteractionResult;
+         }
+         world.captureTreeGeneration = false;
+ 
+-        if (enuminteractionresult == EnumInteractionResult.SUCCESS) {
++        if (extendedEnumInteractionResult.getResult() == EnumInteractionResult.SUCCESS) {
+             org.bukkit.event.block.BlockPlaceEvent placeEvent = null;
+             List<BlockState> blocks = (List<BlockState>) world.capturedBlockStates.clone();
+             world.capturedBlockStates.clear();
+@@ -233,9 +238,12 @@ public final class ItemStack {
+             } else if (blocks.size() == 1) {
+                 placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(world, entityhuman, enumhand, blocks.get(0), blockposition.getX(), blockposition.getY(), blockposition.getZ());
+             }
++            if (placeEvent != null) {
++                extendedEnumInteractionResult.setSendable(placeEvent.isSend());
++            }
+ 
+             if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild())) {
+-                enuminteractionresult = EnumInteractionResult.FAIL; // cancel placement
++                extendedEnumInteractionResult.setResult(EnumInteractionResult.FAIL); // cancel placement
+                 // PAIL: Remove this when MC-99075 fixed
+                 placeEvent.getPlayer().updateInventory();
+ 
+@@ -249,7 +257,10 @@ public final class ItemStack {
+ 
+                 // revert back all captured blocks
+                 for (BlockState blockstate : blocks) {
+-                    blockstate.update(true, false);
++                    org.bukkit.block.Block block = blockstate.getBlock();
++                    int type = blockstate.getTypeId();
++                    block.setTypeIdAndData(type, blockstate.getRawData(), true, false);
++//                    blockstate.update(true, false);
+                 }
+             } else {
+                 // Change the stack to its new contents if it hasn't been tampered with.
+@@ -276,7 +287,8 @@ public final class ItemStack {
+                     if (!(block.getBlock() instanceof BlockTileEntity)) { // Containers get placed automatically
+                         block.getBlock().onPlace(world, newblockposition, block);
+                     }
+-
++                    if (placeEvent != null && !placeEvent.isSend())
++                        updateFlag &= -3;
+                     world.notifyAndUpdatePhysics(newblockposition, null, oldBlock.getBlockData(), block, updateFlag); // send null chunk as chunk.k() returns false by this point
+                 }
+ 
+@@ -319,7 +331,7 @@ public final class ItemStack {
+         world.capturedBlockStates.clear();
+         // CraftBukkit end
+ 
+-        return enuminteractionresult;
++        return extendedEnumInteractionResult;
+     }
+ 
+     public float a(IBlockData iblockdata) {
+diff --git a/src/main/java/net/minecraft/server/ItemWaterLily.java b/src/main/java/net/minecraft/server/ItemWaterLily.java
+index 2af53fe0585cea732b67acafecd2ce913eb8c512..169a7cfd19e48bc70f99a55a773be43a668a7c9f 100644
+--- a/src/main/java/net/minecraft/server/ItemWaterLily.java
++++ b/src/main/java/net/minecraft/server/ItemWaterLily.java
+@@ -1,5 +1,7 @@
+ package net.minecraft.server;
+ 
++import org.bukkit.craftbukkit.block.CraftBlockState;
++
+ public class ItemWaterLily extends ItemWithAuxData {
+ 
+     public ItemWaterLily(Block block) {
+@@ -25,11 +27,11 @@ public class ItemWaterLily extends ItemWithAuxData {
+ 
+                 if (iblockdata.getMaterial() == Material.WATER && ((Integer) iblockdata.get(BlockFluids.LEVEL)).intValue() == 0 && world.isEmpty(blockposition1)) {
+                     // CraftBukkit start - special case for handling block placement with water lilies
+-                    org.bukkit.block.BlockState blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(world, blockposition1.getX(), blockposition1.getY(), blockposition1.getZ());
++                    CraftBlockState blockstate = CraftBlockState.getBlockState(world, blockposition1.getX(), blockposition1.getY(), blockposition1.getZ());
+                     world.setTypeAndData(blockposition1, Blocks.WATERLILY.getBlockData(), 11);
+                     org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(world, entityhuman, enumhand, blockstate, blockposition.getX(), blockposition.getY(), blockposition.getZ());
+                     if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild())) {
+-                        blockstate.update(true, false);
++                        blockstate.update(entityhuman);
+                         return new InteractionResultWrapper(EnumInteractionResult.PASS, itemstack);
+                     }
+                     // CraftBukkit end
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 3d0ddfec94a3d9a4a35f84ab992b4e713254b915..7dd3946c536ceb421d96cbfe14d8da56b3f92919 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1,10 +1,9 @@
+ package net.minecraft.server;
+ 
+-import com.google.common.collect.Lists;
+ import com.google.common.primitives.Doubles;
+ import com.google.common.primitives.Floats;
+-import com.google.common.util.concurrent.Futures;
+ import dev.pomf.dionysus.DionysusConfig;
++import dev.pomf.dionysus.enums.ExtendedEnumInteractionResult;
+ import io.netty.util.concurrent.Future;
+ import io.netty.util.concurrent.GenericFutureListener;
+ import java.io.IOException;
+@@ -35,21 +34,7 @@ import org.bukkit.event.inventory.InventoryAction;
+ import org.bukkit.event.inventory.InventoryClickEvent;
+ import org.bukkit.event.inventory.InventoryCreativeEvent;
+ import org.bukkit.event.inventory.InventoryType.SlotType;
+-import org.bukkit.event.player.AsyncPlayerChatEvent;
+-import org.bukkit.event.player.PlayerAnimationEvent;
+-import org.bukkit.event.player.PlayerChatEvent;
+-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+-import org.bukkit.event.player.PlayerInteractEntityEvent;
+-import org.bukkit.event.player.PlayerItemHeldEvent;
+-import org.bukkit.event.player.PlayerKickEvent;
+-import org.bukkit.event.player.PlayerMoveEvent;
+-import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+-import org.bukkit.event.player.PlayerTeleportEvent;
+-import org.bukkit.event.player.PlayerToggleFlightEvent;
+-import org.bukkit.event.player.PlayerToggleSneakEvent;
+-import org.bukkit.event.player.PlayerToggleSprintEvent;
++import org.bukkit.event.player.*;
+ import org.bukkit.inventory.CraftingInventory;
+ import org.bukkit.inventory.EquipmentSlot;
+ import org.bukkit.inventory.InventoryView;
+@@ -1004,12 +989,14 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                         this.player.playerInteractManager.a(blockposition, packetplayinblockdig.b());
+                     } else {
+                         // CraftBukkit start - fire PlayerInteractEvent
+-                        CraftEventFactory.callPlayerInteractEvent(this.player, Action.LEFT_CLICK_BLOCK, blockposition, packetplayinblockdig.b(), this.player.inventory.getItemInHand(), EnumHand.MAIN_HAND);
+-                        this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition));
+-                        // Update any tile entity data for this block
+-                        TileEntity tileentity = worldserver.getTileEntity(blockposition);
+-                        if (tileentity != null) {
+-                            this.player.playerConnection.sendPacket(tileentity.getUpdatePacket());
++                        PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(this.player, Action.LEFT_CLICK_BLOCK, blockposition, packetplayinblockdig.b(), this.player.inventory.getItemInHand(), EnumHand.MAIN_HAND);
++                        if (event.isSend()) {
++                            this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition));
++                            // Update any tile entity data for this block
++                            TileEntity tileentity = worldserver.getTileEntity(blockposition);
++                            if (tileentity != null) {
++                                this.player.playerConnection.sendPacket(tileentity.getUpdatePacket());
++                            }
+                         }
+                         // CraftBukkit end
+                     }
+@@ -1087,13 +1074,15 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                 return;
+             }
+             // CraftBukkit end
+-            this.player.playerInteractManager.a(this.player, worldserver, itemstack, enumhand, blockposition, enumdirection, packetplayinuseitem.d(), packetplayinuseitem.e(), packetplayinuseitem.f());
++            ExtendedEnumInteractionResult extendedEnumInteractionResult = this.player.playerInteractManager.mouseClick(this.player, worldserver, itemstack, enumhand, blockposition, enumdirection, packetplayinuseitem.d(), packetplayinuseitem.e(), packetplayinuseitem.f());
++            if (!extendedEnumInteractionResult.isSendable())
++                return;
+         }
+ 
+         // Reaper start - Don't send unreachable blocks
+         if (isBlockInReach) {
+-        this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition));
+-        this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition.shift(enumdirection)));
++            this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition));
++            this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition.shift(enumdirection)));
+         }
+         // Reaper end - Don't send unreachable blocks
+     }
+@@ -1128,21 +1117,27 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+             MovingObjectPosition movingobjectposition = this.player.world.rayTrace(vec3d, vec3d1, false);
+ 
+             boolean cancelled;
++            boolean send;
+             if (movingobjectposition == null || movingobjectposition.type != MovingObjectPosition.EnumMovingObjectType.BLOCK) {
+                 org.bukkit.event.player.PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(this.player, Action.RIGHT_CLICK_AIR, itemstack, enumhand);
+                 cancelled = event.useItemInHand() == Event.Result.DENY;
++                send = event.isSend();
+             } else {
+                 if (player.playerInteractManager.firedInteract) {
+                     player.playerInteractManager.firedInteract = false;
+                     cancelled = player.playerInteractManager.interactResult;
++                    send = true;
+                 } else {
+                     org.bukkit.event.player.PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, movingobjectposition.a(), movingobjectposition.direction, itemstack, true, enumhand);
+                     cancelled = event.useItemInHand() == Event.Result.DENY;
++                    send = event.isSend();
+                 }
+             }
+ 
+             if (cancelled) {
+-                this.player.getBukkitEntity().updateInventory(); // SPIGOT-2524
++                if (send) {
++                    this.player.getBukkitEntity().updateInventory(); // SPIGOT-2524
++                }
+                 return;
+             }
+             // Paper start
+diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd7930f61879 100644
+--- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
++++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+@@ -2,6 +2,8 @@ package net.minecraft.server;
+ 
+ // CraftBukkit start
+ import java.util.ArrayList;
++
++import dev.pomf.dionysus.enums.ExtendedEnumInteractionResult;
+ import org.bukkit.event.block.BlockBreakEvent;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.event.Event;
+@@ -109,20 +111,22 @@ public class PlayerInteractManager {
+         // CraftBukkit start
+         PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(this.player, Action.LEFT_CLICK_BLOCK, blockposition, enumdirection, this.player.inventory.getItemInHand(), EnumHand.MAIN_HAND);
+         if (event.isCancelled()) {
+-            // Let the client know the block still exists
+-            ((EntityPlayer) this.player).playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
+-            cancelBreakBlock(blockposition, this.world.getType(blockposition)); // Paper - Avoid visual issues on the client
+-            // Update any tile entity data for this block
+-            TileEntity tileentity = this.world.getTileEntity(blockposition);
+-            if (tileentity != null) {
+-                this.player.playerConnection.sendPacket(tileentity.getUpdatePacket());
++            if (event.isSend()) {
++                // Let the client know the block still exists
++                ((EntityPlayer) this.player).playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
++                cancelBreakBlock(blockposition, this.world.getType(blockposition)); // Paper - Avoid visual issues on the client
++                // Update any tile entity data for this block
++                TileEntity tileentity = this.world.getTileEntity(blockposition);
++                if (tileentity != null) {
++                    this.player.playerConnection.sendPacket(tileentity.getUpdatePacket());
++                }
+             }
+-            return;
++                return;
+         }
+         // CraftBukkit end
+         if (this.isCreative()) {
+             if (!this.world.douseFire((EntityHuman) null, blockposition, enumdirection)) {
+-                this.breakBlock(blockposition);
++                this.breakBlock(blockposition, event.isSend());
+             }
+ 
+         } else {
+@@ -192,7 +196,7 @@ public class PlayerInteractManager {
+             // CraftBukkit end
+ 
+             if (iblockdata.getMaterial() != Material.AIR && f >= 1.0F) {
+-                this.breakBlock(blockposition);
++                this.breakBlock(blockposition, event.isSend());
+             } else {
+                 this.d = true;
+                 this.f = blockposition;
+@@ -248,11 +252,11 @@ public class PlayerInteractManager {
+         this.world.c(this.player.getId(), this.f, -1);
+     }
+ 
+-    private boolean c(BlockPosition blockposition) {
++    private boolean c(BlockPosition blockposition, boolean sendable) {
+         IBlockData iblockdata = this.world.getType(blockposition);
+ 
+         iblockdata.getBlock().a(this.world, blockposition, iblockdata, (EntityHuman) this.player);
+-        boolean flag = this.world.setAir(blockposition);
++        boolean flag = this.world.setTypeAndData(blockposition, Blocks.AIR.getBlockData(), sendable ? 3 : 1);
+ 
+         if (flag) {
+             iblockdata.getBlock().postBreak(this.world, blockposition, iblockdata);
+@@ -260,6 +264,9 @@ public class PlayerInteractManager {
+ 
+         return flag;
+     }
++    private boolean c(BlockPosition blockposition) {
++        return c(blockposition,true);
++    }
+ 
+     // Paper start - Extra method to avoid visual issues on the client when cancelling block breaks
+     private void cancelBreakBlock(BlockPosition position, IBlockData data) {
+@@ -290,6 +297,9 @@ public class PlayerInteractManager {
+     // Paper end
+ 
+     public boolean breakBlock(BlockPosition blockposition) {
++        return breakBlock(blockposition, false);
++    }
++    public boolean breakBlock(BlockPosition blockposition, boolean sendable) {
+         // CraftBukkit start - fire BlockBreakEvent
+         BlockBreakEvent event = null;
+ 
+@@ -299,15 +309,7 @@ public class PlayerInteractManager {
+             // Sword + Creative mode pre-cancel
+             boolean isSwordNoBreak = this.gamemode.isCreative() && !this.player.getItemInMainHand().isEmpty() && this.player.getItemInMainHand().getItem() instanceof ItemSword;
+ 
+-            // Tell client the block is gone immediately then process events
+-            // Don't tell the client if its a creative sword break because its not broken!
+-            if (world.getTileEntity(blockposition) == null && !isSwordNoBreak) {
+-                PacketPlayOutBlockChange packet = new PacketPlayOutBlockChange(this.world, blockposition);
+-                packet.block = Blocks.AIR.getBlockData();
+-                ((EntityPlayer) this.player).playerConnection.sendPacket(packet);
+-            }
+-
+-            event = new BlockBreakEvent(block, this.player.getBukkitEntity());
++            event = new BlockBreakEvent(block, this.player.getBukkitEntity(), sendable);
+ 
+             // Sword + Creative mode pre-cancel
+             event.setCancelled(isSwordNoBreak);
+@@ -330,17 +332,27 @@ public class PlayerInteractManager {
+ 
+             this.world.getServer().getPluginManager().callEvent(event);
+ 
++            // Tell client the block is gone immediately then process events
++            // Don't tell the client if its a creative sword break because its not broken!
++            if (world.getTileEntity(blockposition) == null && !isSwordNoBreak && event.isSend()) {
++                PacketPlayOutBlockChange packet = new PacketPlayOutBlockChange(this.world, blockposition);
++                packet.block = Blocks.AIR.getBlockData();
++                ((EntityPlayer) this.player).playerConnection.sendPacket(packet);
++            }
++
+             if (event.isCancelled()) {
+                 if (isSwordNoBreak) {
+                     return false;
+                 }
+-                // Let the client know the block still exists
+-                ((EntityPlayer) this.player).playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
+-                cancelBreakBlock(blockposition, nmsData); // Paper - Move cancellation code to extra "cancelBreakBlock" method
+-                // Update any tile entity data for this block
+-                TileEntity tileentity = this.world.getTileEntity(blockposition);
+-                if (tileentity != null) {
+-                    this.player.playerConnection.sendPacket(tileentity.getUpdatePacket());
++                if (event.isSend()) {
++                    // Let the client know the block still exists
++                    ((EntityPlayer) this.player).playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
++                    cancelBreakBlock(blockposition, nmsData); // Paper - Move cancellation code to extra "cancelBreakBlock" method
++                    // Update any tile entity data for this block
++                    TileEntity tileentity = this.world.getTileEntity(blockposition);
++                    if (tileentity != null) {
++                        this.player.playerConnection.sendPacket(tileentity.getUpdatePacket());
++                    }
+                 }
+                 return false;
+             }
+@@ -356,18 +368,20 @@ public class PlayerInteractManager {
+             // CraftBukkit start - Special case skulls, their item data comes from a tile entity (Also check if block should drop items)
+             if (iblockdata.getBlock() == Blocks.SKULL && !this.isCreative() && event.isDropItems()) {
+                 iblockdata.getBlock().dropNaturally(world, blockposition, iblockdata, 1.0F, 0);
+-                return this.c(blockposition);
++                return this.c(blockposition, event.isSend());
+             }
+ 
+             // And shulker boxes too for duplication on cancel reasons (Also check if block should drop items)
+             if (iblockdata.getBlock() instanceof BlockShulkerBox && event.isDropItems()) {
+                 iblockdata.getBlock().dropNaturally(world, blockposition, iblockdata, 1.0F, 0);
+-                return this.c(blockposition);
++                return this.c(blockposition, event.isSend());
+             }
+             // CraftBukkit end
+ 
+             if ((block instanceof BlockCommand || block instanceof BlockStructure) && !this.player.isCreativeAndOp()) {
+-                this.world.notify(blockposition, iblockdata, iblockdata, 3);
++                if (event.isSend()) {
++                    this.world.notify(blockposition, iblockdata, iblockdata, 3);
++                }
+                 return false;
+             } else {
+                 if (this.gamemode.c()) {
+@@ -391,7 +405,7 @@ public class PlayerInteractManager {
+                 this.world.a(this.player, 2001, blockposition, Block.getCombinedId(iblockdata));
+                 // CraftBukkit start
+                 world.captureDrops = new ArrayList<>();
+-                boolean flag = this.c(blockposition);
++                boolean flag = this.c(blockposition, event.isSend());
+                 if (event.isDropItems()) {
+                     for (EntityItem item : world.captureDrops) {
+                         world.addEntity(item);
+@@ -401,7 +415,9 @@ public class PlayerInteractManager {
+                 // CraftBukkit end
+ 
+                 if (this.isCreative()) {
+-                    this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
++                    if (event.isSend()) {
++                        this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
++                    }
+                 } else {
+                     ItemStack itemstack1 = this.player.getItemInMainHand();
+                    // ItemStack itemstack2 = itemstack1.isEmpty() ? ItemStack.a : itemstack1.cloneItemStack(); //NeonPaper move up
+@@ -470,9 +486,13 @@ public class PlayerInteractManager {
+     // CraftBukkit start - whole method
+     public boolean interactResult = false;
+     public boolean firedInteract = false;
++
+     public EnumInteractionResult a(EntityHuman entityhuman, World world, ItemStack itemstack, EnumHand enumhand, BlockPosition blockposition, EnumDirection enumdirection, float f, float f1, float f2) {
++        return mouseClick(entityhuman, world, itemstack, enumhand, blockposition, enumdirection, f, f1, f2).getResult();
++    }
++    public ExtendedEnumInteractionResult mouseClick(EntityHuman entityhuman, World world, ItemStack itemstack, EnumHand enumhand, BlockPosition blockposition, EnumDirection enumdirection, float f, float f1, float f2) {
+         IBlockData blockdata = world.getType(blockposition);
+-        EnumInteractionResult enuminteractionresult = EnumInteractionResult.FAIL;
++        ExtendedEnumInteractionResult extendedEnumInteractionResult = new ExtendedEnumInteractionResult(true, EnumInteractionResult.FAIL);
+         if (blockdata.getBlock() != Blocks.AIR) {
+             boolean cancelledBlock = false;
+ 
+@@ -498,32 +518,34 @@ public class PlayerInteractManager {
+             interactResult = event.useItemInHand() == Event.Result.DENY;
+ 
+             if (event.useInteractedBlock() == Event.Result.DENY) {
+-                // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
+-                if (blockdata.getBlock() instanceof BlockDoor) {
+-                    boolean bottom = blockdata.get(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER;
+-                    ((EntityPlayer) entityhuman).playerConnection.sendPacket(new PacketPlayOutBlockChange(world, bottom ? blockposition.up() : blockposition.down()));
+-                } else if (blockdata.getBlock() instanceof BlockCake) {
+-                    ((EntityPlayer) entityhuman).getBukkitEntity().sendHealthUpdate(); // SPIGOT-1341 - reset health for cake
+-                // Paper start - extend Player Interact cancellation
+-                } else if (blockdata.getBlock() instanceof BlockStructure) {
+-                    ((EntityPlayer) entityhuman).playerConnection.sendPacket(new PacketPlayOutCloseWindow());
+-                } else if (blockdata.getBlock() instanceof BlockCommand) {
+-                    ((EntityPlayer) entityhuman).playerConnection.sendPacket(new PacketPlayOutCloseWindow());
+-                } else if (blockdata.getBlock() instanceof BlockFlowerPot) {
+-                    // Send a block change to air and then send back the correct block, just to make the client happy
+-                    PacketPlayOutBlockChange packet = new PacketPlayOutBlockChange(blockposition, Blocks.AIR.getBlockData()); // Reaper - Use custom constructor
+-                    this.player.playerConnection.sendPacket(packet);
+-
+-                    this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
+-
+-                    TileEntity tileentity = this.world.getTileEntity(blockposition);
+-                    if (tileentity != null) {
+-                        player.playerConnection.sendPacket(tileentity.getUpdatePacket());
++                if (event.isSend()) {
++                    // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
++                    if (blockdata.getBlock() instanceof BlockDoor) {
++                        boolean bottom = blockdata.get(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER;
++                        ((EntityPlayer) entityhuman).playerConnection.sendPacket(new PacketPlayOutBlockChange(world, bottom ? blockposition.up() : blockposition.down()));
++                    } else if (blockdata.getBlock() instanceof BlockCake) {
++                        ((EntityPlayer) entityhuman).getBukkitEntity().sendHealthUpdate(); // SPIGOT-1341 - reset health for cake
++                        // Paper start - extend Player Interact cancellation
++                    } else if (blockdata.getBlock() instanceof BlockStructure) {
++                        ((EntityPlayer) entityhuman).playerConnection.sendPacket(new PacketPlayOutCloseWindow());
++                    } else if (blockdata.getBlock() instanceof BlockCommand) {
++                        ((EntityPlayer) entityhuman).playerConnection.sendPacket(new PacketPlayOutCloseWindow());
++                    } else if (blockdata.getBlock() instanceof BlockFlowerPot) {
++                        // Send a block change to air and then send back the correct block, just to make the client happy
++                        PacketPlayOutBlockChange packet = new PacketPlayOutBlockChange(blockposition, Blocks.AIR.getBlockData()); // Reaper - Use custom constructor
++                        this.player.playerConnection.sendPacket(packet);
++
++                        this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
++
++                        TileEntity tileentity = this.world.getTileEntity(blockposition);
++                        if (tileentity != null) {
++                            player.playerConnection.sendPacket(tileentity.getUpdatePacket());
++                        }
++                        // Paper end - extend Player Interact cancellation
+                     }
+-                // Paper end - extend Player Interact cancellation
+                 }
+                 ((EntityPlayer) entityhuman).getBukkitEntity().updateInventory(); // SPIGOT-2867
+-                enuminteractionresult = (event.useItemInHand() != Event.Result.ALLOW) ? EnumInteractionResult.SUCCESS : EnumInteractionResult.PASS;
++                extendedEnumInteractionResult.setResult((event.useItemInHand() != Event.Result.ALLOW) ? EnumInteractionResult.SUCCESS : EnumInteractionResult.PASS);
+             } else if (this.gamemode == EnumGamemode.SPECTATOR) {
+                 TileEntity tileentity = world.getTileEntity(blockposition);
+ 
+@@ -537,27 +559,27 @@ public class PlayerInteractManager {
+ 
+                     if (itileinventory != null) {
+                         entityhuman.openContainer(itileinventory);
+-                        return EnumInteractionResult.SUCCESS;
++                        return extendedEnumInteractionResult.setResult(EnumInteractionResult.SUCCESS);
+                     }
+                 } else if (tileentity instanceof IInventory) {
+                     entityhuman.openContainer((IInventory) tileentity);
+-                    return EnumInteractionResult.SUCCESS;
++                    return extendedEnumInteractionResult.setResult(EnumInteractionResult.SUCCESS);
+                 }
+ 
+-                return EnumInteractionResult.PASS;
++                return extendedEnumInteractionResult.setResult(EnumInteractionResult.PASS);
+             } else {
+                 if (!entityhuman.isSneaking() || entityhuman.getItemInMainHand().isEmpty() && entityhuman.getItemInOffHand().isEmpty()) {
+                     IBlockData iblockdata = world.getType(blockposition);
+ 
+-                    enuminteractionresult = iblockdata.getBlock().interact(world, blockposition, iblockdata, entityhuman, enumhand, enumdirection, f, f1, f2) ? EnumInteractionResult.SUCCESS : EnumInteractionResult.PASS;
++                    extendedEnumInteractionResult.setResult(iblockdata.getBlock().interact(world, blockposition, iblockdata, entityhuman, enumhand, enumdirection, f, f1, f2) ? EnumInteractionResult.SUCCESS : EnumInteractionResult.PASS);
+                 }
+             }
+ 
+-            if (!itemstack.isEmpty() && enuminteractionresult != EnumInteractionResult.SUCCESS && !interactResult) { // add !interactResult SPIGOT-764
++            if (!itemstack.isEmpty() && extendedEnumInteractionResult.getResult() != EnumInteractionResult.SUCCESS && !interactResult) { // add !interactResult SPIGOT-764
+                 int i = itemstack.getData();
+                 int j = itemstack.getCount();
+ 
+-                enuminteractionresult = itemstack.placeItem(entityhuman, world, blockposition, enumhand, enumdirection, f, f1, f2);
++                extendedEnumInteractionResult = itemstack.placeItem(entityhuman, world, blockposition, enumhand, enumdirection, f, f1, f2, event.isSend());
+ 
+                 // The item count should not decrement in Creative mode.
+                 if (this.isCreative()) {
+@@ -566,7 +588,7 @@ public class PlayerInteractManager {
+                 }
+             }
+         }
+-        return enuminteractionresult;
++        return extendedEnumInteractionResult;
+         // CraftBukkit end
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/TileEntity.java b/src/main/java/net/minecraft/server/TileEntity.java
+index 54bfbfc6bcdf033853becd8c363f79d0a50c9040..1df2213ca1f4f8a7effb47898cae22f30c79ab87 100644
+--- a/src/main/java/net/minecraft/server/TileEntity.java
++++ b/src/main/java/net/minecraft/server/TileEntity.java
+@@ -151,6 +151,11 @@ public abstract class TileEntity implements KeyedObject {
+ 
+     }
+ 
++    public void update(EntityPlayer entityPlayer) {
++        entityPlayer.playerConnection.sendPacket(getUpdatePacket());
++    }
++
++
+     public BlockPosition getPosition() {
+         return this.position;
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
+index a9d3f12bc615ab47738ba545732827c1dd9d7fa7..2a4728c68ff87a664588496daef8a97e257b14b7 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
+@@ -133,31 +133,34 @@ public class CraftBlock implements Block {
+     }
+ 
+     public boolean setTypeIdAndData(final int type, final byte data, final boolean applyPhysics) {
++        return setTypeIdAndData(type, data, applyPhysics,true);
++    }
++
++    public boolean setTypeIdAndData(final int type, final byte data, final boolean applyPhysics, final boolean notify) {
+         IBlockData blockData = getNMSBlock(type).fromLegacyData(data);
+         BlockPosition position = new BlockPosition(x, y, z);
+-
+         // SPIGOT-611: need to do this to prevent glitchiness. Easier to handle this here (like /setblock) than to fix weirdness in tile entity cleanup
+         if (type != 0 && blockData.getBlock() instanceof BlockTileEntity && type != getTypeId()) {
+             chunk.getHandle().getWorld().setTypeAndData(position, Blocks.AIR.getBlockData(), 0);
+         }
+-
+         if (applyPhysics) {
+-            return chunk.getHandle().getWorld().setTypeAndData(position, blockData, 3);
++            return chunk.getHandle().getWorld().setTypeAndData(position, blockData, notify ? 3 : 1);
+         } else {
+             IBlockData old = chunk.getHandle().getBlockData(position);
+-            boolean success = chunk.getHandle().getWorld().setTypeAndData(position, blockData, 18); // NOTIFY | NO_OBSERVER
++            boolean success = chunk.getHandle().getWorld().setTypeAndData(position, blockData, notify ? 18 : 16); // NOTIFY | NO_OBSERVER
+             if (success) {
+                 chunk.getHandle().getWorld().notify(
+                         position,
+                         old,
+                         blockData,
+-                        3
++                        notify ? 3 : 1
+                 );
+             }
+             return success;
+         }
+     }
+ 
++
+     public Material getType() {
+         return Material.getMaterial(getTypeId());
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockEntityState.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlockEntityState.java
+index 258be0448c738ec93fb060101133b1a209e72d2c..775a5b46ae423f4f3495fcc68b7305528e074ebf 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockEntityState.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftBlockEntityState.java
+@@ -1,8 +1,6 @@
+ package org.bukkit.craftbukkit.block;
+ 
+-import net.minecraft.server.BlockPosition;
+-import net.minecraft.server.NBTTagCompound;
+-import net.minecraft.server.TileEntity;
++import net.minecraft.server.*;
+ import org.bukkit.Material;
+ import org.bukkit.block.Block;
+ import org.bukkit.craftbukkit.CraftWorld;
+@@ -147,4 +145,12 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
+ 
+         return result;
+     }
++
++    @Override
++    public void update(EntityHuman humanEntity) {
++        if (humanEntity instanceof EntityPlayer entityPlayer) {
++            super.update(humanEntity);
++            tileEntity.update(entityPlayer);
++        }
++    }
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockState.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlockState.java
+index 2a1b731c0c11629792851af77c1284582fd8570b..41861e03756bbd67e4eaee0de7a8f1f7bc72213c 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockState.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftBlockState.java
+@@ -1,6 +1,6 @@
+ package org.bukkit.craftbukkit.block;
+ 
+-import net.minecraft.server.BlockPosition;
++import net.minecraft.server.*;
+ import org.bukkit.Location;
+ import org.bukkit.block.Block;
+ import org.bukkit.Chunk;
+@@ -16,7 +16,6 @@ import org.bukkit.metadata.MetadataValue;
+ import org.bukkit.plugin.Plugin;
+ 
+ import java.util.List;
+-import net.minecraft.server.IBlockData;
+ 
+ public class CraftBlockState implements BlockState {
+     private final CraftWorld world;
+@@ -177,6 +176,14 @@ public class CraftBlockState implements BlockState {
+         return true;
+     }
+ 
++    public void update(EntityHuman humanEntity) {
++        if (humanEntity instanceof EntityPlayer entityPlayer) {
++            BlockPosition pos = new BlockPosition(x, y, z);
++            PacketPlayOutBlockChange packetPlayOutBlockChange = new PacketPlayOutBlockChange(world.getHandle(), pos);
++            entityPlayer.playerConnection.sendPacket(packetPlayOutBlockChange);
++        }
++    }
++
+     private void createData(final byte data) {
+         Material mat = getType();
+         if (mat == null || mat.getData() == null) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftJukebox.java b/src/main/java/org/bukkit/craftbukkit/block/CraftJukebox.java
+index d259cfb82f8d4dbe925e55f059a5d0cbfaa20127..533b8e78f6edec6c19e43abb163bd36fe21c2c1b 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftJukebox.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftJukebox.java
+@@ -1,11 +1,7 @@
+ package org.bukkit.craftbukkit.block;
+ 
+-import net.minecraft.server.BlockJukeBox;
++import net.minecraft.server.*;
+ import net.minecraft.server.BlockJukeBox.TileEntityRecordPlayer;
+-import net.minecraft.server.BlockPosition;
+-import net.minecraft.server.Blocks;
+-import net.minecraft.server.ItemStack;
+-import net.minecraft.server.TileEntity;
+ import org.bukkit.Effect;
+ import org.bukkit.Material;
+ import org.bukkit.block.Block;
+@@ -45,6 +41,17 @@ public class CraftJukebox extends CraftBlockEntityState<TileEntityRecordPlayer>
+         return result;
+     }
+ 
++    @Override
++    public void update(EntityHuman humanEntity) {
++        if (humanEntity instanceof EntityPlayer entityPlayer) {
++            super.update(humanEntity);
++            if (this.getType() == Material.JUKEBOX) {
++                Material record = this.getPlaying();
++                entityPlayer.getBukkitEntity().playEffect(this.getLocation(), Effect.RECORD_PLAY, record.getId());
++            }
++        }
++    }
++
+     @Override
+     public Material getPlaying() {
+         ItemStack record = this.getSnapshot().getRecord();
+diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
+index f1a3ca9509ebc50eaa67bf4dac2645f5ee37bbef..bb3c42a9ec448655e45a26a58fc08f2ae14eed2e 100644
+--- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
++++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
+@@ -127,6 +127,10 @@ public class CraftEventFactory {
+     }
+ 
+     public static BlockPlaceEvent callBlockPlaceEvent(World world, EntityHuman who, EnumHand hand, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ) {
++        return callBlockPlaceEvent(world, who, hand, replacedBlockState, clickedX, clickedY, clickedZ,true);
++    }
++
++    public static BlockPlaceEvent callBlockPlaceEvent(World world, EntityHuman who, EnumHand hand, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ, boolean sendable) {
+         CraftWorld craftWorld = world.getWorld();
+         CraftServer craftServer = world.getServer();
+ 
+@@ -147,7 +151,7 @@ public class CraftEventFactory {
+             equipmentSlot = EquipmentSlot.OFF_HAND;
+         }
+ 
+-        BlockPlaceEvent event = new BlockPlaceEvent(placedBlock, replacedBlockState, blockClicked, item, player, canBuild, equipmentSlot);
++        BlockPlaceEvent event = new BlockPlaceEvent(placedBlock, replacedBlockState, blockClicked, item, player, canBuild, equipmentSlot,sendable);
+         craftServer.getPluginManager().callEvent(event);
+ 
+         return event;
