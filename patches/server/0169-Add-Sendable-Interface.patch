@@ -1,19 +1,20 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Raymano <raymanowy@gmail.com>
-Date: Tue, 17 Jan 2023 00:19:52 +0100
+Date: Wed, 18 Jan 2023 11:13:10 +0100
 Subject: [PATCH] Add-Sendable-Interface
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/enums/ExtendedEnumInteractionResult.java b/src/main/java/dev/pomf/dionysus/enums/ExtendedEnumInteractionResult.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..311a2f1fe37b43e14fa1e87e2121d3a90084d978
+index 0000000000000000000000000000000000000000..f297bc36624364e5cce3e71d18be510bc17ba7cd
 --- /dev/null
 +++ b/src/main/java/dev/pomf/dionysus/enums/ExtendedEnumInteractionResult.java
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,33 @@
 +package dev.pomf.dionysus.enums;
 +
 +import net.minecraft.server.EnumInteractionResult;
 +
++// Dionysus class
 +public class ExtendedEnumInteractionResult {
 +
 +    private boolean sendable;
@@ -43,7 +44,7 @@ index 0000000000000000000000000000000000000000..311a2f1fe37b43e14fa1e87e2121d3a9
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/ItemStack.java b/src/main/java/net/minecraft/server/ItemStack.java
-index c5f5fa4e74fb1564c638f8d586f15d9606ae372c..47d330b0c458714cd0bd72296f6ad86e90ac1f23 100644
+index c5f5fa4e74fb1564c638f8d586f15d9606ae372c..9de3dc2a3b06d93b6aa8672bc372a6f1b9c0d496 100644
 --- a/src/main/java/net/minecraft/server/ItemStack.java
 +++ b/src/main/java/net/minecraft/server/ItemStack.java
 @@ -10,6 +10,7 @@ import javax.annotation.Nullable;
@@ -54,13 +55,11 @@ index c5f5fa4e74fb1564c638f8d586f15d9606ae372c..47d330b0c458714cd0bd72296f6ad86e
  import org.bukkit.Location;
  import org.bukkit.TreeType;
  import org.bukkit.block.BlockState;
-@@ -172,7 +173,11 @@ public final class ItemStack {
-         return this.g ? Item.getItemOf(Blocks.AIR) : this.item;
+@@ -173,6 +174,10 @@ public final class ItemStack {
      }
  
--    public EnumInteractionResult placeItem(EntityHuman entityhuman, World world, BlockPosition blockposition, EnumHand enumhand, EnumDirection enumdirection, float f, float f1, float f2) {
-+    public ExtendedEnumInteractionResult placeItem(EntityHuman entityhuman, World world, BlockPosition blockposition, EnumHand enumhand, EnumDirection enumdirection, float f, float f1, float f2) {
-+        return placeItem(entityhuman, world, blockposition, enumhand, enumdirection, f, f1, f2,true);
+     public EnumInteractionResult placeItem(EntityHuman entityhuman, World world, BlockPosition blockposition, EnumHand enumhand, EnumDirection enumdirection, float f, float f1, float f2) {
++        return placeItem(entityhuman, world, blockposition, enumhand, enumdirection, f, f1, f2,true).getResult();
 +    }
 +
 +    public ExtendedEnumInteractionResult placeItem(EntityHuman entityhuman, World world, BlockPosition blockposition, EnumHand enumhand, EnumDirection enumdirection, float f, float f1, float f2, boolean sendable) {
@@ -103,7 +102,7 @@ index c5f5fa4e74fb1564c638f8d586f15d9606ae372c..47d330b0c458714cd0bd72296f6ad86e
              } else if (blocks.size() == 1) {
                  placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(world, entityhuman, enumhand, blocks.get(0), blockposition.getX(), blockposition.getY(), blockposition.getZ());
              }
-+            if (placeEvent != null) {
++            if (placeEvent != null) { // Dionysus
 +                extendedEnumInteractionResult.setSendable(placeEvent.isSend());
 +            }
  
@@ -113,29 +112,31 @@ index c5f5fa4e74fb1564c638f8d586f15d9606ae372c..47d330b0c458714cd0bd72296f6ad86e
                  // PAIL: Remove this when MC-99075 fixed
                  placeEvent.getPlayer().updateInventory();
  
-@@ -249,7 +257,10 @@ public final class ItemStack {
+@@ -249,7 +257,12 @@ public final class ItemStack {
  
                  // revert back all captured blocks
                  for (BlockState blockstate : blocks) {
 -                    blockstate.update(true, false);
++                    // Dionysus start
 +                    org.bukkit.block.Block block = blockstate.getBlock();
 +                    int type = blockstate.getTypeId();
 +                    block.setTypeIdAndData(type, blockstate.getRawData(), true, false);
 +//                    blockstate.update(true, false);
++                    // Dionysus end
                  }
              } else {
                  // Change the stack to its new contents if it hasn't been tampered with.
-@@ -276,7 +287,8 @@ public final class ItemStack {
+@@ -276,7 +289,8 @@ public final class ItemStack {
                      if (!(block.getBlock() instanceof BlockTileEntity)) { // Containers get placed automatically
                          block.getBlock().onPlace(world, newblockposition, block);
                      }
 -
-+                    if (placeEvent != null && !placeEvent.isSend())
++                    if (placeEvent != null && !placeEvent.isSend()) // Dionysus
 +                        updateFlag &= -3;
                      world.notifyAndUpdatePhysics(newblockposition, null, oldBlock.getBlockData(), block, updateFlag); // send null chunk as chunk.k() returns false by this point
                  }
  
-@@ -319,7 +331,7 @@ public final class ItemStack {
+@@ -319,7 +333,7 @@ public final class ItemStack {
          world.capturedBlockStates.clear();
          // CraftBukkit end
  
@@ -171,7 +172,7 @@ index 2af53fe0585cea732b67acafecd2ce913eb8c512..169a7cfd19e48bc70f99a55a773be43a
                      }
                      // CraftBukkit end
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 3d0ddfec94a3d9a4a35f84ab992b4e713254b915..7dd3946c536ceb421d96cbfe14d8da56b3f92919 100644
+index 3d0ddfec94a3d9a4a35f84ab992b4e713254b915..288ce081c4680963c2b9588bbeb3544e981a0b04 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1,10 +1,9 @@
@@ -230,14 +231,16 @@ index 3d0ddfec94a3d9a4a35f84ab992b4e713254b915..7dd3946c536ceb421d96cbfe14d8da56
                          }
                          // CraftBukkit end
                      }
-@@ -1087,13 +1074,15 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -1087,13 +1074,17 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
                  return;
              }
              // CraftBukkit end
 -            this.player.playerInteractManager.a(this.player, worldserver, itemstack, enumhand, blockposition, enumdirection, packetplayinuseitem.d(), packetplayinuseitem.e(), packetplayinuseitem.f());
++            // Dionysus start
 +            ExtendedEnumInteractionResult extendedEnumInteractionResult = this.player.playerInteractManager.mouseClick(this.player, worldserver, itemstack, enumhand, blockposition, enumdirection, packetplayinuseitem.d(), packetplayinuseitem.e(), packetplayinuseitem.f());
 +            if (!extendedEnumInteractionResult.isSendable())
 +                return;
++            // Dionysus end
          }
  
          // Reaper start - Don't send unreachable blocks
@@ -249,7 +252,7 @@ index 3d0ddfec94a3d9a4a35f84ab992b4e713254b915..7dd3946c536ceb421d96cbfe14d8da56
          }
          // Reaper end - Don't send unreachable blocks
      }
-@@ -1128,21 +1117,27 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+@@ -1128,21 +1119,27 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
              MovingObjectPosition movingobjectposition = this.player.world.rayTrace(vec3d, vec3d1, false);
  
              boolean cancelled;
@@ -279,7 +282,7 @@ index 3d0ddfec94a3d9a4a35f84ab992b4e713254b915..7dd3946c536ceb421d96cbfe14d8da56
              }
              // Paper start
 diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
-index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd7930f61879 100644
+index a474d8af1670ca1619bc0043f2b4f912ea9a4844..3bf6bd81bd46375a783f1701ca7704f337c67888 100644
 --- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
 +++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
 @@ -2,6 +2,8 @@ package net.minecraft.server;
@@ -406,7 +409,7 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
 -                TileEntity tileentity = this.world.getTileEntity(blockposition);
 -                if (tileentity != null) {
 -                    this.player.playerConnection.sendPacket(tileentity.getUpdatePacket());
-+                if (event.isSend()) {
++                if (event.isSend()) { // Dionysus
 +                    // Let the client know the block still exists
 +                    ((EntityPlayer) this.player).playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
 +                    cancelBreakBlock(blockposition, nmsData); // Paper - Move cancellation code to extra "cancelBreakBlock" method
@@ -436,7 +439,7 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
  
              if ((block instanceof BlockCommand || block instanceof BlockStructure) && !this.player.isCreativeAndOp()) {
 -                this.world.notify(blockposition, iblockdata, iblockdata, 3);
-+                if (event.isSend()) {
++                if (event.isSend()) { // Dionysus
 +                    this.world.notify(blockposition, iblockdata, iblockdata, 3);
 +                }
                  return false;
@@ -456,13 +459,13 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
  
                  if (this.isCreative()) {
 -                    this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
-+                    if (event.isSend()) {
++                    if (event.isSend()) { // Dionysus
 +                        this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(this.world, blockposition));
 +                    }
                  } else {
                      ItemStack itemstack1 = this.player.getItemInMainHand();
                     // ItemStack itemstack2 = itemstack1.isEmpty() ? ItemStack.a : itemstack1.cloneItemStack(); //NeonPaper move up
-@@ -470,9 +486,13 @@ public class PlayerInteractManager {
+@@ -470,9 +486,14 @@ public class PlayerInteractManager {
      // CraftBukkit start - whole method
      public boolean interactResult = false;
      public boolean firedInteract = false;
@@ -470,6 +473,7 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
      public EnumInteractionResult a(EntityHuman entityhuman, World world, ItemStack itemstack, EnumHand enumhand, BlockPosition blockposition, EnumDirection enumdirection, float f, float f1, float f2) {
 +        return mouseClick(entityhuman, world, itemstack, enumhand, blockposition, enumdirection, f, f1, f2).getResult();
 +    }
++    // Dionysus method
 +    public ExtendedEnumInteractionResult mouseClick(EntityHuman entityhuman, World world, ItemStack itemstack, EnumHand enumhand, BlockPosition blockposition, EnumDirection enumdirection, float f, float f1, float f2) {
          IBlockData blockdata = world.getType(blockposition);
 -        EnumInteractionResult enuminteractionresult = EnumInteractionResult.FAIL;
@@ -477,7 +481,7 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
          if (blockdata.getBlock() != Blocks.AIR) {
              boolean cancelledBlock = false;
  
-@@ -498,32 +518,34 @@ public class PlayerInteractManager {
+@@ -498,32 +519,34 @@ public class PlayerInteractManager {
              interactResult = event.useItemInHand() == Event.Result.DENY;
  
              if (event.useInteractedBlock() == Event.Result.DENY) {
@@ -502,7 +506,7 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
 -                    TileEntity tileentity = this.world.getTileEntity(blockposition);
 -                    if (tileentity != null) {
 -                        player.playerConnection.sendPacket(tileentity.getUpdatePacket());
-+                if (event.isSend()) {
++                if (event.isSend()) { // Dionysus
 +                    // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
 +                    if (blockdata.getBlock() instanceof BlockDoor) {
 +                        boolean bottom = blockdata.get(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER;
@@ -535,7 +539,7 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
              } else if (this.gamemode == EnumGamemode.SPECTATOR) {
                  TileEntity tileentity = world.getTileEntity(blockposition);
  
-@@ -537,27 +559,27 @@ public class PlayerInteractManager {
+@@ -537,27 +560,27 @@ public class PlayerInteractManager {
  
                      if (itileinventory != null) {
                          entityhuman.openContainer(itileinventory);
@@ -569,7 +573,7 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
  
                  // The item count should not decrement in Creative mode.
                  if (this.isCreative()) {
-@@ -566,7 +588,7 @@ public class PlayerInteractManager {
+@@ -566,7 +589,7 @@ public class PlayerInteractManager {
                  }
              }
          }
@@ -579,13 +583,14 @@ index a474d8af1670ca1619bc0043f2b4f912ea9a4844..7ed627ca9a09050d2ec8abbd614abd79
      }
  
 diff --git a/src/main/java/net/minecraft/server/TileEntity.java b/src/main/java/net/minecraft/server/TileEntity.java
-index 54bfbfc6bcdf033853becd8c363f79d0a50c9040..1df2213ca1f4f8a7effb47898cae22f30c79ab87 100644
+index 54bfbfc6bcdf033853becd8c363f79d0a50c9040..9b8010cc4408a56e2d238d82012b87869e430b3b 100644
 --- a/src/main/java/net/minecraft/server/TileEntity.java
 +++ b/src/main/java/net/minecraft/server/TileEntity.java
-@@ -151,6 +151,11 @@ public abstract class TileEntity implements KeyedObject {
+@@ -151,6 +151,12 @@ public abstract class TileEntity implements KeyedObject {
  
      }
  
++    // Dionysus method
 +    public void update(EntityPlayer entityPlayer) {
 +        entityPlayer.playerConnection.sendPacket(getUpdatePacket());
 +    }
