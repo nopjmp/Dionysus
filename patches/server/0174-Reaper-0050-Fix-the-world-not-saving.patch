@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:06:42 +0500
+Subject: [PATCH] (Reaper 0050) Fix-the-world-not-saving
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 83415a7f6a617d7561b2f07536f63ecbbc4b7dee..a24cb5d7d94b2048dbef2865c51010478c586431 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -273,6 +273,7 @@ public class ChunkProviderServer implements IChunkProvider {
+             }
+         }
+ 
++        if (!flag) // Reaper - Fix the world not saving
+         if (queueSize > world.paperConfig.queueSizeAutoSaveThreshold){
+             return false;
+         }

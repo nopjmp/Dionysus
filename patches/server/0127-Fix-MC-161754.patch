@@ -5,10 +5,10 @@ Subject: [PATCH] Fix-MC-161754
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 22488895599141ce0f8d0cadca48d49973e67416..448aeed01b5604bf2f129bf31ba0b8c28b4e64fe 100644
+index 9c41fd700ae9297ca7638df921c658eeb6229b18..dd371d4cd3ec8442958920eecd5f32f69c00263a 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -372,4 +372,12 @@ public class DionysusConfig {
+@@ -380,4 +380,12 @@ public class DionysusConfig {
      private static void maxProcessedBookNBTSize() {
          maxProcessedBookNBTSize = getInt("max-processed-book-nbt-size", 8000);
      }

@@ -66,10 +66,10 @@ index ac7186fc85839cbe7e196f4272b1be82d6110036..e087e3707412506ef5704d39286db69a
  
      public org.bukkit.Chunk bukkitChunk;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 4ab42aa93c57be327fb7dd60e49eec3021eb795a..629b04da5973730468b6d8225df0008c6b578a93 100644
+index 514afbf7be287a9429756586bbca5d8c92755ae3..1f916627f540ee51e290ca0fbb967e985f7da1ba 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -451,6 +451,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -470,6 +470,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
          this.methodProfiler.b();
      }
  
@@ -78,7 +78,7 @@ index 4ab42aa93c57be327fb7dd60e49eec3021eb795a..629b04da5973730468b6d8225df0008c
      protected void j() {
          this.i();
          if (this.worldData.getType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
-@@ -466,6 +468,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -485,6 +487,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              boolean flag1 = this.X();
  
              this.methodProfiler.a("pollingChunks");
@@ -86,7 +86,7 @@ index 4ab42aa93c57be327fb7dd60e49eec3021eb795a..629b04da5973730468b6d8225df0008c
  
              for (Iterator iterator1 = this.manager.b(); iterator1.hasNext(); this.methodProfiler.b()) {
                  this.methodProfiler.a("getChunk");
-@@ -483,7 +486,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -502,7 +505,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  BlockPosition blockposition;
  
                  // Paper - Disable thunder
@@ -95,7 +95,7 @@ index 4ab42aa93c57be327fb7dd60e49eec3021eb795a..629b04da5973730468b6d8225df0008c
                      this.l = this.l * 3 + 1013904223;
                      l = this.l >> 2;
                      blockposition = this.a(new BlockPosition(j + (l & 15), 0, k + (l >> 8 & 15)));
-@@ -505,7 +508,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -524,7 +527,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  }
  
                  this.methodProfiler.c("iceandsnow");

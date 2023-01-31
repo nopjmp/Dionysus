@@ -1,0 +1,117 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruviolence@users.noreply.github.com>
+Date: Sat, 15 Oct 2022 18:02:18 +0500
+Subject: [PATCH] (Reaper 0041) Implement-Lithium-ai-pathing-ChunkCache
+
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 869b710fed7f006d60b7f52690bb9255a96d4ac5..ae1439776f43093b5a7bfd7e4edabb3b8221ee09 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -448,4 +448,12 @@ public class DionysusConfig {
+             networks is predictable and intuitive rather than locational and chaotic."""
+         );
+     }
++
++    public static boolean lithiumAiPathingChunkCache = true;
++    private static void lithiumAiPathingChunkCache() {
++        lithiumAiPathingChunkCache = getBoolean("lithium-ai-pathing-chunk-cache", lithiumAiPathingChunkCache, """
++                The hottest part of path-finding is reading blocks out from the world.
++                This patch makes a number of changes to avoid slow paths in the game and to better inline code.
++                In testing, it shows a small improvement in path-finding code.""");
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
+index 786d1dd2269adbb6041257e0ae926a8fac4d717d..f315b5961872cb4a9bec09d27a270cd3c15bd241 100644
+--- a/src/main/java/net/minecraft/server/ChunkCache.java
++++ b/src/main/java/net/minecraft/server/ChunkCache.java
+@@ -1,15 +1,28 @@
+ package net.minecraft.server;
+ 
++import dev.pomf.dionysus.DionysusConfig;
++
+ import javax.annotation.Nullable;
+ 
+ public class ChunkCache implements IBlockAccess {
+ 
++    private static final IBlockData DEFAULT_BLOCK = Blocks.AIR.getBlockData(); // Titanium - Lithium: ai/pathing/ChunkCache
++
+     protected int a;
+     protected int b;
+     protected Chunk[][] c;
+     protected boolean d;
+     protected World e;
+ 
++    // Titanium start - Lithium: ai/pathing/ChunkCache
++    // A 1D view of the chunks available to this cache
++    private Chunk[] chunksFlat;
++
++    // The x/z length of this cache
++    private int xLen;
++    private int zLen;
++    // Titanium end
++
+     public ChunkCache(World world, BlockPosition blockposition, BlockPosition blockposition1, int i) {
+         this.e = world;
+         this.a = blockposition.getX() - i >> 4;
+@@ -29,6 +42,18 @@ public class ChunkCache implements IBlockAccess {
+             }
+         }
+ 
++        // Titanium start - Lithium: ai/pathing/ChunkCache
++        this.xLen = 1 + (blockposition1.getX() >> 4) - (blockposition.getX() >> 4);
++        this.zLen = 1 + (blockposition1.getZ() >> 4) - (blockposition.getZ() >> 4);
++
++        this.chunksFlat = new Chunk[this.xLen * this.zLen];
++
++        // Flatten the 2D chunk array into our 1D array
++        for (int x = 0; x < this.xLen; x++) {
++            System.arraycopy(this.c[x], 0, this.chunksFlat, x * this.zLen, this.zLen);
++        }
++        // Titanium end
++
+         for (l = blockposition.getX() >> 4; l <= blockposition1.getX() >> 4; ++l) {
+             for (i1 = blockposition.getZ() >> 4; i1 <= blockposition1.getZ() >> 4; ++i1) {
+                 Chunk chunk = this.c[l - this.a][i1 - this.b];
+@@ -55,20 +80,33 @@ public class ChunkCache implements IBlockAccess {
+     }
+ 
+     public IBlockData getType(BlockPosition blockposition) {
+-        if (blockposition.getY() >= 0 && blockposition.getY() < 256) {
+-            int i = (blockposition.getX() >> 4) - this.a;
+-            int j = (blockposition.getZ() >> 4) - this.b;
++        // Titanium start - Lithium: ai/pathing/ChunkCache
++        int y = blockposition.getY();
++        if (y >= 0 && y< 256) {
++            int x = blockposition.getX();
++            int z = blockposition.getZ();
++
++            int chunkX = (x >> 4) - this.a;
++            int chunkZ = (z >> 4) - this.b;
+ 
+-            if (i >= 0 && i < this.c.length && j >= 0 && j < this.c[i].length) {
+-                Chunk chunk = this.c[i][j];
++            if (chunkX >= 0 && chunkX < this.xLen && chunkZ >= 0 && chunkZ < this.zLen) {
++                Chunk chunk = this.chunksFlat[(chunkX * this.zLen) + chunkZ];
+ 
+                 if (chunk != null) {
+-                    return chunk.getBlockData(blockposition);
++                    ChunkSection section = chunk.getSections()[y >> 4];
++
++                    if (section != null && DionysusConfig.lithiumAiPathingChunkCache) { // Dionysus
++                        // Avoid going through Chunk#getBlockData
++                        return section.getType(x & 15, y & 15, z & 15); // Titanium - Lithium - Dionysus
++                    } else {
++                        return chunk.getBlockData(blockposition);
++                    }
+                 }
+             }
+         }
+ 
+-        return Blocks.AIR.getBlockData();
++        return DEFAULT_BLOCK;
++        // Titanium end
+     }
+ 
+     public boolean isEmpty(BlockPosition blockposition) {

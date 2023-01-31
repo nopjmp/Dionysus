@@ -5,10 +5,10 @@ Subject: [PATCH] Add option to disable duplicate log
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 448aeed01b5604bf2f129bf31ba0b8c28b4e64fe..dba95376bf4385e1bd0a3eb33c731496f52fc0a4 100644
+index dd371d4cd3ec8442958920eecd5f32f69c00263a..fc27044e8643afb828a71fd7178f865760d96528 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -380,4 +380,13 @@ public class DionysusConfig {
+@@ -388,4 +388,13 @@ public class DionysusConfig {
                  "Fixes MC-161754"
          );
      }
@@ -23,10 +23,10 @@ index 448aeed01b5604bf2f129bf31ba0b8c28b4e64fe..dba95376bf4385e1bd0a3eb33c731496
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 629b04da5973730468b6d8225df0008c6b578a93..1f2ab25e92160f6fbca1cd11a1d933c96541c1cf 100644
+index 1f916627f540ee51e290ca0fbb967e985f7da1ba..b0abe3420883143209dbb39859fe33e59fc89cd7 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -1161,8 +1161,10 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -1180,8 +1180,10 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                      this.f.remove(entity1);
                  } else {
                      if (!(entity instanceof EntityHuman)) {

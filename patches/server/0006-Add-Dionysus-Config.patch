@@ -22,7 +22,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index 614779f38fc9d6892a47a15bb28573672a86918c..d720ef33e47d80d7e500ac5b12326d6e5f49cfc6 100644
+index 614779f38fc9d6892a47a15bb28573672a86918c..7ba8e02f446b969ba54f3071b7a944e7918e3fd1 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -169,6 +169,18 @@
@@ -30,9 +30,9 @@ index 614779f38fc9d6892a47a15bb28573672a86918c..d720ef33e47d80d7e500ac5b12326d6e
              <version>3.3.0</version>
          </dependency>
 +        <dependency>
-+            <groupId>me.carleslc.Simple-YAML</groupId>
++            <groupId>com.github.Carleslc.Simple-YAML</groupId>
 +            <artifactId>Simple-Yaml</artifactId>
-+            <version>1.8</version>
++            <version>1.8.3</version>
 +            <scope>compile</scope>
 +            <exclusions>
 +                <exclusion>

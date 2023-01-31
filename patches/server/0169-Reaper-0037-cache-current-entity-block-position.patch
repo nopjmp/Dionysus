@@ -1,0 +1,944 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 13:24:54 +0500
+Subject: [PATCH] (Reaper 0037) Cache-current-entity-block-position
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index bdcf2321521804c984ca134a453186561e63f9ce..72dbd3fdd0e154c2e57f95d2f9869dd918a26c9a 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -130,6 +130,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     public float lastYaw;
+     public float lastPitch;
+     private AxisAlignedBB boundingBox;
++    public BlockPosition blockPos; // Reaper - Cache current block pos
+     public boolean onGround;
+     public boolean positionChanged;
+     public boolean B;
+@@ -216,10 +217,25 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+     // CraftBukkit end
+     public int ttl; // Dionysus
+ 
++    // Reaper start - Cache current block pos
++    void resetBlockPos() {
++        resetBlockPos(locX, locY, locZ);
++    }
++
++    void resetBlockPos(double d0, double d1, double d2) {
++        int blockX = MathHelper.floor(d0);
++        int blockY = MathHelper.floor(d1);
++        int blockZ = MathHelper.floor(d2);
++        if (blockX != this.blockPos.getX() || blockY != this.blockPos.getY() || blockZ != this.blockPos.getZ()) {
++            this.blockPos = new BlockPosition(blockX, blockY, blockZ);
++        }
++    }
++    // Reaper end
+     public Entity(World world) {
+         this.id = Entity.entityCount++;
+         this.passengers = new ObjectArrayList<>(); // Dionysus
+         this.boundingBox = Entity.c;
++        this.blockPos = BlockPosition.ZERO; // Reaper - Cache current block pos
+         this.width = 0.6F;
+         this.length = 1.8F;
+         this.ax = 1;
+@@ -367,6 +383,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+         this.locZ = d2;
+         float f = this.width / 2.0F;
+         float f1 = this.length;
++        resetBlockPos(d0, d1, d2); // Reaper - Cache current block pos
+ 
+         this.a(new AxisAlignedBB(d0 - (double) f, d1, d2 - (double) f, d0 + (double) f, d1 + (double) f1, d2 + (double) f));
+         if (valid) world.entityJoinedWorld(this, false); // CraftBukkit
+@@ -1017,6 +1034,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+         this.locX = (axisalignedbb.a + axisalignedbb.d) / 2.0D;
+         this.locY = axisalignedbb.b;
+         this.locZ = (axisalignedbb.c + axisalignedbb.f) / 2.0D;
++        resetBlockPos(); // Reaper - Cache current block pos
+         if (valid) world.entityJoinedWorld(this, false); // CraftBukkit
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityArrow.java b/src/main/java/net/minecraft/server/EntityArrow.java
+index 8a9e16ad61c92ada45d36ce2b97e55f69aa10850..01dd6f1bb45d141d863890c0d66c243f1965da58 100644
+--- a/src/main/java/net/minecraft/server/EntityArrow.java
++++ b/src/main/java/net/minecraft/server/EntityArrow.java
+@@ -356,6 +356,7 @@ public abstract class EntityArrow extends Entity implements IProjectile {
+             this.locX -= this.motX / (double) f2 * 0.05000000074505806D;
+             this.locY -= this.motY / (double) f2 * 0.05000000074505806D;
+             this.locZ -= this.motZ / (double) f2 * 0.05000000074505806D;
++            resetBlockPos(); // Reaper - Cache current block pos
+             this.a(SoundEffects.u, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+             this.inGround = true;
+             this.shake = 7;
+diff --git a/src/main/java/net/minecraft/server/EntityBat.java b/src/main/java/net/minecraft/server/EntityBat.java
+index bc52fdc8f2ebabfeed91b3cc48b495dbf0d38c01..423f2975d745229069061bd6a1fbdbfaa53fd165 100644
+--- a/src/main/java/net/minecraft/server/EntityBat.java
++++ b/src/main/java/net/minecraft/server/EntityBat.java
+@@ -83,7 +83,7 @@ public class EntityBat extends EntityAmbient {
+ 
+     protected void M() {
+         super.M();
+-        BlockPosition blockposition = new BlockPosition(this);
++        BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+         BlockPosition blockposition1 = blockposition.up();
+ 
+         if (this.isAsleep()) {
+diff --git a/src/main/java/net/minecraft/server/EntityBoat.java b/src/main/java/net/minecraft/server/EntityBoat.java
+index 8996267658531c726381a3894b2081f2dd30aedf..c19e7d4881001236da5742f4c2be88afc922004d 100644
+--- a/src/main/java/net/minecraft/server/EntityBoat.java
++++ b/src/main/java/net/minecraft/server/EntityBoat.java
+@@ -715,7 +715,7 @@ public class EntityBoat extends Entity {
+                 }
+ 
+                 this.fallDistance = 0.0F;
+-            } else if (this.world.getType((new BlockPosition(this)).down()).getMaterial() != Material.WATER && d0 < 0.0D) {
++            } else if (this.world.getType((this.blockPos).down()).getMaterial() != Material.WATER && d0 < 0.0D) { // Reaper - Cache current block pos
+                 this.fallDistance = (float) ((double) this.fallDistance - d0);
+             }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityCreature.java b/src/main/java/net/minecraft/server/EntityCreature.java
+index 9659a45efaf24fe83f0cdc12860fe1c15bff9ed4..2cb70f749452d07b17377f2d32d25d1ace9f6496 100644
+--- a/src/main/java/net/minecraft/server/EntityCreature.java
++++ b/src/main/java/net/minecraft/server/EntityCreature.java
+@@ -35,7 +35,7 @@ public abstract class EntityCreature extends EntityInsentient {
+     }
+ 
+     public boolean df() {
+-        return this.f(new BlockPosition(this));
++        return this.f(this.blockPos); // Reaper - Cache current block pos
+     }
+ 
+     public boolean f(BlockPosition blockposition) {
+diff --git a/src/main/java/net/minecraft/server/EntityEnderCrystal.java b/src/main/java/net/minecraft/server/EntityEnderCrystal.java
+index 9e77fb63340ea0c827fd66a5536835123f97f30f..820a984da4e5eba99f3174b0515c6222d8a3499f 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderCrystal.java
++++ b/src/main/java/net/minecraft/server/EntityEnderCrystal.java
+@@ -41,7 +41,7 @@ public class EntityEnderCrystal extends Entity {
+         this.lastZ = this.locZ;
+         ++this.a;
+         if (!this.world.isClientSide) {
+-            BlockPosition blockposition = new BlockPosition(this);
++            BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+ 
+             if (this.world.worldProvider instanceof WorldProviderTheEnd && this.world.getType(blockposition).getBlock() != Blocks.FIRE) {
+                 // CraftBukkit start
+diff --git a/src/main/java/net/minecraft/server/EntityEnderSignal.java b/src/main/java/net/minecraft/server/EntityEnderSignal.java
+index 2f2f054c6a4daa4c2f12fbdf15cb1212770af8a0..d292ce3f3080edd25f2234c264e0fa502587e25b 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderSignal.java
++++ b/src/main/java/net/minecraft/server/EntityEnderSignal.java
+@@ -114,7 +114,7 @@ public class EntityEnderSignal extends Entity {
+                 if (this.e) {
+                     this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Items.ENDER_EYE)));
+                 } else {
+-                    this.world.triggerEffect(2003, new BlockPosition(this), 0);
++                    this.world.triggerEffect(2003, this.blockPos, 0); // Reaper - Cache current block pos
+                 }
+             }
+         }
+diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
+index 1072f49bf0bf9075e06ec1ebcd8a00ad9ea761ad..8a62f8ecece0b380be807b8fabb74e6a7b4ff176 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderman.java
++++ b/src/main/java/net/minecraft/server/EntityEnderman.java
+@@ -196,8 +196,7 @@ public class EntityEnderman extends EntityMonster {
+ 
+         if (this.world.D() && this.ticksLived >= this.bA + 600) {
+             float f = this.aw();
+-
+-            if (f > 0.5F && this.world.h(new BlockPosition(this)) && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && tryEscape(EndermanEscapeEvent.Reason.RUNAWAY)) { // Paper
++            if (f > 0.5F && this.world.h(this.blockPos) && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && tryEscape(EndermanEscapeEvent.Reason.RUNAWAY)) { // Reaper - Cache current block pos // Paper
+                 this.setGoalTarget((EntityLiving) null);
+                 this.dm();
+             }
+diff --git a/src/main/java/net/minecraft/server/EntityExperienceOrb.java b/src/main/java/net/minecraft/server/EntityExperienceOrb.java
+index becb102c1bf372cc2bcbe7deab08b6d51a0290ff..1821c54d6d5839a226bf6b9b6fe6cd25e09cd88d 100644
+--- a/src/main/java/net/minecraft/server/EntityExperienceOrb.java
++++ b/src/main/java/net/minecraft/server/EntityExperienceOrb.java
+@@ -97,7 +97,7 @@ public class EntityExperienceOrb extends Entity {
+             this.motY -= 0.029999999329447746D;
+         }
+ 
+-        if (this.world.getType(new BlockPosition(this)).getMaterial() == Material.LAVA) {
++        if (this.world.getType(this.blockPos).getMaterial() == Material.LAVA) { // Reaper - Cache current block pos
+             this.motY = 0.20000000298023224D;
+             this.motX = (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
+             this.motZ = (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
+diff --git a/src/main/java/net/minecraft/server/EntityFallingBlock.java b/src/main/java/net/minecraft/server/EntityFallingBlock.java
+index ba943a21f110cd0108f32aff99408a722ba4b3a7..575ef1808fab0158623a7899f23111bf567d6b33 100644
+--- a/src/main/java/net/minecraft/server/EntityFallingBlock.java
++++ b/src/main/java/net/minecraft/server/EntityFallingBlock.java
+@@ -36,7 +36,7 @@ public class EntityFallingBlock extends Entity {
+         this.lastX = d0;
+         this.lastY = d1;
+         this.lastZ = d2;
+-        this.a(new BlockPosition(this));
++        this.a(this.blockPos); // Reaper - Cache current block pos
+     }
+ 
+     public boolean bd() {
+@@ -75,7 +75,7 @@ public class EntityFallingBlock extends Entity {
+             BlockPosition blockposition;
+ 
+             if (this.ticksLived++ == 0) {
+-                blockposition = new BlockPosition(this);
++                blockposition = this.blockPos; // Reaper - Cache current block pos
+                 if (this.world.getType(blockposition).getBlock() == block && !CraftEventFactory.callEntityChangeBlockEvent(this, blockposition, Blocks.AIR, 0).isCancelled()) {
+                     this.world.setAir(blockposition);
+                     this.world.chunkPacketBlockController.updateNearbyBlocks(this.world, blockposition); // Paper - Anti-Xray
+@@ -107,7 +107,7 @@ public class EntityFallingBlock extends Entity {
+             // Paper end
+ 
+             if (!this.world.isClientSide) {
+-                blockposition = new BlockPosition(this);
++                blockposition = this.blockPos; // Reaper - Cache current block pos
+                 boolean flag = this.block.getBlock() == Blocks.dS;
+                 boolean flag1 = flag && this.world.getType(blockposition).getMaterial() == Material.WATER;
+                 double d0 = this.motX * this.motX + this.motY * this.motY + this.motZ * this.motZ;
+diff --git a/src/main/java/net/minecraft/server/EntityFireball.java b/src/main/java/net/minecraft/server/EntityFireball.java
+index 657b3b5ac1d985c7d6b653f512b8f5cbf037cd8f..687a6e6acd9b643078572003d7cefb2b147f364a 100644
+--- a/src/main/java/net/minecraft/server/EntityFireball.java
++++ b/src/main/java/net/minecraft/server/EntityFireball.java
+@@ -59,8 +59,7 @@ public abstract class EntityFireball extends Entity {
+     }
+ 
+     public void B_() {
+-        if (!this.world.isClientSide && (this.shooter != null && this.shooter.dead || !this.world.isLoaded(new BlockPosition(this)))) {
+-            this.die();
++        if (this.shooter != null && this.shooter.dead || !this.world.isLoaded(this.blockPos)) { // Reaper - Remove isClientSide check // Reaper - Cache current block pos            this.die();
+         } else {
+             super.B_();
+             if (this.k()) {
+diff --git a/src/main/java/net/minecraft/server/EntityFishingHook.java b/src/main/java/net/minecraft/server/EntityFishingHook.java
+index 7356fa6a5b024ab8f0034e569732bd95d07be7c6..818933832bfa05c1de18b191af57eaf02beee9dd 100644
+--- a/src/main/java/net/minecraft/server/EntityFishingHook.java
++++ b/src/main/java/net/minecraft/server/EntityFishingHook.java
+@@ -102,7 +102,7 @@ public class EntityFishingHook extends Entity {
+             }
+ 
+             float f = 0.0F;
+-            BlockPosition blockposition = new BlockPosition(this);
++            BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+             IBlockData iblockdata = this.world.getType(blockposition);
+ 
+             if (iblockdata.getMaterial() == Material.WATER) {
+diff --git a/src/main/java/net/minecraft/server/EntityGhast.java b/src/main/java/net/minecraft/server/EntityGhast.java
+index 30ca03977358c997b473b6fb92e2c4ebeb70703a..3f05325ee58dc02f5c2fc444bc867059511b96f8 100644
+--- a/src/main/java/net/minecraft/server/EntityGhast.java
++++ b/src/main/java/net/minecraft/server/EntityGhast.java
+@@ -145,7 +145,7 @@ public class EntityGhast extends EntityFlying implements IMonster {
+ 
+                 ++this.a;
+                 if (this.a == 10) {
+-                    world.a((EntityHuman) null, 1015, new BlockPosition(this.ghast), 0);
++                    world.a((EntityHuman) null, 1015, this.ghast.blockPos, 0); // Reaper - Cache current block pos
+                 }
+ 
+                 if (this.a == 20) {
+@@ -155,7 +155,7 @@ public class EntityGhast extends EntityFlying implements IMonster {
+                     double d3 = entityliving.getBoundingBox().b + (double) (entityliving.length / 2.0F) - (0.5D + this.ghast.locY + (double) (this.ghast.length / 2.0F));
+                     double d4 = entityliving.locZ - (this.ghast.locZ + vec3d.z * 4.0D);
+ 
+-                    world.a((EntityHuman) null, 1016, new BlockPosition(this.ghast), 0);
++                    world.a((EntityHuman) null, 1016, this.ghast.blockPos, 0); // Reaper - Cache current block pos
+                     EntityLargeFireball entitylargefireball = new EntityLargeFireball(world, this.ghast, d2, d3, d4);
+ 
+                     // CraftBukkit - set bukkitYield when setting explosionpower
+@@ -163,6 +163,7 @@ public class EntityGhast extends EntityFlying implements IMonster {
+                     entitylargefireball.locX = this.ghast.locX + vec3d.x * 4.0D;
+                     entitylargefireball.locY = this.ghast.locY + (double) (this.ghast.length / 2.0F) + 0.5D;
+                     entitylargefireball.locZ = this.ghast.locZ + vec3d.z * 4.0D;
++                    entitylargefireball.resetBlockPos(); // Reaper - Cache current block pos
+                     world.addEntity(entitylargefireball);
+                     this.a = -40;
+                 }
+diff --git a/src/main/java/net/minecraft/server/EntityHanging.java b/src/main/java/net/minecraft/server/EntityHanging.java
+index 806497813262decb6e7eea715b2ef73284816699..c8f35b567395dc5bb3cafa1217e852174466dba4 100644
+--- a/src/main/java/net/minecraft/server/EntityHanging.java
++++ b/src/main/java/net/minecraft/server/EntityHanging.java
+@@ -67,6 +67,7 @@ public abstract class EntityHanging extends Entity {
+             entity.locX = d0;
+             entity.locY = d1;
+             entity.locZ = d2;
++            entity.resetBlockPos(); // Reaper - Cache current block pos
+         }
+         double d6 = (double) width;
+         double d7 = (double) height;
+@@ -104,7 +105,7 @@ public abstract class EntityHanging extends Entity {
+             this.d = 0;
+             if (!this.dead && !this.survives()) {
+                 // CraftBukkit start - fire break events
+-                Material material = this.world.getType(new BlockPosition(this)).getMaterial();
++                Material material = this.world.getType(this.blockPos).getMaterial(); // Reaper - Cache current block pos
+                 HangingBreakEvent.RemoveCause cause;
+ 
+                 if (!material.equals(Material.AIR)) {
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 953d88aec19c4c314d87a4bd66f729739cf6365c..0d6cf51c4e9b6fb96cbb2b69c67575e23e43e83c 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -673,7 +673,7 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+         this.setScore(nbttagcompound.getInt("Score"));
+         if (this.sleeping) {
+-            this.bedPosition = new BlockPosition(this);
++            this.bedPosition = this.blockPos; // Reaper - Cache current block pos
+             this.a(true, true, false);
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityIllagerIllusioner.java b/src/main/java/net/minecraft/server/EntityIllagerIllusioner.java
+index ad81bd05932d0ed5c1ee1721737d0ae479455ac1..c439e41458126f629492729c973b4b8ec74a7214 100644
+--- a/src/main/java/net/minecraft/server/EntityIllagerIllusioner.java
++++ b/src/main/java/net/minecraft/server/EntityIllagerIllusioner.java
+@@ -157,7 +157,7 @@ public class EntityIllagerIllusioner extends EntityIllagerWizard implements IRan
+         }
+ 
+         public boolean a() {
+-            return !super.a() ? false : (EntityIllagerIllusioner.this.getGoalTarget() == null ? false : (EntityIllagerIllusioner.this.getGoalTarget().getId() == this.b ? false : EntityIllagerIllusioner.this.world.D(new BlockPosition(EntityIllagerIllusioner.this)).a((float) EnumDifficulty.NORMAL.ordinal())));
++            return !super.a() ? false : (EntityIllagerIllusioner.this.getGoalTarget() == null ? false : (EntityIllagerIllusioner.this.getGoalTarget().getId() == this.b ? false : EntityIllagerIllusioner.this.world.D(EntityIllagerIllusioner.this.blockPos).a((float) EnumDifficulty.NORMAL.ordinal()))); // Reaper - Cache current block pos
+         }
+ 
+         public void c() {
+diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
+index 595bb31dffdcbab943b767886cd8234850dc014e..12c36c98a1a9022ee80f94d8d8d1764a6f9af521 100644
+--- a/src/main/java/net/minecraft/server/EntityInsentient.java
++++ b/src/main/java/net/minecraft/server/EntityInsentient.java
+@@ -751,7 +751,7 @@ public abstract class EntityInsentient extends EntityLiving {
+     }
+ 
+     public boolean P() {
+-        IBlockData iblockdata = this.world.getType((new BlockPosition(this)).down());
++        IBlockData iblockdata = this.world.getType((this.blockPos).down()); // Reaper - Cache current block pos
+ 
+         return iblockdata.a((Entity) this);
+     }
+diff --git a/src/main/java/net/minecraft/server/EntityIronGolem.java b/src/main/java/net/minecraft/server/EntityIronGolem.java
+index 072d20bf4c173a2cc6051c65fe2111e736792772..68c90cd2a620b6c1174329ce97febb2b460254e8 100644
+--- a/src/main/java/net/minecraft/server/EntityIronGolem.java
++++ b/src/main/java/net/minecraft/server/EntityIronGolem.java
+@@ -47,7 +47,7 @@ public class EntityIronGolem extends EntityGolem {
+     protected void M() {
+         if (--this.c <= 0) {
+             this.c = 70 + this.random.nextInt(50);
+-            this.b = this.world.ak().getClosestVillage(new BlockPosition(this), 32);
++            this.b = this.world.ak().getClosestVillage(this.blockPos, 32); // Reaper - Cache current block pos
+             if (this.b == null) {
+                 this.di();
+             } else {
+diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
+index 4fafb4977a40176d88e790924afba8fa9e17867b..d79cb63b9da053371ba7a163d2acf804bb602e56 100644
+--- a/src/main/java/net/minecraft/server/EntityItem.java
++++ b/src/main/java/net/minecraft/server/EntityItem.java
+@@ -98,7 +98,7 @@ public class EntityItem extends Entity implements HopperPusher {
+             boolean flag = (int) this.lastX != (int) this.locX || (int) this.lastY != (int) this.locY || (int) this.lastZ != (int) this.locZ;
+ 
+             if (flag || this.ticksLived % 25 == 0) {
+-                if (this.world.getType(new BlockPosition(this)).getMaterial() == Material.LAVA) {
++                if (this.world.getType(this.blockPos).getMaterial() == Material.LAVA) { // Reaper - Cache current block pos
+                     this.motY = 0.20000000298023224D;
+                     this.motX = (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
+                     this.motZ = (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
+diff --git a/src/main/java/net/minecraft/server/EntityLeash.java b/src/main/java/net/minecraft/server/EntityLeash.java
+index cdd633f72217e830224ee4f5cf13b465f03b0cf2..b2cce3f4e96fc2bb5dd5427c0d26ef3ff46d060e 100644
+--- a/src/main/java/net/minecraft/server/EntityLeash.java
++++ b/src/main/java/net/minecraft/server/EntityLeash.java
+@@ -31,6 +31,7 @@ public class EntityLeash extends EntityHanging {
+         this.locX = (double) this.blockPosition.getX() + 0.5D;
+         this.locY = (double) this.blockPosition.getY() + 0.5D;
+         this.locZ = (double) this.blockPosition.getZ() + 0.5D;
++        resetBlockPos(); // Reaper - Cache current block pos
+         if (valid) world.entityJoinedWorld(this, false); // CraftBukkit
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityLightning.java b/src/main/java/net/minecraft/server/EntityLightning.java
+index acb3408d574ee33f82372ff0b4fbd49fc9defb29..ef8729aa6dc536ed45424770be5c85719cda6156 100644
+--- a/src/main/java/net/minecraft/server/EntityLightning.java
++++ b/src/main/java/net/minecraft/server/EntityLightning.java
+@@ -21,7 +21,7 @@ public class EntityLightning extends EntityWeather {
+         this.a = this.random.nextLong();
+         this.c = this.random.nextInt(3) + 1;
+         this.d = flag;
+-        BlockPosition blockposition = new BlockPosition(this);
++        BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+ 
+         if (!flag && !world.isClientSide && world.getGameRules().getBoolean("doFireTick") && (world.getDifficulty() == EnumDifficulty.NORMAL || world.getDifficulty() == EnumDifficulty.HARD) && world.areChunksLoaded(blockposition, 10)) {
+             if (world.getType(blockposition).getMaterial() == Material.AIR && Blocks.FIRE.canPlace(world, blockposition)) {
+@@ -92,7 +92,7 @@ public class EntityLightning extends EntityWeather {
+                 this.lifeTicks = 1;
+                 if (!this.d && !this.world.isClientSide) {
+                     this.a = this.random.nextLong();
+-                    BlockPosition blockposition = new BlockPosition(this);
++                    BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+ 
+                     if (this.world.getGameRules().getBoolean("doFireTick") && this.world.areChunksLoaded(blockposition, 10) && this.world.getType(blockposition).getMaterial() == Material.AIR && Blocks.FIRE.canPlace(this.world, blockposition)) {
+                         // CraftBukkit start - add "!isEffect"
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index d558f72771c9b7c64d4f2c545e0b5529bd72f718..13776a48b74389801151ef3290ac127c68ef07fa 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -263,7 +263,7 @@ public abstract class EntityLiving extends Entity {
+             }
+ 
+             if (!this.world.isClientSide) {
+-                BlockPosition blockposition = new BlockPosition(this);
++                BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+ 
+                 if (!Objects.equal(this.bF, blockposition)) {
+                     this.bF = blockposition;
+@@ -2592,8 +2592,9 @@ public abstract class EntityLiving extends Entity {
+         this.locX = d0;
+         this.locY = d1;
+         this.locZ = d2;
++        resetBlockPos(); // Reaper - Cache current block pos
+         boolean flag = false;
+-        BlockPosition blockposition = new BlockPosition(this);
++        BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+         World world = this.world;
+         boolean flag1;
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+index fa0dd4798a24a3b91bdee00c0c92f46187af949e..a06922308306b4a18c441843a4dae45645d0fccb 100644
+--- a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
++++ b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+@@ -622,6 +622,7 @@ public abstract class EntityMinecartAbstract extends Entity implements INamableT
+         this.locZ = d2;
+         float f = this.width / 2.0F;
+         float f1 = this.length;
++        resetBlockPos(d0, d1, d2); // Reaper - Cache current block pos
+ 
+         this.a(new AxisAlignedBB(d0 - (double) f, d1, d2 - (double) f, d0 + (double) f, d1 + (double) f1, d2 + (double) f));
+     }
+diff --git a/src/main/java/net/minecraft/server/EntityMinecartMobSpawner.java b/src/main/java/net/minecraft/server/EntityMinecartMobSpawner.java
+index 5dd648e51ad9f7bdbf254ff39b69daf1acc6b51e..f76f3eaf906537433cea7c55b78046b2929412de 100644
+--- a/src/main/java/net/minecraft/server/EntityMinecartMobSpawner.java
++++ b/src/main/java/net/minecraft/server/EntityMinecartMobSpawner.java
+@@ -12,7 +12,7 @@ public class EntityMinecartMobSpawner extends EntityMinecartAbstract {
+         }
+ 
+         public BlockPosition b() {
+-            return new BlockPosition(EntityMinecartMobSpawner.this);
++            return EntityMinecartMobSpawner.this.blockPos; // Reaper - Cache current block pos
+         }
+     };
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityPotion.java b/src/main/java/net/minecraft/server/EntityPotion.java
+index 80d09488e0db1ddb56d8c839570d0fdcb25da162..9fda664376475362d7ff2fbf87fd5cbf8cccb8bf 100644
+--- a/src/main/java/net/minecraft/server/EntityPotion.java
++++ b/src/main/java/net/minecraft/server/EntityPotion.java
+@@ -103,7 +103,7 @@ public class EntityPotion extends EntityProjectile {
+ 
+             int i = potionregistry.c() ? 2007 : 2002;
+ 
+-            this.world.triggerEffect(i, new BlockPosition(this), PotionUtil.c(itemstack));
++            this.world.triggerEffect(i, this.blockPos, PotionUtil.c(itemstack)); // Reaper - Cache current block pos
+             this.die();
+         }
+     }
+diff --git a/src/main/java/net/minecraft/server/EntityRabbit.java b/src/main/java/net/minecraft/server/EntityRabbit.java
+index fb56a290178de9329febfa76bf6f8433c5ea878c..b3d7d27370af26a3d0cc72152cfab4fd8d5eff98 100644
+--- a/src/main/java/net/minecraft/server/EntityRabbit.java
++++ b/src/main/java/net/minecraft/server/EntityRabbit.java
+@@ -316,7 +316,7 @@ public class EntityRabbit extends EntityAnimal {
+     }
+ 
+     private int dw() {
+-        BiomeBase biomebase = this.world.getBiome(new BlockPosition(this));
++        BiomeBase biomebase = this.world.getBiome(this.blockPos); // Reaper - Cache current block pos
+         int i = this.random.nextInt(100);
+ 
+         return biomebase.p() ? (i < 80 ? 1 : 3) : (biomebase instanceof BiomeDesert ? 4 : (i < 50 ? 0 : (i < 90 ? 5 : 2)));
+diff --git a/src/main/java/net/minecraft/server/EntityShulker.java b/src/main/java/net/minecraft/server/EntityShulker.java
+index 0887c24074e072e553fa37a700710bb482f44b0f..b6d8e249c418fc717892b570288a09da09124e8b 100644
+--- a/src/main/java/net/minecraft/server/EntityShulker.java
++++ b/src/main/java/net/minecraft/server/EntityShulker.java
+@@ -141,7 +141,7 @@ public class EntityShulker extends EntityGolem implements IMonster {
+         BlockPosition blockposition = (BlockPosition) ((Optional) this.datawatcher.get(EntityShulker.b)).orNull();
+ 
+         if (blockposition == null && !this.world.isClientSide) {
+-            blockposition = new BlockPosition(this);
++            blockposition = this.blockPos; // Reaper - Cache current block pos
+             this.datawatcher.set(EntityShulker.b, Optional.of(blockposition));
+         }
+ 
+@@ -231,6 +231,7 @@ public class EntityShulker extends EntityGolem implements IMonster {
+             this.locX = (double) blockposition.getX() + 0.5D;
+             this.locY = (double) blockposition.getY();
+             this.locZ = (double) blockposition.getZ() + 0.5D;
++            resetBlockPos(); // Reaper - Cache current block pos
+             if (valid) world.entityJoinedWorld(this, false); // CraftBukkit
+             this.lastX = this.locX;
+             this.lastY = this.locY;
+@@ -322,7 +323,7 @@ public class EntityShulker extends EntityGolem implements IMonster {
+ 
+     protected boolean p() {
+         if (!this.isNoAI() && this.isAlive()) {
+-            BlockPosition blockposition = new BlockPosition(this);
++            BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+ 
+             for (int i = 0; i < 5; ++i) {
+                 BlockPosition blockposition1 = blockposition.a(8 - this.random.nextInt(17), 8 - this.random.nextInt(17), 8 - this.random.nextInt(17));
+diff --git a/src/main/java/net/minecraft/server/EntityShulkerBullet.java b/src/main/java/net/minecraft/server/EntityShulkerBullet.java
+index f019729e91152f4f0befbc1ed1092330435697cf..3e4f932b398a26f24e397d29e371d8261faa1e68 100644
+--- a/src/main/java/net/minecraft/server/EntityShulkerBullet.java
++++ b/src/main/java/net/minecraft/server/EntityShulkerBullet.java
+@@ -37,7 +37,7 @@ public class EntityShulkerBullet extends Entity {
+     public EntityShulkerBullet(World world, EntityLiving entityliving, Entity entity, EnumDirection.EnumAxis enumdirection_enumaxis) {
+         this(world);
+         this.shooter = entityliving;
+-        BlockPosition blockposition = new BlockPosition(entityliving);
++        BlockPosition blockposition = entityliving.blockPos; // Reaper - Cache current block pos
+         double d0 = (double) blockposition.getX() + 0.5D;
+         double d1 = (double) blockposition.getY() + 0.5D;
+         double d2 = (double) blockposition.getZ() + 0.5D;
+@@ -74,7 +74,7 @@ public class EntityShulkerBullet extends Entity {
+         NBTTagCompound nbttagcompound1;
+ 
+         if (this.shooter != null) {
+-            blockposition = new BlockPosition(this.shooter);
++            blockposition = this.shooter.blockPos; // Reaper - Cache current block pos
+             nbttagcompound1 = GameProfileSerializer.a(this.shooter.getUniqueID());
+             nbttagcompound1.setInt("X", blockposition.getX());
+             nbttagcompound1.setInt("Y", blockposition.getY());
+@@ -83,7 +83,7 @@ public class EntityShulkerBullet extends Entity {
+         }
+ 
+         if (this.target != null) {
+-            blockposition = new BlockPosition(this.target);
++            blockposition = this.target.blockPos; // Reaper - Cache current block pos
+             nbttagcompound1 = GameProfileSerializer.a(this.target.getUniqueID());
+             nbttagcompound1.setInt("X", blockposition.getX());
+             nbttagcompound1.setInt("Y", blockposition.getY());
+@@ -137,7 +137,7 @@ public class EntityShulkerBullet extends Entity {
+         BlockPosition blockposition;
+ 
+         if (this.target == null) {
+-            blockposition = (new BlockPosition(this)).down();
++            blockposition = this.blockPos.down(); // Reaper - Cache current block pos
+         } else {
+             d0 = (double) this.target.length * 0.5D;
+             blockposition = new BlockPosition(this.target.locX, this.target.locY + d0, this.target.locZ);
+@@ -149,7 +149,7 @@ public class EntityShulkerBullet extends Entity {
+         EnumDirection enumdirection = null;
+ 
+         if (blockposition.g(this.locX, this.locY, this.locZ) >= 4.0D) {
+-            BlockPosition blockposition1 = new BlockPosition(this);
++            BlockPosition blockposition1 = this.blockPos; // Reaper - Cache current block pos
+             ArrayList arraylist = Lists.newArrayList();
+ 
+             if (enumdirection_enumaxis != EnumDirection.EnumAxis.X) {
+@@ -281,13 +281,13 @@ public class EntityShulkerBullet extends Entity {
+                 }
+ 
+                 if (this.c != null) {
+-                    BlockPosition blockposition = new BlockPosition(this);
++                    BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+                     EnumDirection.EnumAxis enumdirection_enumaxis = this.c.k();
+ 
+                     if (this.world.d(blockposition.shift(this.c), false)) {
+                         this.a(enumdirection_enumaxis);
+                     } else {
+-                        BlockPosition blockposition1 = new BlockPosition(this.target);
++                        BlockPosition blockposition1 = this.target.blockPos; // Reaper - Cache current block pos
+ 
+                         if (enumdirection_enumaxis == EnumDirection.EnumAxis.X && blockposition.getX() == blockposition1.getX() || enumdirection_enumaxis == EnumDirection.EnumAxis.Z && blockposition.getZ() == blockposition1.getZ() || enumdirection_enumaxis == EnumDirection.EnumAxis.Y && blockposition.getY() == blockposition1.getY()) {
+                             this.a(enumdirection_enumaxis);
+diff --git a/src/main/java/net/minecraft/server/EntitySilverfish.java b/src/main/java/net/minecraft/server/EntitySilverfish.java
+index 57552c522179a146c026b7863c236be43563ec85..de00d67e6987ee85105a485b9f302ef060720969 100644
+--- a/src/main/java/net/minecraft/server/EntitySilverfish.java
++++ b/src/main/java/net/minecraft/server/EntitySilverfish.java
+@@ -195,7 +195,7 @@ public class EntitySilverfish extends EntityMonster {
+             if (this.b <= 0) {
+                 World world = this.silverfish.world;
+                 Random random = this.silverfish.getRandom();
+-                BlockPosition blockposition = new BlockPosition(this.silverfish);
++                BlockPosition blockposition = this.silverfish.blockPos; // Reaper - Cache current block pos
+ 
+                 for (int i = 0; i <= 5 && i >= -5; i = (i <= 0 ? 1 : 0) - i) {
+                     for (int j = 0; j <= 10 && j >= -10; j = (j <= 0 ? 1 : 0) - j) {
+diff --git a/src/main/java/net/minecraft/server/EntitySlime.java b/src/main/java/net/minecraft/server/EntitySlime.java
+index 3d3a9ca04cffc7b1106b257f1e608c9b2c9897ee..0db1a40752f22fc73c244cb85b5b7abbf62d4851 100644
+--- a/src/main/java/net/minecraft/server/EntitySlime.java
++++ b/src/main/java/net/minecraft/server/EntitySlime.java
+@@ -247,8 +247,7 @@ public class EntitySlime extends EntityInsentient implements IMonster {
+         } else {
+             if (this.world.getDifficulty() != EnumDifficulty.PEACEFUL) {
+                 BiomeBase biomebase = this.world.getBiome(blockposition);
+-
+-                if (biomebase == Biomes.h && this.locY > 50.0D && this.locY < 70.0D && this.random.nextFloat() < 0.5F && this.random.nextFloat() < this.world.G() && this.world.getLightLevel(new BlockPosition(this)) <= this.random.nextInt(8)) {
++                if (biomebase == Biomes.h && this.locY > 50.0D && this.locY < 70.0D && this.random.nextFloat() < 0.5F && this.random.nextFloat() < this.world.G() && this.world.getLightLevel(this.blockPos) <= this.random.nextInt(8)) { // Reaper - Cache current block pos
+                     return super.P();
+                 }
+                 boolean isSlimeChunk = world.paperConfig.allChunksAreSlimeChunks || chunk.a(world.spigotConfig.slimeSeed).nextInt(10) == 0; // Spigot // Paper
+diff --git a/src/main/java/net/minecraft/server/EntityThrownExpBottle.java b/src/main/java/net/minecraft/server/EntityThrownExpBottle.java
+index e14f614f59eaa9e4d78a5adbfab7d087d7a52469..923a0f3c1643fcf6426d2591fe148bb8b787c0aa 100644
+--- a/src/main/java/net/minecraft/server/EntityThrownExpBottle.java
++++ b/src/main/java/net/minecraft/server/EntityThrownExpBottle.java
+@@ -32,7 +32,7 @@ public class EntityThrownExpBottle extends EntityProjectile {
+             org.bukkit.event.entity.ExpBottleEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callExpBottleEvent(this, i);
+             i = event.getExperience();
+             if (event.getShowEffect()) {
+-                this.world.triggerEffect(2002, new BlockPosition(this), PotionUtil.a(Potions.b));
++                this.world.triggerEffect(2002, this.blockPos, PotionUtil.a(Potions.b)); // Reaper - Cache current block pos
+             }
+             // CraftBukkit end
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index c60b969f00d3ac569f01b622ce08bc470a2aa2ea..0694aa9dc782e9d7410d0cdd90bae2ceaaec85b0 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -420,7 +420,7 @@ public class EntityTrackerEntry {
+                         EntityHuman entityhuman = (EntityHuman) this.tracker;
+ 
+                         if (entityhuman.isSleeping()) {
+-                            entityplayer.playerConnection.sendPacket(new PacketPlayOutBed(entityhuman, new BlockPosition(this.tracker)));
++                            entityplayer.playerConnection.sendPacket(new PacketPlayOutBed(entityhuman, this.tracker.blockPos)); // Reaper - Cache current block pos
+                         }
+                     }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityVex.java b/src/main/java/net/minecraft/server/EntityVex.java
+index 673c3ff3c60724da8bef377a92dc45a9622d8ece..59f0fa5910020216d03fcd473bee0313aa4b406e 100644
+--- a/src/main/java/net/minecraft/server/EntityVex.java
++++ b/src/main/java/net/minecraft/server/EntityVex.java
+@@ -207,7 +207,7 @@ public class EntityVex extends EntityMonster {
+             BlockPosition blockposition = EntityVex.this.dm();
+ 
+             if (blockposition == null) {
+-                blockposition = new BlockPosition(EntityVex.this);
++                blockposition = EntityVex.this.blockPos; // Reaper - Cache current block pos = new BlockPosition(EntityVex.this);
+             }
+ 
+             for (int i = 0; i < 3; ++i) {
+diff --git a/src/main/java/net/minecraft/server/EntityVillager.java b/src/main/java/net/minecraft/server/EntityVillager.java
+index a9c4ab10df7113754230b20473f24acfe092c358..d3377a9b56d554e661ee9fe7548a25f327d41e6f 100644
+--- a/src/main/java/net/minecraft/server/EntityVillager.java
++++ b/src/main/java/net/minecraft/server/EntityVillager.java
+@@ -115,7 +115,7 @@ public class EntityVillager extends EntityAgeable implements NPC, IMerchant {
+ 
+     protected void M() {
+         if (--this.profession <= 0) {
+-            BlockPosition blockposition = new BlockPosition(this);
++            BlockPosition blockposition = this.blockPos; // Reaper - Cache current block pos
+ 
+             this.world.ak().a(blockposition);
+             this.profession = 70 + this.random.nextInt(50);
+@@ -516,7 +516,7 @@ public class EntityVillager extends EntityAgeable implements NPC, IMerchant {
+     }
+ 
+     public BlockPosition v_() {
+-        return new BlockPosition(this);
++        return this.blockPos; // Reaper - Cache current block pos
+     }
+ 
+     public IChatBaseComponent getScoreboardDisplayName() {
+@@ -626,7 +626,7 @@ public class EntityVillager extends EntityAgeable implements NPC, IMerchant {
+     public EntityVillager b(EntityAgeable entityageable) {
+         EntityVillager entityvillager = new EntityVillager(this.world);
+ 
+-        entityvillager.prepare(this.world.D(new BlockPosition(entityvillager)), (GroupDataEntity) null);
++        entityvillager.prepare(this.world.D(entityvillager.blockPos), (GroupDataEntity) null); // Reaper - Cache current block pos
+         return entityvillager;
+     }
+ 
+@@ -645,7 +645,7 @@ public class EntityVillager extends EntityAgeable implements NPC, IMerchant {
+             // Paper end
+ 
+             entitywitch.setPositionRotation(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
+-            entitywitch.prepare(this.world.D(new BlockPosition(entitywitch)), (GroupDataEntity) null);
++            entitywitch.prepare(this.world.D(entitywitch.blockPos), (GroupDataEntity) null); // Reaper - Cache current block pos
+             entitywitch.setNoAI(this.isNoAI());
+             if (this.hasCustomName()) {
+                 entitywitch.setCustomName(this.getCustomName());
+diff --git a/src/main/java/net/minecraft/server/EntityWither.java b/src/main/java/net/minecraft/server/EntityWither.java
+index 416fa8253d593a52b02255226a6364d6c7bac1e9..f6ef19f2a10f04f2a7e468ca942e2e4f66b46601 100644
+--- a/src/main/java/net/minecraft/server/EntityWither.java
++++ b/src/main/java/net/minecraft/server/EntityWither.java
+@@ -341,7 +341,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+                     }
+ 
+                     if (flag) {
+-                        this.world.a((EntityHuman) null, 1022, new BlockPosition(this), 0);
++                        this.world.a((EntityHuman) null, 1022, this.blockPos, 0); // Reaper - Cache current block pos
+                     }
+                 }
+             }
+@@ -420,7 +420,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+     }
+ 
+     private void a(int i, double d0, double d1, double d2, boolean flag) {
+-        this.world.a((EntityHuman) null, 1024, new BlockPosition(this), 0);
++        this.world.a(null, 1024, this.blockPos, 0); // Reaper - Cache current block pos
+         double d3 = this.n(i);
+         double d4 = this.o(i);
+         double d5 = this.p(i);
+@@ -436,6 +436,7 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+         entitywitherskull.locY = d4;
+         entitywitherskull.locX = d3;
+         entitywitherskull.locZ = d5;
++        resetBlockPos(); // Reaper - Cache current block pos
+         this.world.addEntity(entitywitherskull);
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
+index 6111ca0b26c2a88bd56629244712fe7f7cce0db8..17021a9c795955e07ff159d8c14edf445eacd631 100644
+--- a/src/main/java/net/minecraft/server/EntityZombie.java
++++ b/src/main/java/net/minecraft/server/EntityZombie.java
+@@ -183,7 +183,7 @@ public class EntityZombie extends EntityMonster {
+                         if (!this.world.isPlayerNearby((double) i1, (double) j1, (double) k1, 7.0D) && this.world.a(entityzombie.getBoundingBox(), (Entity) entityzombie) && this.world.getCubes(entityzombie, entityzombie.getBoundingBox()).isEmpty() && !this.world.containsLiquid(entityzombie.getBoundingBox())) {
+                             this.world.addEntity(entityzombie, CreatureSpawnEvent.SpawnReason.REINFORCEMENTS); // CraftBukkit
+                             entityzombie.setGoalTarget(entityliving, EntityTargetEvent.TargetReason.REINFORCEMENT_TARGET, true);
+-                            entityzombie.prepare(this.world.D(new BlockPosition(entityzombie)), (GroupDataEntity) null);
++                            entityzombie.prepare(this.world.D(entityzombie.blockPos), (GroupDataEntity) null); // Reaper - Cache current block pos
+                             this.getAttributeInstance(EntityZombie.a).b(new AttributeModifier("Zombie reinforcement caller charge", -0.05000000074505806D, 0));
+                             entityzombie.getAttributeInstance(EntityZombie.a).b(new AttributeModifier("Zombie reinforcement callee charge", -0.05000000074505806D, 0));
+                             break;
+@@ -202,7 +202,7 @@ public class EntityZombie extends EntityMonster {
+         boolean flag = super.B(entity);
+ 
+         if (flag) {
+-            float f = this.world.D(new BlockPosition(this)).b();
++            float f = this.world.D(this.blockPos).b(); // Reaper - Cache current block pos
+ 
+             if (this.getItemInMainHand().isEmpty() && this.isBurning() && this.random.nextFloat() < f * 0.3F) {
+                 // CraftBukkit start
+@@ -296,7 +296,7 @@ public class EntityZombie extends EntityMonster {
+ 
+             entityzombievillager.u(entityvillager);
+             this.world.kill(entityvillager);
+-            entityzombievillager.prepare(this.world.D(new BlockPosition(entityzombievillager)), new EntityZombie.GroupDataZombie(false, null));
++            entityzombievillager.prepare(this.world.D(entityzombievillager.blockPos), new EntityZombie.GroupDataZombie(false, null)); // Reaper - Cache current block pos
+             entityzombievillager.setProfession(entityvillager.getProfession());
+             entityzombievillager.setBaby(entityvillager.isBaby());
+             entityzombievillager.setNoAI(entityvillager.isNoAI());
+@@ -306,7 +306,7 @@ public class EntityZombie extends EntityMonster {
+             }
+ 
+             this.world.addEntity(entityzombievillager, CreatureSpawnEvent.SpawnReason.INFECTION); // CraftBukkit - add SpawnReason
+-            this.world.a((EntityHuman) null, 1026, new BlockPosition(this), 0);
++            this.world.a((EntityHuman) null, 1026, this.blockPos, 0); // Reaper - Cache current block pos
+         }
+ 
+     }
+diff --git a/src/main/java/net/minecraft/server/EntityZombieVillager.java b/src/main/java/net/minecraft/server/EntityZombieVillager.java
+index dde846c616eb74d52dd87c3c75ae2b0c4f8c0cb1..ddd845cea1fc3e55e946cf11e409636d97f2868a 100644
+--- a/src/main/java/net/minecraft/server/EntityZombieVillager.java
++++ b/src/main/java/net/minecraft/server/EntityZombieVillager.java
+@@ -116,7 +116,7 @@ public class EntityZombieVillager extends EntityZombie {
+ 
+         entityvillager.u(this);
+         entityvillager.setProfession(this.getProfession());
+-        entityvillager.a(this.world.D(new BlockPosition(entityvillager)), (GroupDataEntity) null, false);
++        entityvillager.a(this.world.D(entityvillager.blockPos), (GroupDataEntity) null, false); // Reaper - Cache current block pos
+         entityvillager.dp();
+         if (this.isBaby()) {
+             entityvillager.setAgeRaw(-24000);
+diff --git a/src/main/java/net/minecraft/server/ItemMonsterEgg.java b/src/main/java/net/minecraft/server/ItemMonsterEgg.java
+index 5a08f6b4e10f064d572bc35bf7f3750d98b096cc..febb70def54cf8410f9be2deea546dc9c5551a56 100644
+--- a/src/main/java/net/minecraft/server/ItemMonsterEgg.java
++++ b/src/main/java/net/minecraft/server/ItemMonsterEgg.java
+@@ -175,7 +175,7 @@ public class ItemMonsterEgg extends Item {
+                     entity.setPositionRotation(d0, d1, d2, MathHelper.g(world.random.nextFloat() * 360.0F), 0.0F);
+                     entityinsentient.aP = entityinsentient.yaw;
+                     entityinsentient.aN = entityinsentient.yaw;
+-                    entityinsentient.prepare(world.D(new BlockPosition(entityinsentient)), (GroupDataEntity) null);
++                    entityinsentient.prepare(world.D(entityinsentient.blockPos), (GroupDataEntity) null); // Reaper - Cache current block pos
+                     // CraftBukkit start - don't return an entity when CreatureSpawnEvent is canceled
+                     if (!world.addEntity(entity, spawnReason)) {
+                         entity = null;
+diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+index 6c5d88c86a52a6e15b6255bf79a8ff503ede1e37..1cb7fec6dd815b8aee15da8052a260b9c831c13e 100644
+--- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
++++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+@@ -134,7 +134,7 @@ public abstract class MobSpawnerAbstract {
+                     entity.setPositionRotation(entity.locX, entity.locY, entity.locZ, world.random.nextFloat() * 360.0F, 0.0F);
+                     if (entityinsentient == null || entityinsentient.P() && entityinsentient.canSpawn()) {
+                         if (this.spawnData.b().d() == 1 && this.spawnData.b().hasKeyOfType("id", 8) && entity instanceof EntityInsentient) {
+-                            ((EntityInsentient) entity).prepare(world.D(new BlockPosition(entity)), (GroupDataEntity) null);
++                            ((EntityInsentient) entity).prepare(world.D(entity.blockPos), (GroupDataEntity) null); // Reaper - Cache current block pos
+                         }
+                         entity.spawnedViaMobSpawner = true; // Paper
+                         // Spigot Start
+diff --git a/src/main/java/net/minecraft/server/NavigationAbstract.java b/src/main/java/net/minecraft/server/NavigationAbstract.java
+index 935b2e81e5fe67bf03cd006630370599ca0114aa..32ff5abd38d92d3ce0b4ba7aa67af8a1078e10f6 100644
+--- a/src/main/java/net/minecraft/server/NavigationAbstract.java
++++ b/src/main/java/net/minecraft/server/NavigationAbstract.java
+@@ -80,7 +80,7 @@ public abstract class NavigationAbstract {
+             float f = this.i();
+ 
+             this.b.methodProfiler.a("pathfind");
+-            BlockPosition blockposition1 = new BlockPosition(this.a);
++            BlockPosition blockposition1 = this.a.blockPos; // Reaper - Cache current block pos
+             int i = (int) (f + 8.0F);
+             ChunkCache chunkcache = new ChunkCache(this.b, blockposition1.a(-i, -i, -i), blockposition1.a(i, i, i), 0);
+             PathEntity pathentity = this.r.a(chunkcache, this.a, this.q, f);
+@@ -95,7 +95,7 @@ public abstract class NavigationAbstract {
+         if (!this.b()) {
+             return null;
+         } else {
+-            BlockPosition blockposition = new BlockPosition(entity);
++            BlockPosition blockposition = entity.blockPos; // Reaper - Cache current block pos
+             if (!getEntity().getWorld().getWorldBorder().isInBounds(blockposition)) return null; // Paper - don't path out of world border
+ 
+             if (this.c != null && !this.c.b() && blockposition.equals(this.q)) {
+@@ -106,7 +106,7 @@ public abstract class NavigationAbstract {
+                 float f = this.i();
+ 
+                 this.b.methodProfiler.a("pathfind");
+-                BlockPosition blockposition1 = (new BlockPosition(this.a)).up();
++                BlockPosition blockposition1 = (this.a.blockPos).up(); // Reaper - Cache current block pos
+                 int i = (int) (f + 16.0F);
+                 ChunkCache chunkcache = new ChunkCache(this.b, blockposition1.a(-i, -i, -i), blockposition1.a(i, i, i), 0);
+                 PathEntity pathentity = this.r.a(chunkcache, this.a, entity, f);
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java b/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java
+index a360b60b9f5e74648740f0defafa912419378668..dba09f2f266c3037a23bf1bbc8920e58540e1bdc 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalGotoTarget.java
+@@ -69,7 +69,7 @@ public abstract class PathfinderGoalGotoTarget extends PathfinderGoal {
+     private boolean i() {
+         int i = this.h;
+         boolean flag = true;
+-        BlockPosition blockposition = new BlockPosition(this.c);
++        BlockPosition blockposition = this.c.blockPos; // Reaper - Cache current block pos
+ 
+         for (int j = 0; j <= 1; j = j > 0 ? -j : 1 - j) {
+             for (int k = 0; k < i; ++k) {
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalHorseTrap.java b/src/main/java/net/minecraft/server/PathfinderGoalHorseTrap.java
+index cfe493307f9ecd18c5a9f1cee3ff7112d5c2a59d..7d051691ab5297a504acf9a428dc93907056373c 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalHorseTrap.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalHorseTrap.java
+@@ -13,7 +13,7 @@ public class PathfinderGoalHorseTrap extends PathfinderGoal {
+     }
+ 
+     public void e() {
+-        DifficultyDamageScaler difficultydamagescaler = this.a.world.D(new BlockPosition(this.a));
++        DifficultyDamageScaler difficultydamagescaler = this.a.world.D(this.a.blockPos); // Reaper - Cache current block pos
+ 
+         this.a.p(false);
+         this.a.setTamed(true);
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalMakeLove.java b/src/main/java/net/minecraft/server/PathfinderGoalMakeLove.java
+index c2221106e4ad37c78540f2472246f811a6333782..1135f0aeaaf5a8fce4ae536ded28e6d109abe014 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalMakeLove.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalMakeLove.java
+@@ -20,7 +20,7 @@ public class PathfinderGoalMakeLove extends PathfinderGoal {
+         } else if (this.b.getRandom().nextInt(500) != 0) {
+             return false;
+         } else {
+-            this.a = this.d.ak().getClosestVillage(new BlockPosition(this.b), 0);
++            this.a = this.d.ak().getClosestVillage(this.b.blockPos, 0); // Reaper - Cache current block pos
+             if (this.a == null) {
+                 return false;
+             } else if (this.f() && this.b.r(true)) {
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalPanic.java b/src/main/java/net/minecraft/server/PathfinderGoalPanic.java
+index 29c1bc7632ebb327374d30b992896f41c62a1627..47cafb896956ed4df0cb8e6a795e9f53585e5df3 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalPanic.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalPanic.java
+@@ -64,7 +64,7 @@ public class PathfinderGoalPanic extends PathfinderGoal {
+ 
+     @Nullable
+     private BlockPosition a(World world, Entity entity, int i, int j) {
+-        BlockPosition blockposition = new BlockPosition(entity);
++        BlockPosition blockposition = new BlockPosition(entity.blockPos); // Reaper - Cache current block pos
+         int k = blockposition.getX();
+         int l = blockposition.getY();
+         int i1 = blockposition.getZ();
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalTarget.java b/src/main/java/net/minecraft/server/PathfinderGoalTarget.java
+index ba8c1480bc83f8996c59056649fedd169f7f7daf..ba07493ce61ff95e609f46c6b9cd4217dcd0c9c4 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalTarget.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalTarget.java
+@@ -115,7 +115,7 @@ public abstract class PathfinderGoalTarget extends PathfinderGoal {
+     protected boolean a(@Nullable EntityLiving entityliving, boolean flag) {
+         if (!a(this.e, entityliving, flag, this.f)) {
+             return false;
+-        } else if (!this.e.f(new BlockPosition(entityliving))) {
++        } else if (!this.e.f(entityliving.blockPos)) { // Reaper - Cache current block pos
+             return false;
+         } else {
+             if (this.a) {
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 897a49eda09df4654ea31808907cb60c8fa94f77..f5624e7dc1d071f21072ea3e100e44822d7e6b29 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -142,6 +142,7 @@ public abstract class PlayerList {
+         entityplayer.yaw = newLoc.getYaw();
+         entityplayer.pitch = newLoc.getPitch();
+         entityplayer.dimension = ((CraftWorld) newLoc.getWorld()).getHandle().dimension;
++        entityplayer.resetBlockPos(); // Reaper - Cache current block pos
+         // Paper end
+ 
+         entityplayer.spawnIn(this.server.getWorldServer(entityplayer.dimension));
+diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
+index d3390faf9d55a760eb9347c87c6e6e3167e26eca..c998ef5d983796712713c8b63664003439adcf68 100644
+--- a/src/main/java/net/minecraft/server/SpawnerCreature.java
++++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
+@@ -246,7 +246,7 @@ public final class SpawnerCreature {
+ 
+                                                         entityinsentient.setPositionRotation(f, j2, f1, worldserver.random.nextFloat() * 360.0F, 0.0F);
+                                                         if (entityinsentient.P() && entityinsentient.canSpawn()) {
+-                                                            groupdataentity = entityinsentient.prepare(worldserver.D(new BlockPosition(entityinsentient)), groupdataentity);
++                                                            groupdataentity = entityinsentient.prepare(worldserver.D(entityinsentient.blockPos), groupdataentity); // Reaper - Cache current block pos
+                                                             if (entityinsentient.canSpawn()) {
+                                                                 // CraftBukkit start
+                                                                 if (worldserver.addEntity(entityinsentient, SpawnReason.NATURAL)) {
+@@ -358,7 +358,7 @@ public final class SpawnerCreature {
+ 
+                             entityinsentient.setPositionRotation((double) ((float) j1 + 0.5F), (double) blockposition.getY(), (double) ((float) k1 + 0.5F), random.nextFloat() * 360.0F, 0.0F);
+                             // CraftBukkit start - Added a reason for spawning this creature, moved entityinsentient.prepare(groupdataentity) up
+-                            groupdataentity = entityinsentient.prepare(world.D(new BlockPosition(entityinsentient)), groupdataentity);
++                            groupdataentity = entityinsentient.prepare(world.D(entityinsentient.blockPos), groupdataentity); // Reaper - Cache current block pos
+                             world.addEntity(entityinsentient, SpawnReason.CHUNK_GEN);
+                             // CraftBukkit end
+                             flag = true;
+diff --git a/src/main/java/net/minecraft/server/VillageSiege.java b/src/main/java/net/minecraft/server/VillageSiege.java
+index 6fce3015f4032c1d609cd87906e01c0098fd62f9..ff2b55dab0e4c3fb9ae04cfac8b75397b101aff9 100644
+--- a/src/main/java/net/minecraft/server/VillageSiege.java
++++ b/src/main/java/net/minecraft/server/VillageSiege.java
+@@ -73,7 +73,7 @@ public class VillageSiege {
+             EntityHuman entityhuman = (EntityHuman) iterator.next();
+ 
+             if (!entityhuman.isSpectator()) {
+-                this.f = this.a.ak().getClosestVillage(new BlockPosition(entityhuman), 1);
++                this.f = this.a.ak().getClosestVillage(entityhuman.blockPos, 1); // Reaper - Cache current block pos
+                 if (this.f != null && this.f.c() >= 10 && this.f.d() >= 20 && this.f.e() >= 20) {
+                     BlockPosition blockposition = this.f.a();
+                     float f = (float) this.f.b();
+@@ -135,7 +135,7 @@ public class VillageSiege {
+ 
+             try {
+                 entityzombie = new EntityZombie(this.a);
+-                entityzombie.prepare(this.a.D(new BlockPosition(entityzombie)), (GroupDataEntity) null);
++                entityzombie.prepare(this.a.D(entityzombie.blockPos), (GroupDataEntity) null); // Reaper - Cache current block pos
+             } catch (Exception exception) {
+                 exception.printStackTrace();
+                 ServerInternalException.reportInternalException(exception); // Paper
+diff --git a/src/main/java/net/minecraft/server/WorldGenVillagePieces.java b/src/main/java/net/minecraft/server/WorldGenVillagePieces.java
+index 9b281b6a9634081e0907b6fc2991cb92389a2a11..c22098cac2f4d5fab43c0186ce73568dce47765d 100644
+--- a/src/main/java/net/minecraft/server/WorldGenVillagePieces.java
++++ b/src/main/java/net/minecraft/server/WorldGenVillagePieces.java
+@@ -1669,7 +1669,7 @@ public class WorldGenVillagePieces {
+                         EntityZombieVillager entityzombievillager = new EntityZombieVillager(world);
+ 
+                         entityzombievillager.setPositionRotation((double) j1 + 0.5D, (double) k1, (double) l1 + 0.5D, 0.0F, 0.0F);
+-                        entityzombievillager.prepare(world.D(new BlockPosition(entityzombievillager)), (GroupDataEntity) null);
++                        entityzombievillager.prepare(world.D(entityzombievillager.blockPos), (GroupDataEntity) null); // Reaper - Cache current block pos
+                         entityzombievillager.setProfession(this.c(i1, 0));
+                         entityzombievillager.cW();
+                         world.addEntity(entityzombievillager, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CHUNK_GEN); // CraftBukkit - add SpawnReason
+@@ -1678,7 +1678,7 @@ public class WorldGenVillagePieces {
+ 
+                         entityvillager.setPositionRotation((double) j1 + 0.5D, (double) k1, (double) l1 + 0.5D, 0.0F, 0.0F);
+                         entityvillager.setProfession(this.c(i1, world.random.nextInt(6)));
+-                        entityvillager.a(world.D(new BlockPosition(entityvillager)), (GroupDataEntity) null, false);
++                        entityvillager.a(world.D(entityvillager.blockPos), (GroupDataEntity) null, false); // Reaper - Cache current block pos
+                         world.addEntity(entityvillager, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CHUNK_GEN); // CraftBukkit - add SpawnReason
+                     }
+                 }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index 6274566dd3101afef4f37073a16b05c90065e835..4b2a3b16aaa7a84a28d8d9d73374c5fc35085b5f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -1284,7 +1284,7 @@ public class CraftWorld implements World {
+         Preconditions.checkArgument(entity != null, "Cannot spawn null entity");
+ 
+         if (entity instanceof EntityInsentient) {
+-            ((EntityInsentient) entity).prepare(getHandle().D(new BlockPosition(entity)), (GroupDataEntity) null);
++            ((EntityInsentient) entity).prepare(getHandle().D(entity.blockPos), (GroupDataEntity) null); // Reaper - Cache current block pos
+         }
+ 
+         if (function != null) {

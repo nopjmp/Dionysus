@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:16:37 +0500
+Subject: [PATCH] (Reaper 0063) Fix-oversized-bounding-box-on-dismount
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 080ca7cb800612ab996b998e7cd27b228bb7121e..b128b87c98c47d583e88a868b4cfd19054ef5eac 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -388,6 +388,11 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+             if (this.bJ(true) != null && !this.bJ().dead) {
+                 axisalignedbb = this.getBoundingBox().b(this.bJ().getBoundingBox()).grow(1.0D, 0.0D, 1.0D);
++                // Reaper start - Fix crash
++                if (axisalignedbb.d - axisalignedbb.a > 64 || axisalignedbb.e - axisalignedbb.b > 64 || axisalignedbb.f - axisalignedbb.c > 64) {
++                    MinecraftServer.LOGGER.warn("Bounding box of the player " + getName() + " is oversized: " + axisalignedbb);
++                    axisalignedbb = this.getBoundingBox().grow(1.0D, 0.5D, 1.0D);
++                } // Reaper end
+             } else {
+                 axisalignedbb = this.getBoundingBox().grow(1.0D, 0.5D, 1.0D);
+             }

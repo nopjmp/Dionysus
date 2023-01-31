@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:03:00 +0500
+Subject: [PATCH] (Reaper 0048) Fix-tile-entity-crash
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index d8c3697c59ef8df664e12769581700b164ebfdee..6e3942ec2d80a1ed8dbdfad0bae415c78da5355a 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -767,7 +767,15 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                 NextTickListEntry nextticklistentry;
+ 
+                 for (int j = 0; j < i; ++j) {
++                    // Reaper start - Fix TileEntity ticking crash
++                    try {
+                     nextticklistentry = (NextTickListEntry) this.nextTickList.first();
++                    } catch (java.util.NoSuchElementException e) {
++                        LogManager.getLogger().warn("NextTickList got an inconsistency in the world " + worldData.getName() + ", fixing it.");
++                        nextTickList.fixInconsistence();
++                        break;
++                    }
++                    // Reaper end
+                     if (!flag && nextticklistentry.b > this.worldData.getTime()) {
+                         break;
+                     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java b/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java
+index cd864c404747f8f77417e67ca319b3daa04bae59..e386e387873c816625d8fb145b0e61d6ff48026b 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java
+@@ -113,5 +113,6 @@ public class HashTreeSet<V> implements Set<V> {
+     public V first() {
+         return tree.first();
+     }
++    public void fixInconsistence() { hash.removeIf(entry -> !tree.contains(entry)); } // Reaper - Fix TileEntity ticking crash
+ 
+ }

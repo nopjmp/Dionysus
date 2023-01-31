@@ -82,6 +82,7 @@ import PacketDecompressor
 import PacketEncrypter
 import PacketDecrypter
 import StatisticWrapper
+import BlockSign
 
 ########################################################
 ########################################################

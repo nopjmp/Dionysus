@@ -5,10 +5,10 @@ Subject: [PATCH] Backport Purpur's Alternative Keepalive Handling
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index e74a8b2fe6ce80d4bb27a4226184f2c4f105f177..f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7 100644
+index 86d3ff8e04b9e410d6c3de09786f685d2a1e5412..314f09e1c108035b7bbcbd048e5690b630027ef5 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -394,4 +394,9 @@ public class DionysusConfig {
+@@ -402,4 +402,9 @@ public class DionysusConfig {
      private static void disableMojangServerCommunicationInOfflineMode() {
          disableMojangServerCommunicationInOfflineMode = getBoolean("disable-mojang-server-communication-in-offline-mode", false);
      }

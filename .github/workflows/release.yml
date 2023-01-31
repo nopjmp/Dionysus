@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'dev'
+    paths:
+      - '**.patch'
 
 jobs:
   build-release:
@@ -47,29 +51,40 @@ jobs:
           name: Dionysus-JDK17
           path: dionysus-paperclip.jar
 
-      - name: Extract release notes
-        id: extract_release_notes
-        uses: ffurrer2/extract-release-notes@v1
+      - name: Publish Release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: 'latest'
+          prerelease: true
+          title: "Dionysus"
+          files: |
+            LICENSE.txt
+            dionysus-paperclip.jar
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: ${{ steps.extract_release_notes.outputs.release_notes }}
-          draft: false
-          prerelease: false
-      
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dionysus-paperclip.jar
-          asset_name: dionysus-paperclip.jar
-          asset_content_type: application/zip
+#      - name: Extract release notes
+#        id: extract_release_notes
+#        uses: ffurrer2/extract-release-notes@v1
+#
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: Release ${{ github.ref }}
+#          body: ${{ steps.extract_release_notes.outputs.release_notes }}
+#          draft: false
+#          prerelease: false
+#
+#      - name: Upload Release Asset
+#        id: upload-release-asset
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: dionysus-paperclip.jar
+#          asset_name: dionysus-paperclip.jar
+#          asset_content_type: application/zip

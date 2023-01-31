@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruviolence@users.noreply.github.com>
+Date: Tue, 15 Nov 2022 12:22:03 +1000
+Subject: [PATCH] (Reaper 0025) Disable sign commands
+
+Co-authored-by: RemainingToast <remainingtoast@gmail.com>
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index a72084f3ab19ba739dd0fac8a66889e8aaf5c98d..944e7b1a1e6855a07aa223af2dc16d789b0ff55f 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -450,4 +450,9 @@ public class DionysusConfig {
+     private static void disableSavingFireworksArrows() {
+         disableSavingFireworksArrows = getBoolean("disable-saving-fireworks-arrows", disableSavingFireworksArrows, "Whether saving of fireworks and arrows should be disabled.");
+     }
++
++    public static boolean disableSignCommands = true;
++    private static void disableSignCommands() {
++        disableSignCommands = getBoolean("disable-sign-commands", disableSignCommands, "Disables the vanilla feature, but protects against exploits and improves performance.");
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockSign.java b/src/main/java/net/minecraft/server/BlockSign.java
+index 468186c56368c04a6536264c8ca5926ad2dbe565..fc225c5eb53c49efe18627c9a406d4148cdf6403 100644
+--- a/src/main/java/net/minecraft/server/BlockSign.java
++++ b/src/main/java/net/minecraft/server/BlockSign.java
+@@ -1,5 +1,7 @@
+ package net.minecraft.server;
+ 
++import dev.pomf.dionysus.DionysusConfig;
++
+ import java.util.Random;
+ import javax.annotation.Nullable;
+ 
+@@ -52,6 +54,7 @@ public class BlockSign extends BlockTileEntity {
+         if (world.isClientSide) {
+             return true;
+         } else {
++            if (DionysusConfig.disableSignCommands) return true; // Reaper - Disable sign commands // Dionysus - make configurable
+             TileEntity tileentity = world.getTileEntity(blockposition);
+ 
+             return tileentity instanceof TileEntitySign ? ((TileEntitySign) tileentity).b(entityhuman) : false;

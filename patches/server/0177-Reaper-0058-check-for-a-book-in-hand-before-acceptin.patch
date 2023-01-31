@@ -1,0 +1,73 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Sun, 16 Oct 2022 14:13:03 +0500
+Subject: [PATCH] (Reaper 0058)
+ Check-for-a-book-in-hand-before-accepting-the-book-edit-packet
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 6b443540ecc6fb8a06379bfdc66b74e33253ccd2..7086a0e40466062468a759dddb2ca2d6eeb7acc7 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -2518,6 +2518,12 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+             packetdataserializer = packetplayincustompayload.b();
+ 
+             try {
++                // Reaper start
++                itemstack1 = this.player.getItemInMainHand();
++                if (itemstack1.isEmpty() || itemstack1.getItem() != Items.WRITABLE_BOOK) {
++                    return;
++                }
++                // Reaper end
+                 itemstack = packetdataserializer.k();
+                 if (itemstack.isEmpty()) {
+                     return;
+@@ -2526,13 +2532,15 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                 if (!ItemBookAndQuill.b(itemstack.getTag())) {
+                     throw new IOException("Invalid book tag!");
+                 }
+-
++                /*
+                 itemstack1 = this.player.getItemInMainHand();
+                 if (itemstack1.isEmpty()) {
+                     return;
+                 }
+ 
+-                if (itemstack.getItem() == Items.WRITABLE_BOOK && itemstack.getItem() == itemstack1.getItem()) {
++                 */
++
++                if (itemstack.getItem() == Items.WRITABLE_BOOK /*&& itemstack.getItem() == itemstack1.getItem()*/) { // Reaper
+                     if (!validateBook(itemstack, true)) return; // Paper
+                     itemstack1.a("pages", (NBTBase) itemstack.getTag().getList("pages", 8));
+                     CraftEventFactory.handleEditBookEvent(player, itemstack1); // CraftBukkit
+@@ -2554,6 +2562,12 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                 packetdataserializer = packetplayincustompayload.b();
+ 
+                 try {
++                    // Reaper start
++                    itemstack1 = this.player.getItemInMainHand();
++                    if (itemstack1.isEmpty() || itemstack1.getItem() != Items.WRITABLE_BOOK) {
++                        return;
++                    }
++                    // Reaper end
+                     itemstack = packetdataserializer.k();
+                     if (itemstack.isEmpty()) {
+                         return;
+@@ -2562,13 +2576,15 @@ public class PlayerConnection implements PacketListenerPlayIn, ITickable {
+                     if (!ItemWrittenBook.b(itemstack.getTag())) {
+                         throw new IOException("Invalid book tag!");
+                     }
+-
++                    /*
+                     itemstack1 = this.player.getItemInMainHand();
+                     if (itemstack1.isEmpty()) {
+                         return;
+                     }
+ 
+-                    if (itemstack.getItem() == Items.WRITABLE_BOOK && itemstack1.getItem() == Items.WRITABLE_BOOK) {
++                     */
++
++                    if (itemstack.getItem() == Items.WRITABLE_BOOK /*&& itemstack1.getItem() == Items.WRITABLE_BOOK*/) { // Reaper
+                         if (!validateBook(itemstack, true)) return; // Paper
+                         ItemStack itemstack2 = new ItemStack(Items.WRITTEN_BOOK);
+ 
