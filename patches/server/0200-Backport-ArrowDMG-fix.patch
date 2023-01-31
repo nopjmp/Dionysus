@@ -6,7 +6,7 @@ Subject: [PATCH] Backport ArrowDMG fix
 Upstream commit: PaperMC/Paper@bb397ba74c034ffe5ae164d774a043cb7bca0472
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index d558f72771c9b7c64d4f2c545e0b5529bd72f718..ed416aab3398e57553a4e611f7863d048348e31e 100644
+index 3793f62c7ce99d87f17f2fdd4eebf4980ac090d2..d71f229277b5ade945fb1c987e7ba2bb96d4bbb8 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -1719,13 +1719,26 @@ public abstract class EntityLiving extends Entity {
