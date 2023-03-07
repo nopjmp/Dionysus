@@ -7,7 +7,7 @@ When the server is lagging, players will wait longer when eating.
 Change to also use a time check instead if it passes.
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index c6644f21e3b037e6044ac0c8e1a28b79df4aee08..d558f72771c9b7c64d4f2c545e0b5529bd72f718 100644
+index c6644f21e3b037e6044ac0c8e1a28b79df4aee08..df6b38f46c0ba20ac6ad246102b6209d044d34bb 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -106,7 +106,7 @@ public abstract class EntityLiving extends Entity {
@@ -45,7 +45,19 @@ index c6644f21e3b037e6044ac0c8e1a28b79df4aee08..d558f72771c9b7c64d4f2c545e0b5529
                      this.v();
                  }
              } else {
-@@ -2443,7 +2453,10 @@ public abstract class EntityLiving extends Entity {
+@@ -2419,7 +2429,10 @@ public abstract class EntityLiving extends Entity {
+ 
+         if (!itemstack.isEmpty() && !this.isHandRaised()) {
+             this.activeItem = itemstack;
+-            this.bp = itemstack.m();
++            // Paper start - lag compensate eating
++            this.bp = this.totalEatTimeTicks = itemstack.m();
++            this.eatStartTime = System.nanoTime();
++            // Paper end
+             if (!this.world.isClientSide) {
+                 int i = 1;
+ 
+@@ -2443,7 +2456,10 @@ public abstract class EntityLiving extends Entity {
                  }
              } else if (!this.isHandRaised() && !this.activeItem.isEmpty()) {
                  this.activeItem = ItemStack.a;
@@ -57,7 +69,7 @@ index c6644f21e3b037e6044ac0c8e1a28b79df4aee08..d558f72771c9b7c64d4f2c545e0b5529
              }
          }
  
-@@ -2551,7 +2564,10 @@ public abstract class EntityLiving extends Entity {
+@@ -2551,7 +2567,10 @@ public abstract class EntityLiving extends Entity {
          }
  
          this.activeItem = ItemStack.a;
