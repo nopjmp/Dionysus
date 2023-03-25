@@ -5,6 +5,89 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.16] - 2023-03-25
+
+* remove two patches around hoppers
+* fix missing code in lag compensated eating patch
+* Backport ArrowDMG fix
+* Add possible fix for TP exploit
+* override paper 1.12.2's download mechanism
+* Remove unused variable now....
+* Switch from ConcurrentQueue to synchronized list for plugin compat
+* Trim map after clear test...
+* Fix Patch
+* PlayerItemHeldEvent Add Slot
+* Clean up Dionysus Config
+* remove unnecessary lines
+* rename patch
+* Clean up linear region file patch
+* start on linear files
+* Update README.md
+* Prevent IndexOutOfBound in window packet
+* Add few helpful patches
+* Prevent recursive chunk loading for join chunks
+* Improve do not load chunks for light checks patch
+* Few improvements
+* Update java information
+* Set chunk coord int pair patch author to original author
+* Merge branch 'dev' of https://github.com/nopjmp/Dionysus into dev
+* Improve fire spread patch
+* Drop revert xray (#49)
+* Add Alternate Current redstone implementation (#48)
+* Further improve light queue and improve other methods as well
+* Temporarily drop map chunk load patch
+* Prevent vehicle move while awaiting teleport confirm
+* Tuinity Optimise ActivationRange#activateChunkEntities
+* Fixup stats system with new long change
+* Fix backwards compat with long change
+* Migrate stats to long and improve stats map performance
+* Migrate stats to long and improve stats map performance
+* Use fastutil for entity tracker
+* Add faster NBT compare options and improve guessSize patch
+* Use FastThreadLocalThread for netty IO threads (#43)
+* Prepare guessSize patch for future code for patches
+* Add crash comment to config
+* Fix a bug in disabling mojang server communication (#42)
+* Add very dirty async world tick patch
+* Fixup previous patch
+* Backport Purpur's Alternative Keepalive Handling (#41)
+* Add option to disable communication with mojang servers in offline mode (#40)
+* Tiny cleanup of donkey patch
+* Add option to disable duplicate log
+* Fix banner color changing
+* [ci skip] add nightly link
+* Improve position iterator performance
+* Port some other patches and improve performance (#39)
+* Improve NeonPaper chest patch
+* Improve fire spread checks
+* Add slime setSize patch
+* Improve guesssize method
+* Optimize passenger list with fastutil
+* Guava to caffeine
+* Add dependency on caffeine
+* Add a few extra patches
+* Remove not needed tab change for update dependencies
+* Fix-MC-161754
+* Remove CHM patch
+* Sort patches differently and delete comments from one patch
+* Backport newer config system
+* Add client sign limit
+* Add jitpack way earlier
+* Fix zstd dependency
+* Add annotations to dependency commit
+* Delete 0125-Dont-Tick-Dead-Players.patch
+* Port even more patches
+* Port few extra patches from FlamePaper, TacoSpigot and Reaper
+* Port first few patches from NeonPaper
+* Drop flare patch in API as well
+* Drop flare profiler
+* Paper Backport: Lag compensate eating
+* Update sentry and allow concurrent book meta access
+* Add a bit better handling for ZSTD config
+* Fixup bukkit API in cases where data would still be written to the internal object
+* Update Sentry and add pufferfish credits (#31)
+* Port patches from Airplane and Pufferfish (#25)
+
 ## [0.1.15] - 2022-06-18
 
 ### Changes
