@@ -7,7 +7,7 @@ Optimizes to not repeatedly look up the same chunk for
  light lookups.
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index f3d0760a02a06588fa182822fb4b9b4c451e5b08..c65812e4e83444877dae0edf3e0f5e295c422ec6 100644
+index 3064103d908aebcb8af5302087b70bf23fa6f1f0..bea857f1c1a7c424a5236063761526270cae8d95 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -335,7 +335,7 @@ public class Chunk {

@@ -5,7 +5,7 @@ Subject: [PATCH] Improve position iterator performance
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 4cebe154334214b9a831ffec597f47148b021013..5ed789cd30c8b7d40c2a81863b7a91a62b1704f1 100644
+index a966a83549cf661339778c6ad49bdd46ee5ea64c..99c331d48f98fb38379395b134a63cc9f9e56940 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -1206,9 +1206,11 @@ public class Chunk {

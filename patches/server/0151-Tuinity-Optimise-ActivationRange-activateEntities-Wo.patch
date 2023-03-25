@@ -7,7 +7,7 @@ By using our Chunk#forEachEntity method, the time trimmed was
 approximately 2-5x in my testing.
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 5ed789cd30c8b7d40c2a81863b7a91a62b1704f1..2ec314d3ccd3292a6466ebfaa647d65da6561cfb 100644
+index 99c331d48f98fb38379395b134a63cc9f9e56940..34c2710096347cfe62383183e5774cb6ffb9a753 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -160,6 +160,25 @@ public class Chunk {

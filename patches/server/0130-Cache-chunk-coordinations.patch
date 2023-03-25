@@ -5,7 +5,7 @@ Subject: [PATCH] Cache-chunk-coordinations
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index c65812e4e83444877dae0edf3e0f5e295c422ec6..4cebe154334214b9a831ffec597f47148b021013 100644
+index bea857f1c1a7c424a5236063761526270cae8d95..a966a83549cf661339778c6ad49bdd46ee5ea64c 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -126,6 +126,7 @@ public class Chunk {

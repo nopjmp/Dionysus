@@ -22,7 +22,7 @@ index e80adc4f254a28cf9524eaf5a1c8be5132ae280b..b39c5a3a3965f1d4b3e5da555d8e38ec
          return b(Math.min(blockposition.getX(), blockposition1.getX()), Math.min(blockposition.getY(), blockposition1.getY()), Math.min(blockposition.getZ(), blockposition1.getZ()), Math.max(blockposition.getX(), blockposition1.getX()), Math.max(blockposition.getY(), blockposition1.getY()), Math.max(blockposition.getZ(), blockposition1.getZ()));
      }
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 2ec314d3ccd3292a6466ebfaa647d65da6561cfb..877dfa37ac5e103cee54e3ffe5d4c8b7263d19c9 100644
+index 34c2710096347cfe62383183e5774cb6ffb9a753..668aeb16dce33abb4c98e3483141951ffbdc8ac5 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -1545,7 +1545,7 @@ public class Chunk {
