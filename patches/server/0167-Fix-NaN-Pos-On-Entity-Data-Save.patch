@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ruViolence <78062896+ruViolence@users.noreply.github.com>
+Date: Wed, 8 Jun 2022 11:40:48 +0500
+Subject: [PATCH] Fix NaN Pos On Entity Data Save
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 35bc094758b8f1fcaa58356a0adb865b0b933afd..8061a7c12aa32e6dc9bdd697983925cfd93eee96 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -1565,7 +1565,15 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
+ 
+     public NBTTagCompound save(NBTTagCompound nbttagcompound) {
+         try {
+-            nbttagcompound.set("Pos", this.a(new double[] { this.locX, this.locY, this.locZ}));
++            // Reaper start
++            double locX = this.locX;
++            double locY = this.locY;
++            double locZ = this.locZ;
++            if (Double.isNaN(locX)) locX = 0;
++            if (Double.isNaN(locY)) locY = 0;
++            if (Double.isNaN(locZ)) locZ = 0;
++            nbttagcompound.set("Pos", this.a(new double[] {locX, locY, locZ}));
++            // Reaper end
+             nbttagcompound.set("Motion", this.a(new double[] { this.motX, this.motY, this.motZ}));
+ 
+             // CraftBukkit start - Checking for NaN pitch/yaw and resetting to zero
