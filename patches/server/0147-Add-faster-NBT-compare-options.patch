@@ -5,12 +5,12 @@ Subject: [PATCH] Add faster NBT compare options
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 302358c002a9611b1ece57d0854ba872433db1ff..80f7510422412e009f02650c5c6f49614d40ae12 100644
+index f73dc92cd8926a4cc6eb4c8a0a400cb39bab3ac7..ad4df1253a9d33a1a58fa3b3531de477caad0c7a 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-@@ -409,4 +409,21 @@ public class DionysusConfig {
-                 "it can improve server performance by a lot."
-         );
+@@ -399,4 +399,21 @@ public class DionysusConfig {
+     private static void useAlternateKeepAlive() {
+         useAlternateKeepAlive = getBoolean("use-alternate-keepalive", useAlternateKeepAlive);
      }
 +
 +    public enum NBTCompareMethod {

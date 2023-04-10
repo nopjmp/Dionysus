@@ -5,7 +5,7 @@ Subject: [PATCH] Clean up Dionysus Config
 
 
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 76837460a0e03b70a3ee3c0ea9a64d013df309a8..baadaa251b94c4cb40d98d03825f2385e9a496d1 100644
+index e5d310d6ae270ec682a2a889ce0c87517b336576..71e6826180a7566e16aaebbea2f79f3ec75cd659 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -69,11 +69,13 @@ public class DionysusConfig {
@@ -294,23 +294,7 @@ index 76837460a0e03b70a3ee3c0ea9a64d013df309a8..baadaa251b94c4cb40d98d03825f2385
      }
  
      public static boolean useAlternateKeepAlive = false;
-@@ -412,11 +385,10 @@ public class DionysusConfig {
- 
-     public static boolean asyncWorldTick = false;
-     private static void asyncWorldTick() {
--        asyncWorldTick = getBoolean("async-world-tick", asyncWorldTick);
--        setComment("async-world-tick",
--                "Async world ticking is a experimental feature that may cause",
--                "issues with some plugins, world corruption, crashes or other issues, but",
--                "it can improve server performance by a lot."
-+        asyncWorldTick = getBoolean("async-world-tick", asyncWorldTick, """
-+                        ## EXPERIMENTAL ##
-+                        Async world ticking is a experimental feature that may cause issues with some plugins,
-+                        world corruption, crashes or other issues, but it can improve server performance by a lot."""
-         );
-     }
- 
-@@ -428,26 +400,22 @@ public class DionysusConfig {
+@@ -418,26 +391,22 @@ public class DionysusConfig {
  
      public static NBTCompareMethod nbtCompareMethod = NBTCompareMethod.EQUAL;
      private static void nbtCompareMethod() {

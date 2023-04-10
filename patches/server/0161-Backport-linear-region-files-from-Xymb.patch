@@ -21,7 +21,7 @@ index 1f2fc8223808ce352267660ca9a11d7ffec94d70..37259967bb36d70159d8a4ceff1d671a
  
      <repositories>
 diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
-index 4af57cf5694ea4217be8fd70c00e5ad6e7aaa219..76837460a0e03b70a3ee3c0ea9a64d013df309a8 100644
+index 6d5a3c943c3bf3db7424f6dfc6cd3063c9c1ebf5..e5d310d6ae270ec682a2a889ce0c87517b336576 100644
 --- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 +++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
 @@ -367,8 +367,18 @@ public class DionysusConfig {
