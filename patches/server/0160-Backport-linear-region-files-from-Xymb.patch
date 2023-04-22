@@ -5,7 +5,7 @@ Subject: [PATCH] Backport linear region files from Xymb
 
 
 diff --git a/pom.xml b/pom.xml
-index 1f2fc8223808ce352267660ca9a11d7ffec94d70..37259967bb36d70159d8a4ceff1d671aee0bda87 100644
+index 50379d685eb5df2b1bae58cbe22286f9d69f4cc9..9c7f0d20b078459eaf0650adab102ca06bc904bd 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -186,6 +186,11 @@
