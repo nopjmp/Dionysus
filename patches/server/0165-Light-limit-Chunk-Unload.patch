@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nop <kthompson@hey.com>
+Date: Sat, 22 Apr 2023 17:12:17 -0500
+Subject: [PATCH] Light limit Chunk Unload
+
+This breaks vanilla behavior for additional performance, so defaults to off
+
+Will need to merge this back down at some point.
+
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index 71e6826180a7566e16aaebbea2f79f3ec75cd659..fdbfe87de4f1152adb8c571305dc6d969b41716c 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -176,6 +176,11 @@ public class DionysusConfig {
+         maxLightTimePerTick = getInt("light-updates-max-ms-per-tick", maxLightTimePerTick) * 1000000;
+     }
+ 
++    public static boolean limitLightChunkUnload = false;
++    private static void limitLightChunkUnload() {
++        limitLightChunkUnload = getBoolean("light-limit-chunk-unload", limitLightChunkUnload);
++    }
++
+     public static boolean customNameAiLimitBypass = true;
+     public static boolean tamableAiLimitBypass = true;
+     public static boolean spawnerAiLimitBypass = true;
+diff --git a/src/main/java/net/minecraft/server/DionysusLightingQueue.java b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
+index 9ea8cdd120375ae05086b5042f114362cfb25e3a..aea8d7e68d6ec4b2466c353c23720062252264ad 100644
+--- a/src/main/java/net/minecraft/server/DionysusLightingQueue.java
++++ b/src/main/java/net/minecraft/server/DionysusLightingQueue.java
+@@ -89,11 +89,16 @@ final class DionysusLightingQueue {
+             if (!chunk.world.paperConfig.queueLightUpdates) {
+                 return;
+             }
++            
++            long startTime = 0;
++            long maxTickTime = 0;
+ 
+-            final long startTime = System.nanoTime();
+-            final long maxTickTime = DionysusConfig.maxLightTimePerTick - (startTime - MinecraftServer.getServer().tickStartTime);
++            if (DionysusConfig.limitLightChunkUnload) {
++                startTime = System.nanoTime();
++                maxTickTime = DionysusConfig.maxLightTimePerTick - (startTime - MinecraftServer.getServer().tickStartTime);
++            }
+ 
+-            if (maxTickTime <= 0) {
++            if (isOutOfTime(maxTickTime, startTime)) {
+                 return;
+             }
+ 
