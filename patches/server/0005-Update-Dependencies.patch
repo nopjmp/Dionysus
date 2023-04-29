@@ -5,7 +5,7 @@ Subject: [PATCH] Update Dependencies
 
 
 diff --git a/pom.xml b/pom.xml
-index 4216f43e566394cd7d863be1ee1744083a04faba..614779f38fc9d6892a47a15bb28573672a86918c 100644
+index 4216f43e566394cd7d863be1ee1744083a04faba..1681728c93e8825137525cf98241bb15005bf009 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -19,6 +19,8 @@
@@ -22,7 +22,7 @@ index 4216f43e566394cd7d863be1ee1744083a04faba..614779f38fc9d6892a47a15bb2857367
              <groupId>io.netty</groupId>
              <artifactId>netty-all</artifactId>
 -            <version>4.1.24.Final</version>
-+            <version>4.1.77.Final</version>
++            <version>4.1.92.Final</version>
              <scope>compile</scope>
          </dependency>
          <dependency>

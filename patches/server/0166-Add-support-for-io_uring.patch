@@ -1,0 +1,98 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aviana Cruz <gwencroft@proton.me>
+Date: Sat, 29 Apr 2023 04:17:32 +0000
+Subject: [PATCH] Add support for io_uring
+
+This only works when compression is disabled because
+clients can not decode compressed packets sent with io_uring.
+
+diff --git a/pom.xml b/pom.xml
+index c17b56c039fe0c2312323f8516076baa77737def..a30f782bd9306aa05faba6c7609b62d5c4328a6e 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -38,6 +38,22 @@
+             <version>4.1.92.Final</version>
+             <scope>compile</scope>
+         </dependency>
++        <!-- Dionysus start - Add support for io_uring -->
++        <dependency>
++            <groupId>io.netty.incubator</groupId>
++            <artifactId>netty-incubator-transport-native-io_uring</artifactId>
++            <version>0.0.21.Final</version>
++            <classifier>linux-x86_64</classifier>
++            <scope>compile</scope>
++        </dependency>
++        <dependency>
++            <groupId>io.netty.incubator</groupId>
++            <artifactId>netty-incubator-transport-native-io_uring</artifactId>
++            <version>0.0.21.Final</version>
++            <classifier>linux-aarch_64</classifier>
++            <scope>compile</scope>
++        </dependency>
++        <!-- Dionysus end - Add support for io_uring -->
+         <dependency>
+             <groupId>dev.pomf.dionysus</groupId>
+             <artifactId>dionysus-api</artifactId>
+diff --git a/src/main/java/dev/pomf/dionysus/DionysusConfig.java b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+index fdbfe87de4f1152adb8c571305dc6d969b41716c..ee814c7670c5ef6a900402f2c00c31adccc61e5a 100644
+--- a/src/main/java/dev/pomf/dionysus/DionysusConfig.java
++++ b/src/main/java/dev/pomf/dionysus/DionysusConfig.java
+@@ -414,4 +414,9 @@ public class DionysusConfig {
+                         networks is predictable and intuitive rather than locational and chaotic."""
+         );
+     }
++
++    public static boolean useIouring = true;
++    private static void useIouring() {
++        useIouring = getBoolean("use-iouring", useIouring);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
+index 098c51675e8b0a0543676797d1abc4b6769c30d7..cf0018a25bf2329dfec8592f8688982f03d6a53d 100644
+--- a/src/main/java/net/minecraft/server/ServerConnection.java
++++ b/src/main/java/net/minecraft/server/ServerConnection.java
+@@ -88,6 +88,17 @@ public class ServerConnection {
+             return this.a();
+         }
+     };
++    // Dionysus start - Add support for io_uring
++    public static final LazyInitVar<io.netty.incubator.channel.uring.IOUringEventLoopGroup> SERVER_IO_URING_EVENT_GROUP = new LazyInitVar<>() {
++        private io.netty.incubator.channel.uring.IOUringEventLoopGroup a() {
++            return new io.netty.incubator.channel.uring.IOUringEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty io_uring Server IO #%d").setDaemon(true).build());
++        }
++
++        protected io.netty.incubator.channel.uring.IOUringEventLoopGroup init() {
++            return this.a();
++        }
++    };
++    // Dionysus end - Add support for io_uring
+     public static final LazyInitVar<LocalEventLoopGroup> c = new LazyInitVar() {
+         protected LocalEventLoopGroup a() {
+             return new LocalEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Local Server IO #%d").setDaemon(true).build());
+@@ -125,10 +136,22 @@ public class ServerConnection {
+             Class oclass;
+             LazyInitVar lazyinitvar;
+ 
+-            if (Epoll.isAvailable() && this.f.af()) {
+-                oclass = EpollServerSocketChannel.class;
+-                lazyinitvar = ServerConnection.b;
+-                ServerConnection.e.info("Using epoll channel type");
++            // Dionysus start - Add support for io_uring
++            if ((io.netty.incubator.channel.uring.IOUring.isAvailable() || Epoll.isAvailable()) && this.f.af()) {
++                if (dev.pomf.dionysus.DionysusConfig.useIouring && io.netty.incubator.channel.uring.IOUring.isAvailable() && this.f.aG() == -1) {
++                    oclass = io.netty.incubator.channel.uring.IOUringServerSocketChannel.class;
++                    lazyinitvar = ServerConnection.SERVER_IO_URING_EVENT_GROUP;
++                    ServerConnection.e.info("Using io_uring channel type");
++                } else if (Epoll.isAvailable()) {
++                    oclass = EpollServerSocketChannel.class;
++                    lazyinitvar = ServerConnection.b;
++                    ServerConnection.e.info("Using epoll channel type");
++                } else {
++                    oclass = NioServerSocketChannel.class;
++                    lazyinitvar = ServerConnection.a;
++                    ServerConnection.e.info("Using default channel type");
++                }
++                // Dionysus end - Add support for io_uring
+             } else {
+                 oclass = NioServerSocketChannel.class;
+                 lazyinitvar = ServerConnection.a;
