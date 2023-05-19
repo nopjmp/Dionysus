@@ -1,8 +1,10 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: ruViolence <78062896+ruViolence@users.noreply.github.com>
 Date: Wed, 8 Jun 2022 11:40:48 +0500
-Subject: [PATCH] Fix NaN Pos On Entity Data Save
+Subject: [PATCH] fix: NaN pos on entity data save
 
+Original code from https://github.com/ruViolence/Reaper
+Licensed under GPL-3.0
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
 index 35bc094758b8f1fcaa58356a0adb865b0b933afd..8061a7c12aa32e6dc9bdd697983925cfd93eee96 100644
