@@ -20,7 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index d720ef33e47d80d7e500ac5b12326d6e5f49cfc6..acb87b2e3b50267079cdc7633c95f4cf26f4907f 100644
+index db5c365fda7dcb36798db95256e9cf76ac81787a..6edada21866a695de54138cdf5847bb4566ca13d 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -347,6 +347,9 @@
