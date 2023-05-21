@@ -1,21 +1,10 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Softik Lord <dimap9986@gmail.com>
 Date: Mon, 11 Jul 2022 18:24:54 +0500
-Subject: [PATCH] Reset-players-airTicks-on-respawn
+Subject: [PATCH] fix: reset players airTicks on respawn
 
-
-diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 5a5d082bb5953a38004ec5c1e963b8c24e96ea07..e8272c8bfd9a201f3f2d6dc9fbb3dd094ed24311 100644
---- a/src/main/java/net/minecraft/server/Entity.java
-+++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -2139,7 +2139,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
-         }
-     }
- 
--    public int aM() {
-+    public int getMaxAirTicks() { return aM(); } public int aM() { // NeonPaper - OBF HELPER
-         return 300;
-     }
+Original code from https://github.com/ruViolence/Reaper
+Licensed under GPL-3.0
  
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
 index 6fe460b437849488bb1b84d9ec9a737047d8d095..f43809b13f5f04c5fd74cfecae57492f3efefd53 100644
@@ -25,7 +14,7 @@ index 6fe460b437849488bb1b84d9ec9a737047d8d095..f43809b13f5f04c5fd74cfecae57492f
  
          this.setHealth(this.getMaxHealth());
          this.fireTicks = 0;
-+        this.setAirTicks(this.getMaxAirTicks()); // NeonPaper
++        this.setAirTicks(300); // Reaper - Reset airTicks on respawn
          this.fallDistance = 0;
          this.foodData = new FoodMetaData(this);
          this.expLevel = this.newLevel;
