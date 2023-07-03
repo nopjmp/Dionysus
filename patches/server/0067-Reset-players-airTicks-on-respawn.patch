@@ -4,28 +4,15 @@ Date: Mon, 11 Jul 2022 18:24:54 +0500
 Subject: [PATCH] Reset-players-airTicks-on-respawn
 
 
-diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 5a5d082bb5953a38004ec5c1e963b8c24e96ea07..e8272c8bfd9a201f3f2d6dc9fbb3dd094ed24311 100644
---- a/src/main/java/net/minecraft/server/Entity.java
-+++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -2139,7 +2139,7 @@ public abstract class Entity implements ICommandListener, KeyedObject { // Paper
-         }
-     }
- 
--    public int aM() {
-+    public int getMaxAirTicks() { return aM(); } public int aM() { // NeonPaper - OBF HELPER
-         return 300;
-     }
- 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 6fe460b437849488bb1b84d9ec9a737047d8d095..f43809b13f5f04c5fd74cfecae57492f3efefd53 100644
+index 710f357910fce1dc2d8ec3b7a1d01337310173c7..60944b5044ff714b05869d8747c2a71dab083a91 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -1562,6 +1562,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -1641,6 +1641,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
  
          this.setHealth(this.getMaxHealth());
          this.fireTicks = 0;
-+        this.setAirTicks(this.getMaxAirTicks()); // NeonPaper
++        this.setAirTicks(300); // Reaper - Reset airTicks on respawn
          this.fallDistance = 0;
          this.foodData = new FoodMetaData(this);
          this.expLevel = this.newLevel;
