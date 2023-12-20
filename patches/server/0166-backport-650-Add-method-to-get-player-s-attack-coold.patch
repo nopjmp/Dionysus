@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aviana Cruz <gwencroft@proton.me>
+Date: Wed, 4 Jan 2023 16:47:52 +0800
+Subject: [PATCH] backport #650: Add method to get player's attack cooldown
+
+Upstream commit: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/commits/893ad93b3eb6d81b338cdc5850cdb6bbea6af95f
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index caac1a569fd6c00ab80e5c9f21f9ab44d388c5ef..99e7d80f95d07c598df158517bfab99e17e1ac0c 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -971,7 +971,7 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+                 f *= 0.2F + f2 * f2 * 0.8F;
+                 f1 *= f2;
+-                this.ds();
++                // this.ds(); // Dionysus - Moved to EntityLiving to reset the cooldown after the damage is dealt
+                 if (f > 0.0F || f1 > 0.0F) {
+                     boolean flag = f2 > 0.9F;
+                     boolean flag1 = false;
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 17c0d84827c28afdd6543ee4ae4bc4a2a2068d25..75c1681fc7b9dbb406758eae68d70f80810578b3 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1424,6 +1424,11 @@ public abstract class EntityLiving extends Entity {
+             float absorptionModifier = absorption.apply((double) f).floatValue();
+ 
+             EntityDamageEvent event = CraftEventFactory.handleLivingEntityDamageEvent(this, damagesource, originalDamage, hardHatModifier, blockingModifier, armorModifier, resistanceModifier, magicModifier, absorptionModifier, hardHat, blocking, armor, resistance, magic, absorption);
++            // Dionysus start - backport #650: Add method to get player's attack cooldown
++            if (damagesource.getEntity() instanceof EntityHuman) {
++                ((EntityHuman) damagesource.getEntity()).ds(); // Moved from EntityHuman in order to make the cooldown reset get called after the damage event is fired
++            }
++            // Dionysus end - backport #650: Add method to get player's attack cooldown
+             if (event.isCancelled()) {
+                 return false;
+             }
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftHumanEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftHumanEntity.java
+index 05ca403e828328dabee3d3412ae6adb83d62b4e7..59b66fee5173b4846c2dcbf00dcf1c3b7db38328 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftHumanEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftHumanEntity.java
+@@ -426,6 +426,11 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
+         return getHandle().getExpToLevel();
+     }
+ 
++    @Override
++    public float getAttackCooldown() {
++        return getHandle().n(0.5f);
++    }
++
+     @Override
+     public boolean hasCooldown(Material material) {
+         Preconditions.checkArgument(material != null, "material");
