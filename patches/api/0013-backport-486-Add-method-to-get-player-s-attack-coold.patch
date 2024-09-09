@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aviana Cruz <gwencroft@proton.me>
+Date: Wed, 4 Jan 2023 16:55:46 +0800
+Subject: [PATCH] backport #486: Add method to get player's attack cooldown
+
+Upstream commit: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/commits/220bc5946757e81379fed13097dbaa386c823381
+
+diff --git a/src/main/java/org/bukkit/entity/HumanEntity.java b/src/main/java/org/bukkit/entity/HumanEntity.java
+index 8fe01e47e71273cd63321f6e064270c518bfdca3..dabb09c24f1fa96fa6004b049aa479d3b4880f1d 100644
+--- a/src/main/java/org/bukkit/entity/HumanEntity.java
++++ b/src/main/java/org/bukkit/entity/HumanEntity.java
+@@ -265,6 +265,16 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
+      */
+     public int getExpToLevel();
+ 
++    /**
++     * Gets the current cooldown for a player's attack.
++     *
++     * This is used to calculate damage, with 1.0 representing a fully charged
++     * attack and 0.0 representing a non-charged attack
++     *
++     * @return A float between 0.0-1.0 representing the progress of the charge
++     */
++    public float getAttackCooldown();
++
+     // Paper start
+     /**
+      * If there is an Entity on this entities left shoulder, it will be released to the world and returned.
