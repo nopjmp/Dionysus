@@ -1,0 +1,216 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RaymanoPL <matdro100@o2.pl>
+Date: Sat, 27 Aug 2022 16:16:21 +0200
+Subject: [PATCH] Add-Sendable-interface
+
+Fix Sendable
+
+Add JavaDocs
+
+diff --git a/src/main/java/org/bukkit/block/Block.java b/src/main/java/org/bukkit/block/Block.java
+index 2dbc784cbe151068e9276516b3b2b851da10395c..dea2cf1b2b6b9c212fb7cdcba9ef250fa6a8927c 100644
+--- a/src/main/java/org/bukkit/block/Block.java
++++ b/src/main/java/org/bukkit/block/Block.java
+@@ -251,6 +251,9 @@ public interface Block extends Metadatable {
+     @Deprecated
+     boolean setTypeIdAndData(int type, byte data, boolean applyPhysics);
+ 
++    @Deprecated
++    boolean setTypeIdAndData(int type, byte data, boolean applyPhysics, boolean notify);
++
+     /**
+      * Gets the face relation of this block compared to the given block.
+      * <p>
+diff --git a/src/main/java/org/bukkit/event/Sendable.java b/src/main/java/org/bukkit/event/Sendable.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..aa1f1c84d724cbad7511b19d4c7fdb9ba83f07b0
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/Sendable.java
+@@ -0,0 +1,18 @@
++package org.bukkit.event;
++
++/**
++ * Allows to disable sending of packets about changing blocks
++ * You should write your own implementation
++ * Careless use may result in de-synchronization
++ */
++public interface Sendable {
++    /**
++     * @return true if packet will be sent
++     */
++    boolean isSend();
++
++    /**
++     * @param send false if you don't want sent packet about blocks changes
++     */
++    void setSend(boolean send);
++}
+\ No newline at end of file
+diff --git a/src/main/java/org/bukkit/event/block/BlockBreakEvent.java b/src/main/java/org/bukkit/event/block/BlockBreakEvent.java
+index b6c95cc1efaa55110b631513ee7f1f929cfe0a74..a98d01c71dbcc9efc4f24162ad24588677a145f2 100644
+--- a/src/main/java/org/bukkit/event/block/BlockBreakEvent.java
++++ b/src/main/java/org/bukkit/event/block/BlockBreakEvent.java
+@@ -4,6 +4,7 @@ import org.bukkit.block.Block;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.Cancellable;
+ import org.bukkit.event.HandlerList;
++import org.bukkit.event.Sendable;
+ 
+ /**
+  * Called when a block is broken by a player.
+@@ -26,16 +27,22 @@ import org.bukkit.event.HandlerList;
+  * If a Block Break event is cancelled, the block will not break and
+  * experience will not drop.
+  */
+-public class BlockBreakEvent extends BlockExpEvent implements Cancellable {
++public class BlockBreakEvent extends BlockExpEvent implements Cancellable, Sendable {
+     private final Player player;
+     private boolean dropItems;
+     private boolean cancel;
++    private boolean sendable;
+ 
+     public BlockBreakEvent(final Block theBlock, final Player player) {
++        this(theBlock, player, true);
++    }
++
++    public BlockBreakEvent(final Block theBlock, final Player player, boolean sendable) {
+         super(theBlock, 0);
+ 
+         this.player = player;
+         this.dropItems = true; // Defaults to dropping items as it normally would
++        this.sendable = sendable;
+     }
+ 
+     /**
+@@ -72,4 +79,14 @@ public class BlockBreakEvent extends BlockExpEvent implements Cancellable {
+     public void setCancelled(boolean cancel) {
+         this.cancel = cancel;
+     }
++
++    @Override
++    public boolean isSend() {
++        return sendable;
++    }
++
++    @Override
++    public void setSend(boolean sendable) {
++        this.sendable = sendable;
++    }
+ }
+diff --git a/src/main/java/org/bukkit/event/block/BlockPlaceEvent.java b/src/main/java/org/bukkit/event/block/BlockPlaceEvent.java
+index 0ee9e465e22991bbf6b1cce902d4cd0f7dc26f58..b452986648e46c802b4715e0d332981e9b39e845 100644
+--- a/src/main/java/org/bukkit/event/block/BlockPlaceEvent.java
++++ b/src/main/java/org/bukkit/event/block/BlockPlaceEvent.java
+@@ -5,6 +5,7 @@ import org.bukkit.block.BlockState;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.Cancellable;
+ import org.bukkit.event.HandlerList;
++import org.bukkit.event.Sendable;
+ import org.bukkit.inventory.EquipmentSlot;
+ import org.bukkit.inventory.ItemStack;
+ 
+@@ -13,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
+  * <p>
+  * If a Block Place event is cancelled, the block will not be placed.
+  */
+-public class BlockPlaceEvent extends BlockEvent implements Cancellable {
++public class BlockPlaceEvent extends BlockEvent implements Cancellable, Sendable {
+     private static final HandlerList handlers = new HandlerList();
+     protected boolean cancel;
+     protected boolean canBuild;
+@@ -22,13 +23,14 @@ public class BlockPlaceEvent extends BlockEvent implements Cancellable {
+     protected ItemStack itemInHand;
+     protected Player player;
+     protected EquipmentSlot hand;
++    protected boolean sendable;
+ 
+     @Deprecated
+     public BlockPlaceEvent(final Block placedBlock, final BlockState replacedBlockState, final Block placedAgainst, final ItemStack itemInHand, final Player thePlayer, final boolean canBuild) {
+-        this(placedBlock, replacedBlockState, placedAgainst, itemInHand, thePlayer, canBuild, EquipmentSlot.HAND);
++        this(placedBlock, replacedBlockState, placedAgainst, itemInHand, thePlayer, canBuild, EquipmentSlot.HAND,true);
+     }
+ 
+-    public BlockPlaceEvent(final Block placedBlock, final BlockState replacedBlockState, final Block placedAgainst, final ItemStack itemInHand, final Player thePlayer, final boolean canBuild, final EquipmentSlot hand) {
++    public BlockPlaceEvent(final Block placedBlock, final BlockState replacedBlockState, final Block placedAgainst, final ItemStack itemInHand, final Player thePlayer, final boolean canBuild, final EquipmentSlot hand, boolean sendable) {
+         super(placedBlock);
+         this.placedAgainst = placedAgainst;
+         this.itemInHand = itemInHand;
+@@ -36,7 +38,8 @@ public class BlockPlaceEvent extends BlockEvent implements Cancellable {
+         this.replacedBlockState = replacedBlockState;
+         this.canBuild = canBuild;
+         this.hand = hand;
+-        cancel = false;
++        this.cancel = false;
++        this.sendable = sendable;
+     }
+ 
+     public boolean isCancelled() {
+@@ -134,4 +137,14 @@ public class BlockPlaceEvent extends BlockEvent implements Cancellable {
+     public static HandlerList getHandlerList() {
+         return handlers;
+     }
++
++    @Override
++    public boolean isSend() {
++        return sendable;
++    }
++
++    @Override
++    public void setSend(boolean send) {
++        this.sendable = send;
++    }
+ }
+diff --git a/src/main/java/org/bukkit/event/player/PlayerInteractEvent.java b/src/main/java/org/bukkit/event/player/PlayerInteractEvent.java
+index 0c841fb1fe57310ba900abf85f13ed327f64e96a..e44ae6f08ad9fa11b1e72518eb1ab1b5c6d597d1 100644
+--- a/src/main/java/org/bukkit/event/player/PlayerInteractEvent.java
++++ b/src/main/java/org/bukkit/event/player/PlayerInteractEvent.java
+@@ -3,6 +3,7 @@ package org.bukkit.event.player;
+ import org.bukkit.block.Block;
+ import org.bukkit.block.BlockFace;
+ import org.bukkit.event.HandlerList;
++import org.bukkit.event.Sendable;
+ import org.bukkit.inventory.ItemStack;
+ import org.bukkit.Material;
+ import org.bukkit.entity.Player;
+@@ -18,7 +19,7 @@ import org.bukkit.inventory.EquipmentSlot;
+  * This event will fire as cancelled if the vanilla behavior
+  * is to do nothing (e.g interacting with air)
+  */
+-public class PlayerInteractEvent extends PlayerEvent implements Cancellable {
++public class PlayerInteractEvent extends PlayerEvent implements Cancellable, Sendable {
+     private static final HandlerList handlers = new HandlerList();
+     protected ItemStack item;
+     protected Action action;
+@@ -27,6 +28,7 @@ public class PlayerInteractEvent extends PlayerEvent implements Cancellable {
+     private Result useClickedBlock;
+     private Result useItemInHand;
+     private EquipmentSlot hand;
++    protected boolean sendable;
+ 
+     public PlayerInteractEvent(final Player who, final Action action, final ItemStack item, final Block clickedBlock, final BlockFace clickedFace) {
+         this(who, action, item, clickedBlock, clickedFace, EquipmentSlot.HAND);
+@@ -42,6 +44,7 @@ public class PlayerInteractEvent extends PlayerEvent implements Cancellable {
+ 
+         useItemInHand = Result.DEFAULT;
+         useClickedBlock = clickedBlock == null ? Result.DENY : Result.ALLOW;
++        this.sendable = true;
+     }
+ 
+     /**
+@@ -198,6 +201,16 @@ public class PlayerInteractEvent extends PlayerEvent implements Cancellable {
+         return hand;
+     }
+ 
++    @Override
++    public boolean isSend() {
++        return sendable;
++    }
++
++    @Override
++    public void setSend(boolean sendable) {
++        this.sendable = sendable;
++    }
++
+     @Override
+     public HandlerList getHandlers() {
+         return handlers;
